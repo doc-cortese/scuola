@@ -125,7 +125,7 @@
 
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('monaco'), {
-        value: localStorage.getItem("codicePython") || 'print("Ciao Antonio!")',
+        value: localStorage.getItem("codicePython") || '#Scrivi qui il tuo codice.',
         language: 'python',
         theme: 'vs-dark',
         automaticLayout: true
