@@ -135,7 +135,7 @@ function handleCredentialResponse(response) {
   const data = jwt_decode(response.credential);
   const email = data.email;
 
-  if (email.endsWith("@liceoscientificocortese.edu.it")) {
+  if (email.endsWith("@lscortese.com")) {
     document.getElementById("contenutoProtetto").style.display = "block";
     document.getElementById("login").style.display = "none";
   } else {
@@ -146,6 +146,7 @@ function handleCredentialResponse(response) {
 
 </body>
 </html>
+
 
 
 
