@@ -142,10 +142,31 @@ function handleCredentialResponse(response) {
     alert("Accesso consentito solo agli account della scuola!");
   }
 }
+
+  function filtraClasse() {
+  const classeSelezionata = document.getElementById('classSelect').value;
+  const items = document.querySelectorAll('#courseList li');
+  const titolo = document.getElementById('classTitle');
+
+  if (classeSelezionata) {
+    titolo.textContent = `Sezione ${classeSelezionata}`;
+    titolo.style.display = 'block';
+  } else {
+    titolo.textContent = '';
+    titolo.style.display = 'none';
+  }
+
+  items.forEach(item => {
+    const classe = item.getAttribute('data-classe');
+    item.style.display = (classe === classeSelezionata || !classeSelezionata) ? '' : 'none';
+  });
+}
+
 </script>
 
 </body>
 </html>
+
 
 
 
