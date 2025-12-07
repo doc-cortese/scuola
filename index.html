@@ -100,13 +100,14 @@
 <!-- Contenuto protetto -->
 <main id="contenutoProtetto">
   <h3>Seleziona la tua classe</h3>
-  <ul class="course-list">
-    <li><a href="pagina01.html?classe=Prime">Prime</a></li>
-    <li><a href="pagina01.html?classe=Seconde">Seconde</a></li>
-    <li><a href="pagina01.html?classe=Terze">Terze</a></li>
-    <li><a href="pagina01.html?classe=Quarte">Quarte</a></li>
-    <li><a href="pagina01.html?classe=Quinte">Quinte</a></li>
-  </ul>
+ <ul class="course-list" id="courseList">
+  <li data-classe="Prime"><a href="pagina01.html?classe=Prime">Prime</a></li>
+  <li data-classe="Seconde"><a href="pagina01.html?classe=Seconde">Seconde</a></li>
+  <li data-classe="Terze"><a href="pagina01.html?classe=Terze">Terze</a></li>
+  <li data-classe="Quarte"><a href="pagina01.html?classe=Quarte">Quarte</a></li>
+  <li data-classe="Quinte"><a href="pagina01.html?classe=Quinte">Quinte</a></li>
+</ul>
+
 </main>
 
 <!-- Login Google -->
@@ -166,6 +167,7 @@ function handleCredentialResponse(response) {
 
 </body>
 </html>
+
 
 
 
