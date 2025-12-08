@@ -24,7 +24,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      overflow-y: hidden; /* Per evitare doppio scroll */
+      overflow-y: hidden; 
     }
     #traccia, #editor {
       padding: 10px;
@@ -79,10 +79,10 @@
         height: 100vh;
       }
       #pdfFrame {
-        height: calc(100vh - 150px); /* Regolato */
+        height: calc(100vh - 150px);
       }
       #monaco {
-        height: calc(100vh - 350px); /* Regolato */
+        height: calc(100vh - 350px);
       }
       .button-row button {
         flex: 1 1 auto;
@@ -110,7 +110,7 @@
     <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome" />
     <input type="file" accept=".py" onchange="caricaFile(this)" />
     <div class="button-row">
-      <button onclick="eseguiCodice()">Esegui Codice</button>
+      <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
       <button onclick="inviaCodice()">Invia a GitHub</button>
       <button onclick="esportaPDF()">Esporta PDF</button>
       </div>
@@ -120,8 +120,11 @@
   <script type="module">
     let editor;
     let pyodide;
+    let pyodideReady = false; // Flag per lo stato di Pyodide
 
-    // Inizializza Monaco Editor
+    // ------------------------------------
+    // 1. INIZIALIZZAZIONE MONACO EDITOR
+    // ------------------------------------
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('monaco'), {
         value: localStorage.getItem("codicePython") || '# Scrivi qui il tuo codice Python.',
@@ -136,17 +139,46 @@
       });
     });
 
+    // ------------------------------------
+    // 2. INIZIALIZZAZIONE PYODIDE (ASINCRONA)
+    // ------------------------------------
+    async function initializePyodide() {
+        document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
+        try {
+            pyodide = await window.loadPyodide();
+            pyodideReady = true;
+            
+            const eseguiBtn = document.getElementById("eseguiBtn");
+            eseguiBtn.disabled = false;
+            eseguiBtn.textContent = "Esegui Codice";
+            document.getElementById("output").textContent = "Pyodide pronto. Scrivi il codice e premi Esegui.";
+
+        } catch (e) {
+            console.error("Errore fatale nel caricamento di Pyodide:", e);
+            document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Controlla la console per i dettagli.";
+        }
+    }
+    document.addEventListener("DOMContentLoaded", initializePyodide);
+
+
+    // ------------------------------------
+    // 3. FUNZIONI PRINCIPALI
+    // ------------------------------------
+
     /**
      * Esegue il codice Python nell'editor tramite Pyodide.
      */
     async function eseguiCodice() {
-      document.getElementById("output").textContent = "Esecuzione in corso...";
-      if (!pyodide) {
-        pyodide = await window.loadPyodide();
+      if (!pyodideReady) {
+        document.getElementById("output").textContent = "Pyodide non è ancora pronto. Attendere.";
+        return;
       }
+      
+      document.getElementById("output").textContent = "Esecuzione in corso...";
+      
       const codice = editor.getValue();
       try {
-        const result = await pyodide.runPythonAsync(codice);
+        const result = await pyodide.runPythonAsync(codice); 
         document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output)";
       } catch (err) {
         document.getElementById("output").textContent = "ERRORE:\n" + err;
@@ -163,7 +195,6 @@
       const codice = editor.getValue();
       const output = document.getElementById("output").textContent.trim();
       
-      // Recupera il nome della traccia dal frame PDF
       const tracciaUrl = document.getElementById("pdfFrame").src;
       const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Non specificata"; 
       
@@ -171,14 +202,13 @@
 
       if (!nome) return alert("Inserisci il tuo nome per inviare l'esercizio.");
 
-      // =========================================================================
-      // *********** MODIFICA QUESTO PERCORSO CON IL TUO REPOSITORY ***********
+      // *********** AGGIORNA QUESTO PERCORSO! ***********
       const repo = "doc-cortese/esercizi2025"; 
-      // =========================================================================
-      
+      // *************************************************
+
       const titolo = `Esercizio di ${nome} – ${dataOra}`;
       
-      // Markdown body
+      // Corpo del messaggio formattato in Markdown
       const corpo = `
 ## Studente: ${nome}
 **Data e ora:** ${dataOra}
@@ -223,13 +253,14 @@ ${output}
       document.getElementById("pdfFrame").src = url;
     };
     
-    // Mantenute, sebbene meno prioritarie rispetto all'invio su GitHub
+    /**
+     * Esporta codice e output in un PDF (funzionalità legacy mantenuta)
+     */
     window.esportaPDF = function (stampa = false) {
       const jsPDF = window.jspdf?.jsPDF;
       if (!jsPDF) return alert("jsPDF non disponibile");
 
       const doc = new jsPDF();
-      // (Logica PDF omessa per brevità, mantiene la struttura precedente)
       const nome = document.getElementById("nomeStudente").value.trim();
       const codice = editor.getValue();
       const output = document.getElementById("output").textContent.trim();
@@ -264,6 +295,10 @@ ${output}
     window.stampaPDF = () => window.esportaPDF(true);
 
 
+    // ------------------------------------
+    // 4. GESTIONE URL E CLASSE
+    // ------------------------------------
+
     /**
      * Imposta la traccia iniziale in base al parametro 'classe' nell'URL.
      */
@@ -294,7 +329,9 @@ ${output}
           break;
       }
       
+      // Imposta il percorso del PDF
       pdfFrame.src = pdfPath;
+      // Imposta il titolo della classe
       if (classe) {
           classeTitolo.textContent = `– Classe ${classe}`;
       }
