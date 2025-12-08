@@ -12,10 +12,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script type="module">
-    import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.24.1/pyodide.mjs";
-    window.loadPyodide = loadPyodide;
-  </script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 
   <style>
     body {
@@ -113,14 +110,14 @@
       <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
       <button onclick="inviaCodice()">Invia a GitHub</button>
       <button onclick="esportaPDF()">Esporta PDF</button>
-      </div>
+    </div>
     <pre id="output">Output...</pre>
   </div>
 
-  <script type="module">
+  <script>
     let editor;
     let pyodide;
-    let pyodideReady = false; // Flag per lo stato di Pyodide
+    let pyodideReady = false; 
 
     // ------------------------------------
     // 1. INIZIALIZZAZIONE MONACO EDITOR
@@ -133,7 +130,6 @@
         automaticLayout: true
       });
 
-      // Salva il codice in locale ad ogni modifica
       editor.onDidChangeModelContent(() => {
         localStorage.setItem("codicePython", editor.getValue());
       });
@@ -145,7 +141,8 @@
     async function initializePyodide() {
         document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
         try {
-            pyodide = await window.loadPyodide();
+            // 🔥 CHIAMATA CORRETTA: loadPyodide è ora una funzione globale
+            pyodide = await loadPyodide(); 
             pyodideReady = true;
             
             const eseguiBtn = document.getElementById("eseguiBtn");
@@ -158,6 +155,7 @@
             document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Controlla la console per i dettagli.";
         }
     }
+    // Avvia l'inizializzazione quando il DOM è pronto
     document.addEventListener("DOMContentLoaded", initializePyodide);
 
 
@@ -202,13 +200,12 @@
 
       if (!nome) return alert("Inserisci il tuo nome per inviare l'esercizio.");
 
-      // *********** AGGIORNA QUESTO PERCORSO! ***********
+      // *********** AGGIORNA QUESTO PERCORSO CON IL TUO REPO ***********
       const repo = "doc-cortese/esercizi2025"; 
       // *************************************************
 
       const titolo = `Esercizio di ${nome} – ${dataOra}`;
       
-      // Corpo del messaggio formattato in Markdown
       const corpo = `
 ## Studente: ${nome}
 **Data e ora:** ${dataOra}
@@ -226,7 +223,6 @@ ${output}
 `;
       const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpo)}`;
       
-      // Apre l'interfaccia di creazione Issue in una nuova finestra/tab
       window.open(url, "_blank");
       
       alert("La tua consegna è stata preparata! Clicca su 'Submit new issue' nella nuova finestra per completare l'invio.");
@@ -248,13 +244,12 @@ ${output}
      * Cambia la traccia PDF visualizzata.
      */
     window.cambiaTraccia = function (select) {
-      // Aggiunge un parametro variabile per forzare il refresh del PDF
       const url = select.value + "?t=" + new Date().getTime();
       document.getElementById("pdfFrame").src = url;
     };
     
     /**
-     * Esporta codice e output in un PDF (funzionalità legacy mantenuta)
+     * Esporta codice e output in un PDF
      */
     window.esportaPDF = function (stampa = false) {
       const jsPDF = window.jspdf?.jsPDF;
@@ -329,9 +324,7 @@ ${output}
           break;
       }
       
-      // Imposta il percorso del PDF
       pdfFrame.src = pdfPath;
-      // Imposta il titolo della classe
       if (classe) {
           classeTitolo.textContent = `– Classe ${classe}`;
       }
