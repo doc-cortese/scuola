@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"</title>
+  <style>
+    /* Stili Istituzionali UNINA-inspired */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif; /* Font più istituzionale */
+      background-color: #f0f0f0; /* Sfondo chiaro */
+      color: #000;
+    }
+
+    /* Header e Barra di Navigazione (Ispirato a UNINA) */
+    .top-bar {
+      background-color: #004080; /* Blu scuro istituzionale */
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Stile per il nuovo Logo LSC */
+    .logo-lsc {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+
+    .lsc-initials {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .lsc-l { color: #cc00cc; } /* Viola Magenta */
+    .lsc-s { color: #007bff; } /* Blu */
+    .lsc-c { color: #ff6600; } /* Arancione */
+
+    .lsc-separator {
+      height: 45px;
+      width: 2px;
+      background-color: white;
+      margin: 0 10px;
+    }
+
+    .logo-text {
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: bold;
+    }
+    
+    .logo-text small {
+        font-weight: normal;
+        display: block;
+    }
+
+    .top-menu a {
+      color: white;
+      text-decoration: none;
+      margin-left: 15px;
+      font-size: 13px;
+      padding: 5px 10px;
+      border: 1px solid transparent;
+      transition: background-color 0.3s;
+    }
+
+    .top-menu a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .top-menu .accesso-docenti {
+        background-color: #f7a81b; /* Arancione/giallo per risalto */
+        border: 1px solid #f7a81b;
+        color: #004080;
+        font-weight: bold;
+    }
+
+    /* Area principale del docente (sotto l'header) */
+    header {
+      background-color: #fff;
+      padding: 20px;
+      border-bottom: 2px solid #ccc;
+      text-align: left;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #004080;
+    }
+
+    header h2 {
+      margin: 5px 0 0;
+      font-size: 16px;
+      font-weight: normal;
+      color: #333;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* Sezioni Docente/Insegnamenti (come nell'immagine) */
+    .content-box {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 25px;
+      border-left: 5px solid #004080; /* Barra laterale come nell'immagine */
+    }
+    
+    .content-box-inner {
+        padding: 15px 20px;
+    }
+
+    .section-title {
+      background-color: #e0e0e0; /* Sfondo grigio chiaro per il titolo della sezione */
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      border-bottom: 1px solid #ccc;
+    }
+
+    /* Elenco Classi (che imitano gli insegnamenti) */
+    .course-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    .course-list li {
+      padding: 8px 0;
+      border-bottom: 1px dotted #ddd;
+    }
+    
+    .course-list li:last-child {
+        border-bottom: none;
+    }
+
+    .course-list a {
+      text-decoration: none;
+      color: #004080; /* Blu per i link */
+      font-weight: normal;
+    }
+    
+    .course-list a:hover {
+        text-decoration: underline;
+    }
+    
+    .course-description {
+        color: #666;
+        font-size: 12px;
+        display: block;
+        margin-top: 2px;
+    }
+
+    /* Login Google */
+    #login {
+      text-align: center;
+      margin-top: 50px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    #login p {
+        color: #333;
+        font-weight: bold;
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #666;
+      background-color: #e0e0e0;
+      margin-top: 40px;
+    }
+
+    footer a {
+      color: #004080;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    
+    /* Nascondi il contenuto protetto di default */
+    #contenutoProtetto {
+        display: none; 
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="logo-container">
+        <div class="logo-lsc">
+            <span class="lsc-initials lsc-l">L</span>
+            <span class="lsc-initials lsc-s">S</span>
+            <span class="lsc-initials lsc-c">C</span>
+            <div class="lsc-separator"></div>
+        </div>
+        <div class="logo-text">
+            LICEO SCIENTIFICO<br>
+            <small>NINO CORTESE</small>
+        </div>
+    </div>
+    <div class="top-menu">
+        <a href="#">INGLESE</a>
+        <a href="#">CERCA</a>
+        <a href="#">CONTATTI</a>
+        <a href="#">ACCESSO STUDENTI</a>
+        <a href="#" class="accesso-docenti">ACCESSO DOCENTI</a>
+    </div>
+</div>
+
+<header>
+  <h1>Prof. Antonio Adinolfi</h1>
+  <h2>Liceo Scientifico "N. Cortese" - Materiale Didattico</h2>
+</header>
+
+<main>
+  
+    <div class="section-title">Docente</div>
+    <div class="content-box">
+        <div class="content-box-inner">
+            <p><strong>ADINOLFI ANTONIO</strong></p>
+            <p style="font-size: 14px; color: #666;">
+                DIPARTIMENTO DI INFORMATICA E TECNOLOGIE DIGITALI - LICEO SCIENTIFICO
+            </p>
+        </div>
+    </div>
+
+    <div id="contenutoProtetto">
+        <div class="section-title">Insegnamenti (Classi)</div>
+        <div class="content-box">
+             <div class="content-box-inner">
+                 <ul class="course-list" id="courseList">
+                  <li data-classe="Prime">
+                      <a href="pagina01.html?classe=Prime">PRIME</a>
+                      <span class="course-description">Materiale didattico per le Classi Prime</span>
+                  </li>
+                  <li data-classe="Seconde">
+                      <a href="pagina01.html?classe=Seconde">SECONDE</a>
+                      <span class="course-description">Materiale didattico per le Classi Seconde</span>
+                  </li>
+                  <li data-classe="Terze">
+                      <a href="pagina01.html?classe=Terze">TERZE</a>
+                      <span class="course-description">Materiale didattico per le Classi Terze</span>
+                  </li>
+                  <li data-classe="Quarte">
+                      <a href="pagina01.html?classe=Quarte">QUARTE</a>
+                      <span class="course-description">Materiale didattico per le Classi Quarte</span>
+                  </li>
+                  <li data-classe="Quinte">
+                      <a href="pagina01.html?classe=Quinte">QUINTE</a>
+                      <span class="course-description">Materiale didattico per le Classi Quinte</span>
+                  </li>
+                </ul>
+            </div>
+        </div>
+        <p style="text-align: right; font-size: 12px; color: #666;">Risultati 1-5 di 5</p>
+    </div>
+
+</main>
+
+<div id="login">
+  <p>Accedi con il tuo account Google della scuola</p>
+  <div id="g_id_onload"
+       data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="false">
+  </div>
+  <div class="g_id_signin" data-type="standard"></div>
+</div>
+
+<footer>
+  &copy; 2025 Prof. Antonio Adinolfi – Liceo Scientifico "N. Cortese". Tutti i diritti riservati.<br>
+  <a href="https://www.liceoscientificocortese.edu.it/la-scuola/" target="_blank">Sito ufficiale del Liceo</a> | 
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">Licenza Creative Commons BY-NC-SA 4.0</a>
+</footer>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
+<script>
+// Funzioni JavaScript originali (mantenute)
+function handleCredentialResponse(response) {
+  const jwt_decode_external = window.jwt_decode || (data => JSON.parse(atob(data.split('.')[1])));
+  
+  const data = jwt_decode_external(response.credential);
+  const email = data.email;
+
+  if (email.endsWith("@lscortese.com")) {
+    document.getElementById("contenutoProtetto").style.display = "block";
+    document.getElementById("login").style.display = "none";
+  } else {
+    alert("Accesso consentito solo agli account della scuola!");
+  }
+}
+
+function filtraClasse() {
+  const classeSelezionata = document.getElementById('classSelect').value;
+  const items = document.querySelectorAll('#courseList li');
+
+  items.forEach(item => {
+    const classe = item.getAttribute('data-classe');
+    item.style.display = (classe === classeSelezionata || !classeSelezionata) ? '' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>
