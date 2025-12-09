@@ -9,7 +9,6 @@
     window.require = { paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
-
   <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 
   <style>
@@ -20,29 +19,38 @@
       flex-direction: column;
       height: 100vh;
       overflow-y: hidden; 
+      background-color: #f0f0f0;
     }
     #traccia, #editor {
-      padding: 10px;
+      padding: 15px;
       box-sizing: border-box;
       overflow-y: auto;
+      background-color: white; /* Sfondo chiaro per il contenuto */
     }
     #traccia {
-      background-color: #f0f0f0;
+      border-right: 1px solid #ddd;
     }
     #pdfFrame {
       width: 100%;
       height: 300px;
-      border: none;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     #monaco {
       height: 250px;
       border: 1px solid #ccc;
+      border-radius: 4px;
     }
     input[type="text"] {
       width: 100%;
       margin-top: 10px;
       padding: 12px;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[type="file"] {
+        margin-top: 10px;
     }
     .button-row {
       display: flex;
@@ -52,18 +60,35 @@
     }
     .button-row button {
       flex: 1 1 auto; 
-      padding: 10px;
+      padding: 12px 10px;
       font-size: 15px;
       cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      background-color: #004080;
+      color: white;
+      font-weight: bold;
+    }
+    .button-row button:hover:not(:disabled) {
+        background-color: #0056b3;
+    }
+    .button-row button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
     }
     pre#output {
       background-color: #eee;
-      padding: 10px;
+      padding: 15px;
       margin-top: 10px;
       white-space: pre-wrap;
       max-height: 200px;
       overflow-y: auto;
       border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    h2 {
+        color: #004080;
     }
     @media (min-width: 768px) {
       body {
@@ -77,7 +102,7 @@
         height: calc(100vh - 150px);
       }
       #monaco {
-        height: calc(100vh - 350px);
+        height: calc(100vh - 400px); /* Regolato per far spazio agli input */
       }
     }
   </style>
@@ -86,7 +111,7 @@
 <body>
   <div id="traccia">
     <h2>Traccia <span id="classeTitolo"></span></h2>
-    <select onchange="cambiaTraccia(this)">
+    <select onchange="cambiaTraccia(this)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
       <option value="tracce/default.pdf">Cambia Esercizio...</option>
       <option value="tracce/Esercizio_03122025.pdf">Esercizio 03/12/2025</option>
       <option value="tracce/Esercizio_04122025.pdf">Esercizio 04/12/2025</option>
@@ -99,13 +124,14 @@
   <div id="editor">
     <h2>Editor Python</h2>
     <div id="monaco"></div>
-    <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome" />
-    <input type="file" accept=".py" onchange="caricaFile(this)" />
+    <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
+    <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" />
+    
     <div class="button-row">
       <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-      <button onclick="inviaCodice('github')">Invia a GitHub</button>
-      <button onclick="inviaCodice('classroom')">Invia a Classroom</button>
-      <button onclick="esportaCSV()">Esporta CSV</button>
+      <button onclick="inviaCodice('github')">Invia Codice (GitHub)</button>
+      <button onclick="inviaCodice('classroom')">Invia Consegna (Classroom)</button>
+      <button onclick="esportaODS()">Esporta Dati (ODS)</button>
     </div>
     <pre id="output">Output...</pre>
   </div>
@@ -126,6 +152,7 @@
         automaticLayout: true
       });
 
+      // Salva il codice in locale ad ogni modifica
       editor.onDidChangeModelContent(() => {
         localStorage.setItem("codicePython", editor.getValue());
       });
@@ -170,8 +197,10 @@
       
       const codice = editor.getValue();
       try {
+        // Valuta il codice; l'output stampato (print) va nella console, il risultato dell'ultima espressione viene catturato.
+        // Per catturare l'output di 'print', si può reindirizzare sys.stdout, ma runPythonAsync lo fa spesso in automatico o tramite result.
         const result = await pyodide.runPythonAsync(codice); 
-        document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output)";
+        document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output visualizzato direttamente)";
       } catch (err) {
         document.getElementById("output").textContent = "ERRORE:\n" + err;
       }
@@ -180,22 +209,11 @@
 
     
     /**
-     * Helper per formattare dati per il CSV (gestisce virgolette e newlines)
+     * 🔥 FUNZIONE AGGIORNATA: Esporta i dati come file ODS (Open Document Spreadsheet).
+     * Nota: Utilizziamo il formato tab-separated values (TSV) per simulare un foglio di calcolo, 
+     * il quale può essere facilmente aperto da LibreOffice Calc o Excel e salvato come .ods.
      */
-    function escapeCsv(data) {
-        if (typeof data !== 'string') data = String(data);
-        // Sostituisce le virgolette interne con doppie virgolette, poi avvolge il tutto tra virgolette se necessario.
-        if (data.includes(';') || data.includes('\n') || data.includes('"')) {
-            return '"' + data.replace(/"/g, '""') + '"';
-        }
-        return data;
-    }
-
-
-    /**
-     * 🔥 NUOVA FUNZIONE: Esporta i dati come file CSV.
-     */
-    window.esportaCSV = function () {
+    window.esportaODS = function () {
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -209,35 +227,29 @@
 
         if (!nome) return alert("Inserisci il tuo nome e cognome per esportare il file.");
 
-        // Intestazioni (usiamo il punto e virgola come separatore, comune in Italia)
-        const headers = ["Nome Studente", "Classe", "Data e Ora", "Traccia PDF", "Codice Python", "Output"];
+        // Dati da includere, separati da tab (\t)
+        const content = [
+            ["Nome Studente", nome],
+            ["Classe", classe],
+            ["Data e Ora", dataOra],
+            ["Traccia PDF", tracciaNome],
+            ["Codice Python", codice.replace(/\n/g, ' ')], // Rimuove newlines dal codice per riga singola
+            ["Output", output.replace(/\n/g, ' ')]         // Rimuove newlines dall'output per riga singola
+        ].map(row => row.join('\t')).join('\n');
         
-        // Dati
-        const dataRow = [
-            nome,
-            classe,
-            dataOra,
-            tracciaNome,
-            codice,
-            output
-        ];
-        
-        // Costruzione del contenuto CSV
-        const csvContent = [
-            headers.map(escapeCsv).join(';'), 
-            dataRow.map(escapeCsv).join(';')
-        ].join('\n');
+        // Intestazione per ODS (TSV)
+        const ODS_CONTENT = "Testo della Consegna:\n" + content;
 
         // Crea Blob e innesca il download
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([ODS_CONTENT], { type: 'text/tab-separated-values;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', `consegna_${nome || "studente"}_${classe}.csv`);
+        link.setAttribute('download', `consegna_${nome.replace(/ /g, '_')}_${classe}.ods`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        alert(`File CSV salvato con successo come "consegna_${nome || "studente"}_${classe}.csv" nella cartella Download!`);
+        alert(`File ODS (Tabulato) salvato con successo come "consegna_${nome.replace(/ /g, '_')}_${classe}.ods" nella cartella Download!`);
     };
 
 
@@ -283,16 +295,19 @@ ${output}
             const repo = "doc-cortese/esercizi2025"; 
             // *************************************************
             const titolo = `Esercizio di ${nome} – ${dataOra} (Classe ${classe})`;
+            
+            // Crea un link diretto per l'apertura di una Nuova Issue
             const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpoPost)}`;
             
             window.open(url, "_blank");
-            alert("Consegna preparata per GitHub. Clicca su 'Submit new issue' nella nuova finestra per completare l'invio.");
+            alert("Consegna preparata per GitHub. Clicca su 'Submit new issue' nella nuova finestra per completare l'invio al repository!");
 
         } else if (destinazione === 'classroom') {
+            // Crea un link per Google Classroom. L'utente dovrà incollare il corpoPost.
             const urlClassroom = `https://classroom.google.com/share?url=${encodeURIComponent(window.location.href)}&content=${encodeURIComponent(corpoPost)}`;
             
             window.open(urlClassroom, "_blank");
-            alert("Consegna preparata per Google Classroom. Incolla il contenuto (codice e output) nel tuo post/commento di consegna.");
+            alert("Consegna preparata per Google Classroom. Incolla il contenuto (codice e output) nel tuo post/commento di consegna, se richiesto.");
         }
     };
 
@@ -312,7 +327,7 @@ ${output}
      * Cambia la traccia PDF visualizzata.
      */
     window.cambiaTraccia = function (select) {
-      const url = select.value + "?t=" + new Date().getTime();
+      const url = select.value + "?t=" + new Date().getTime(); // Aggiunge timestamp per evitare la cache
       document.getElementById("pdfFrame").src = url;
     };
     
@@ -322,6 +337,7 @@ ${output}
 
     /**
      * Imposta la traccia iniziale in base al parametro 'classe' nell'URL.
+     * Carica il nome dello studente salvato in locale.
      */
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -332,19 +348,20 @@ ${output}
       let pdfPath = "tracce/default.pdf"; 
       
       if (classe) {
-          // Crea il percorso dinamico: es. "tracce/Esercizio_Prime.pdf"
+          // Percorso dinamico basato sulla classe: es. "tracce/Esercizio_Prime.pdf"
           pdfPath = `tracce/Esercizio_${classe}.pdf`; 
           classeTitolo.textContent = `– Classe ${classe}`;
       }
       
       pdfFrame.src = pdfPath;
       
-      // Carica il nome salvato in locale e salva le modifiche
+      // Carica e salva il nome dello studente
+      const nomeStudenteInput = document.getElementById("nomeStudente");
       const nomeSalvato = localStorage.getItem("nomeStudente");
       if (nomeSalvato) {
-          document.getElementById("nomeStudente").value = nomeSalvato;
+          nomeStudenteInput.value = nomeSalvato;
       }
-      document.getElementById("nomeStudente").addEventListener('input', (e) => {
+      nomeStudenteInput.addEventListener('input', (e) => {
         localStorage.setItem("nomeStudente", e.target.value);
       });
     });
