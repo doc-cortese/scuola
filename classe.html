@@ -91,7 +91,6 @@
     #eseguiBtn { background-color: #004080; color: white; }
     #githubBtn { background-color: #333; color: white; }
     #rtfBtn { background-color: #f7a81b; color: #004080; }
-    /* NUOVO STILE */
     #ritornaBtn { background-color: #d9534f; color: white; }
 
     .button-row button:hover:not(:disabled) { opacity: 0.9; }
@@ -207,6 +206,13 @@
         theme: 'vs-dark',
         automaticLayout: true
       });
+
+      // === LOGICA ANTI-INCOLLA (NOVITÀ) ===
+      editor.getDomNode().addEventListener('paste', (e) => {
+        e.preventDefault();
+        alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
+      });
+      // ==================================
 
       editor.onDidChangeModelContent(() => {
         localStorage.setItem("codicePython", editor.getValue());
@@ -325,12 +331,11 @@
     // ------------------------------------
 
     async function eseguiCodice() {
-      // ... (logica eseguiCodice)
       if (!pyodideReady) {
         document.getElementById("output").textContent = "Pyodide non è ancora pronto. Attendere.";
         return;
       }
-      resetActivityTimer(); // Resetta il timer quando si esegue il codice
+      resetActivityTimer(); 
       document.getElementById("output").textContent = "Esecuzione in corso...";
       
       const codice = editor.getValue();
@@ -345,7 +350,7 @@
 
     
     window.esportaRTF = function () {
-        resetActivityTimer(); // Resetta il timer quando si esporta
+        resetActivityTimer(); 
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -396,7 +401,7 @@ Traccia di Riferimento: ${tracciaNome}\\par
 
 
     window.inviaCodice = function (destinazione) {
-        resetActivityTimer(); // Resetta il timer quando si invia
+        resetActivityTimer(); 
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -444,7 +449,7 @@ ${output}
 
 
     window.caricaFile = function (input) {
-      resetActivityTimer(); // Resetta il timer quando si carica
+      resetActivityTimer(); 
       const file = input.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -453,7 +458,7 @@ ${output}
     };
 
     window.cambiaTraccia = function (select) {
-      resetActivityTimer(); // Resetta il timer quando si cambia traccia
+      resetActivityTimer(); 
       const url = select.value + "?t=" + new Date().getTime(); 
       document.getElementById("pdfFrame").src = url;
     };
@@ -484,7 +489,7 @@ ${output}
       }
       nomeStudenteInput.addEventListener('input', (e) => {
         localStorage.setItem("nomeStudente", e.target.value);
-        resetActivityTimer(); // Resetta il timer quando si modifica il nome
+        resetActivityTimer(); 
       });
       
     });
