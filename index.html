@@ -8,14 +8,14 @@
     /* Stili Istituzionali UNINA-inspired */
     body {
       margin: 0;
-      font-family: Arial, sans-serif; /* Font più istituzionale */
-      background-color: #f0f0f0; /* Sfondo chiaro */
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
       color: #000;
     }
 
-    /* Header e Barra di Navigazione (Ispirato a UNINA) */
+    /* Header e Barra di Navigazione */
     .top-bar {
-      background-color: #004080; /* Blu scuro istituzionale */
+      background-color: #004080;
       color: white;
       padding: 10px 20px;
       display: flex;
@@ -28,7 +28,6 @@
       align-items: center;
     }
 
-    /* Stile per il nuovo Logo LSC */
     .logo-lsc {
       display: flex;
       align-items: center;
@@ -42,9 +41,9 @@
       line-height: 1;
     }
 
-    .lsc-l { color: #cc00cc; } /* Viola Magenta */
-    .lsc-s { color: #007bff; } /* Blu */
-    .lsc-c { color: #ff6600; } /* Arancione */
+    .lsc-l { color: #cc00cc; }
+    .lsc-s { color: #007bff; }
+    .lsc-c { color: #ff6600; }
 
     .lsc-separator {
       height: 45px;
@@ -72,10 +71,9 @@
       padding: 5px 10px;
       border: 1px solid transparent;
       transition: background-color 0.3s;
-      cursor: pointer; /* Indica che è cliccabile */
+      cursor: pointer;
     }
     
-    /* Stile per le informazioni del docente loggato */
     #loggedInInfo {
         display: flex;
         align-items: center;
@@ -93,13 +91,21 @@
     }
     
     .top-menu .accesso-docenti {
-        background-color: #f7a81b; /* Arancione/giallo per risalto */
+        background-color: #f7a81b;
         border: 1px solid #f7a81b;
         color: #004080;
         font-weight: bold;
     }
+    
+    .top-menu .nav-link { /* Stile per i link standard */
+        background-color: transparent;
+        border: 1px solid transparent;
+        color: white;
+        font-weight: normal;
+    }
 
-    /* Area principale del docente (sotto l'header) */
+
+    /* Area principale del docente */
     header {
       background-color: #fff;
       padding: 20px;
@@ -125,7 +131,7 @@
         padding: 10px 0;
         background-color: #f7f7f7;
         border-bottom: 1px solid #ddd;
-        display: none; /* Inizialmente nascosto */
+        display: none;
     }
     
     #search-input {
@@ -176,7 +182,7 @@
       flex-shrink: 0;
       width: 120px;
       height: 120px;
-      border-radius: 50%; /* Immagine tonda */
+      border-radius: 50%;
       border: 3px solid #004080;
       display: flex;
       align-items: center;
@@ -227,16 +233,13 @@
         font-weight: bold;
     }
     
-    /* Fine STILI SEZIONE DOCENTE */
-
-
     /* Sezioni Insegnamenti */
     .content-box {
       background: #fff;
       border-radius: 4px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       margin-bottom: 25px;
-      border-left: 5px solid #004080; /* Barra laterale come nell'immagine */
+      border-left: 5px solid #004080;
     }
     
     .content-box-inner {
@@ -244,7 +247,7 @@
     }
 
     .section-title {
-      background-color: #e0e0e0; /* Sfondo grigio chiaro per il titolo della sezione */
+      background-color: #e0e0e0;
       padding: 10px 20px;
       font-size: 16px;
       font-weight: bold;
@@ -262,7 +265,7 @@
     .course-list li {
       padding: 12px 0;
       border-bottom: 1px dotted #ddd;
-      display: flex; /* Utilizza flexbox per allineare titolo e data */
+      display: flex;
       justify-content: space-between;
       align-items: center;
     }
@@ -301,8 +304,6 @@
         font-style: italic;
         margin-top: 4px;
     }
-    /* === FINE NUOVI STILI LISTA CLASSI SCALABILE === */
-
 
     /* Login Google */
     #login {
@@ -338,7 +339,6 @@
       font-weight: bold;
     }
     
-    /* Nascondi il contenuto protetto e il messaggio di benvenuto di default */
     #contenutoProtetto {
         display: none; 
     }
@@ -363,12 +363,11 @@
         </div>
     </div>
     <div class="top-menu">
-        <a href="index_en.html" class="lang-link">INGLESE</a>
         <a id="search-toggle" onclick="toggleSearch()">CERCA</a>
         <a href="mailto:antonioadinolfi@lscortese.com">CONTATTI</a>
-        <a href="#">ACCESSO STUDENTI</a>
         
-        <a href="#" class="accesso-docenti" id="acessoDocentiLink">ACCESSO DOCENTI</a>
+        <a href="studenti.html" class="nav-link">ACCESSO STUDENTI</a> 
+        <a href="docenti.html" class="nav-link" id="acessoDocentiLink">ACCESSO DOCENTI</a> 
         
         <div id="loggedInInfo" style="display: none;">
             <span id="userName"></span>
@@ -496,24 +495,27 @@
 <script>
 // Funzione aggiornata per gestire il login
 function handleCredentialResponse(response) {
+  // Funzione per decodificare il JWT, gestisce compatibilità
   const jwt_decode_external = window.jwt_decode || (data => JSON.parse(atob(data.split('.')[1])));
   
   const data = jwt_decode_external(response.credential);
   const email = data.email;
-  const userName = data.name || "Prof. Antonio Adinolfi"; 
+  const userName = data.name || "Docente"; 
 
+  // Verifica che l'email appartenga al dominio della scuola
   if (email.endsWith("@lscortese.com")) {
     document.getElementById("contenutoProtetto").style.display = "block";
     document.getElementById("welcomeMessage").style.display = "block";
     
     document.getElementById("login").style.display = "none";
     
+    // Nasconde il link "ACCESSO DOCENTI" standard e mostra le info utente
     document.getElementById("acessoDocentiLink").style.display = "none";
     document.getElementById("userName").textContent = `Ciao, ${userName.split(' ')[0]}!`;
     document.getElementById("loggedInInfo").style.display = "flex";
 
   } else {
-    alert("Accesso consentito solo agli account della scuola!");
+    alert("Accesso consentito solo agli account della scuola (@lscortese.com)!");
   }
 }
 
@@ -539,7 +541,7 @@ function toggleSearch() {
     
     if (isVisible) {
         document.getElementById('searchInput').value = '';
-        performSearch();
+        performSearch(); // Resetta i filtri
     } else {
         document.getElementById('searchInput').focus();
     }
@@ -552,13 +554,12 @@ function performSearch() {
     let visibleCount = 0;
 
     items.forEach(item => {
-        // La ricerca ora si concentra sul course-title e sulle keywords
         const linkText = item.querySelector('.course-title').textContent.toLowerCase();
         const keywords = item.getAttribute('data-keywords').toLowerCase();
         
         const isMatch = (linkText.includes(query) || keywords.includes(query));
         
-        item.style.display = isMatch ? 'flex' : 'none'; // Usa 'flex' come display mode
+        item.style.display = isMatch ? 'flex' : 'none';
         if (isMatch) {
             visibleCount++;
         }
@@ -572,4 +573,5 @@ function performSearch() {
 </body>
 
 </html>
+
 
