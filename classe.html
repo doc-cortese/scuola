@@ -2,14 +2,8 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Editor Python con Pyodide</title>
+  <title>Lancio Esercizio Python e Consegna</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <script>
-    window.require = { paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 
   <style>
     body {
@@ -25,7 +19,7 @@
       padding: 15px;
       box-sizing: border-box;
       overflow-y: auto;
-      background-color: white; /* Sfondo chiaro per il contenuto */
+      background-color: white; 
     }
     #traccia {
       border-right: 1px solid #ddd;
@@ -36,18 +30,14 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    #monaco {
-      height: 250px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    input[type="text"] {
+    input[type="text"], textarea {
       width: 100%;
       margin-top: 10px;
       padding: 12px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      box-sizing: border-box; /* Importante per width: 100% */
     }
     input[type="file"] {
         margin-top: 10px;
@@ -56,7 +46,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 15px; /* Spazio maggiore per i pulsanti di consegna */
     }
     .button-row button {
       flex: 1 1 auto; 
@@ -66,45 +56,46 @@
       border: none;
       border-radius: 4px;
       transition: background-color 0.3s;
-      background-color: #004080;
-      color: white;
-      font-weight: bold;
     }
+    
+    /* Stili per i pulsanti specifici */
+    #githubBtn {
+        background-color: #004080;
+        color: white;
+        font-weight: bold;
+    }
+    #rtfBtn {
+        background-color: #f7a81b; /* Giallo per l'esportazione */
+        color: #004080;
+        font-weight: bold;
+    }
+    
     .button-row button:hover:not(:disabled) {
-        background-color: #0056b3;
+        opacity: 0.9;
     }
     .button-row button:disabled {
         background-color: #ccc;
         cursor: not-allowed;
     }
-    pre#output {
-      background-color: #eee;
-      padding: 15px;
-      margin-top: 10px;
-      white-space: pre-wrap;
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
+
     h2 {
         color: #004080;
     }
     
-    /* Stile per il selettore di formato */
-    #format-selector {
-        flex: 1 1 100%; /* Occupa una riga intera su schermi piccoli */
+    /* Stile per il riquadro di istruzioni */
+    .istruzioni-box {
+        background-color: #e6f0ff; 
+        padding: 15px; 
+        border-left: 5px solid #004080; 
+        margin-bottom: 15px;
+        border-radius: 4px;
+    }
+    .istruzioni-box button {
+        background-color: #004080 !important; /* Forza lo stile per il pulsante Launch */
+        color: white !important;
+        font-weight: bold !important;
+        padding: 10px 15px !important;
         margin-top: 10px;
-        display: flex;
-        gap: 10px;
-    }
-    #format-selector button {
-        flex-grow: 1;
-        background-color: #f7a81b;
-        color: #004080;
-    }
-    #format-selector button:hover {
-        background-color: #ffc107;
     }
 
     @media (min-width: 768px) {
@@ -117,12 +108,6 @@
       }
       #pdfFrame {
         height: calc(100vh - 150px);
-      }
-      #monaco {
-        height: calc(100vh - 400px); /* Regolato per far spazio agli input */
-      }
-      #format-selector {
-        flex: 1 1 auto; /* Torna ad affiancarsi agli altri pulsanti */
       }
     }
   </style>
@@ -142,101 +127,59 @@
 
   
   <div id="editor">
-    <h2>Editor Python</h2>
-    <div id="monaco"></div>
+    <h2>Spazio di Lavoro e Consegna</h2>
+    
+    <div class="istruzioni-box">
+        <p style="font-weight: bold; margin-top: 0;">1. Svolgi l'esercizio sul Notebook</p>
+        <p style="margin-bottom: 5px;">Clicca qui sotto per aprire l'ambiente **JupyterLite** e scrivere il tuo codice.</p>
+        
+        <button onclick="lanciaJupyterLite()">APRI NOTEBOOK JUPYTERLITE</button>
+    </div>
+
     <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
-    <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" />
+    <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" disabled style="background-color: #eee;" />
     
+    <p style="font-weight: bold; margin-top: 25px; margin-bottom: 5px;">2. Incolla il codice e l'output dal Notebook</p>
+    
+    <textarea id="codicePaste" rows="10" placeholder="<<< INCOLLA QUI IL TUO CODICE PYTHON DAL NOTEBOOK >>>"></textarea>
+    <textarea id="outputPaste" rows="5" placeholder="<<< INCOLLA QUI L'OUTPUT DEL CODICE >>>"></textarea>
+
     <div class="button-row">
-      <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-      <button onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
+      <button id="githubBtn" onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
+      <button id="rtfBtn" onclick="esportaRTF()">Esporta Consegna (RTF)</button>
     </div>
     
-    <div class="button-row" id="format-selector">
-        <button onclick="esportaDOCX_ODF('docx')">Esporta Consegna (DOCX)</button>
-        <button onclick="esportaDOCX_ODF('odt')">Esporta Consegna (ODF)</button>
-    </div>
-    
-    <pre id="output">Output...</pre>
   </div>
 
   <script>
-    let editor;
-    let pyodide;
-    let pyodideReady = false; 
-
-    // ------------------------------------
-    // 1. INIZIALIZZAZIONE MONACO EDITOR
-    // ------------------------------------
-    require(['vs/editor/editor.main'], function () {
-      editor = monaco.editor.create(document.getElementById('monaco'), {
-        value: localStorage.getItem("codicePython") || '# Scrivi qui il tuo codice Python.',
-        language: 'python',
-        theme: 'vs-dark',
-        automaticLayout: true
-      });
-
-      // Salva il codice in locale ad ogni modifica
-      editor.onDidChangeModelContent(() => {
-        localStorage.setItem("codicePython", editor.getValue());
-      });
-    });
-
-    // ------------------------------------
-    // 2. INIZIALIZZAZIONE PYODIDE
-    // ------------------------------------
-    async function initializePyodide() {
-        document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
-        try {
-            pyodide = await loadPyodide(); 
-            pyodideReady = true;
-            
-            const eseguiBtn = document.getElementById("eseguiBtn");
-            eseguiBtn.disabled = false;
-            eseguiBtn.textContent = "Esegui Codice";
-            document.getElementById("output").textContent = "Pyodide pronto. Scrivi il codice e premi Esegui.";
-
-        } catch (e) {
-            console.error("Errore fatale nel caricamento di Pyodide:", e);
-            document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Controlla la console per i dettagli.";
-        }
-    }
-    document.addEventListener("DOMContentLoaded", initializePyodide);
-
-
-    // ------------------------------------
-    // 3. FUNZIONI PRINCIPALI
-    // ------------------------------------
+    // URL di base per la tua installazione di JupyterLite (DA AGGIORNARE)
+    const JUPYTERLITE_BASE_URL = "https://tuo-dominio.com/jupyterlite/index.html"; 
 
     /**
-     * Esegue il codice Python nell'editor tramite Pyodide.
+     * Lancia l'ambiente JupyterLite.
      */
-    async function eseguiCodice() {
-      if (!pyodideReady) {
-        document.getElementById("output").textContent = "Pyodide non è ancora pronto. Attendere.";
-        return;
-      }
-      
-      document.getElementById("output").textContent = "Esecuzione in corso...";
-      
-      const codice = editor.getValue();
-      try {
-        const result = await pyodide.runPythonAsync(codice); 
-        document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output visualizzato direttamente)";
-      } catch (err) {
-        document.getElementById("output").textContent = "ERRORE:\n" + err;
-      }
+    window.lanciaJupyterLite = function() {
+        // Logica per determinare quale Notebook aprire in base alla classe
+        const urlParams = new URLSearchParams(window.location.search);
+        const classe = urlParams.get("classe") || "Default";
+        
+        // Esempio: Apre il Notebook "Esercizio_Prime.ipynb"
+        const notebookPath = `Esercizi/Esercizio_${classe}.ipynb`; 
+        
+        // Costruisci il link per aprire il Notebook direttamente in una nuova scheda
+        const url = `${JUPYTERLITE_BASE_URL}?path=${encodeURIComponent(notebookPath)}`;
+        
+        window.open(url, "_blank");
     }
-    window.eseguiCodice = eseguiCodice;
 
     
     /**
-     * 🔥 FUNZIONE AGGIORNATA: Esporta i dati come file DOCX o ODF (simulazione solo testo).
+     * 🔥 NUOVA FUNZIONE: Esporta i dati come file RTF.
      */
-    window.esportaDOCX_ODF = function (format) {
+    window.esportaRTF = function () {
         const nome = document.getElementById("nomeStudente").value.trim();
-        const codice = editor.getValue();
-        const output = document.getElementById("output").textContent.trim();
+        const codice = document.getElementById("codicePaste").value;
+        const output = document.getElementById("outputPaste").value;
         
         const urlParams = new URLSearchParams(window.location.search);
         const classe = urlParams.get("classe") || "N/D";
@@ -245,43 +188,44 @@
         const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
         const dataOra = new Date().toLocaleString("it-IT");
 
-        if (!nome) return alert("Inserisci il tuo nome e cognome per esportare il file.");
+        if (!nome || codice.trim() === "" || output.trim() === "") {
+            return alert("Inserisci il tuo nome e incolla il codice e l'output per esportare il file RTF.");
+        }
         
-        // Costruzione del contenuto testuale
-        const content = `
-CONSEGNA ESERCIZIO SVOLTO
-=====================================
-Studente: ${nome}
-Classe: ${classe}
-Data e Ora: ${dataOra}
-Traccia di Riferimento: ${tracciaNome}
-=====================================
-
-CODICE PYTHON
--------------------------------------
-${codice}
--------------------------------------
-
-OUTPUT DEL CODICE
--------------------------------------
-${output}
--------------------------------------
-        `.trim();
+        // Costruzione del contenuto in formato RTF (Rich Text Format)
+        const rtfContent = `{\\rtf1\\ansi\\deff0
+{\\fonttbl{\\f0 Arial;}{\\f1 Courier New;}}
+\\pard\\sa200\\sl276\\slmult1\\f0\\fs24 
+\\b CONSEGNA ESERCIZIO SVOLTO\\b0\\par
+\\b =====================================\\b0\\par
+Studente: ${nome}\\par
+Classe: ${classe}\\par
+Data e Ora: ${dataOra}\\par
+Traccia di Riferimento: ${tracciaNome}\\par
+\\b =====================================\\b0\\par
+\\par
+\\b CODICE PYTHON\\b0\\par
+\\b -------------------------------------\\b0\\par
+\\f1\\fs20 ${codice.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par\n')}\\f0\\fs24\\par
+\\b -------------------------------------\\b0\\par
+\\par
+\\b OUTPUT DEL CODICE\\b0\\par
+\\b -------------------------------------\\b0\\par
+\\f1\\fs20 ${output.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par\n')}\\f0\\fs24\\par
+\\b -------------------------------------\\b0\\par
+}`;
         
-        // Tipo MIME in base al formato
-        const mimeType = 'text/plain;charset=utf-8;';
-        const extension = format === 'odt' ? 'odt' : 'docx';
-
-        // Crea Blob e innesca il download
-        const blob = new Blob([content], { type: mimeType });
+        const mimeType = 'application/rtf;charset=utf-8;';
+        const blob = new Blob([rtfContent], { type: mimeType });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', `consegna_${nome.replace(/ /g, '_')}_${classe}.${extension}`);
+        const fileName = `consegna_RTF_${nome.replace(/ /g, '_')}_${classe}.rtf`;
+        link.setAttribute('download', fileName);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        alert(`File ${extension.toUpperCase()} (Testo Semplice) salvato con successo come "consegna_${nome.replace(/ /g, '_')}_${classe}.${extension}" nella cartella Download!`);
+        alert(`File RTF salvato con successo come "${fileName}" nella cartella Download!`);
     };
 
 
@@ -289,10 +233,10 @@ ${output}
      * Invia l'esercizio a GitHub (Issue).
      */
     window.inviaCodice = function (destinazione) {
-        // ... (Logica di invio codice a GitHub Issue, come da versione precedente, mantenuta)
+        // Legge i dati incollati
         const nome = document.getElementById("nomeStudente").value.trim();
-        const codice = editor.getValue();
-        const output = document.getElementById("output").textContent.trim();
+        const codice = document.getElementById("codicePaste").value;
+        const output = document.getElementById("outputPaste").value;
         
         const urlParams = new URLSearchParams(window.location.search);
         const classe = urlParams.get("classe") || "Non Specificata";
@@ -301,7 +245,9 @@ ${output}
         const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
         const dataOra = new Date().toLocaleString("it-IT");
 
-        if (!nome) return alert("Inserisci il tuo nome e cognome per inviare l'esercizio.");
+        if (!nome || codice.trim() === "" || output.trim() === "") {
+            return alert("Inserisci il tuo nome e incolla il codice e l'output per inviare l'esercizio su GitHub.");
+        }
 
         const corpoPost = `
 **Consegna Esercizio Python**
@@ -312,12 +258,12 @@ Data e ora: ${dataOra}
 Traccia: ${tracciaNome}
 
 --------------------------------------
-### Codice:
+### Codice (Copiato da Notebook):
 \`\`\`python
 ${codice}
 \`\`\`
 
-### Output:
+### Output (Copiato da Notebook):
 \`\`\`
 ${output}
 \`\`\`
@@ -340,21 +286,17 @@ ${output}
 
 
     /**
-     * Carica un file .py locale nell'editor.
+     * Funzione non più rilevante con JupyterLite, ma mantenuta come placeholder.
      */
     window.caricaFile = function (input) {
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => editor.setValue(e.target.result);
-      reader.readAsText(file);
+        alert("Carica file non supportato in questa modalità. Usa il Notebook per caricare i dati.");
     };
 
     /**
      * Cambia la traccia PDF visualizzata.
      */
     window.cambiaTraccia = function (select) {
-      const url = select.value + "?t=" + new Date().getTime(); // Aggiunge timestamp per evitare la cache
+      const url = select.value + "?t=" + new Date().getTime(); 
       document.getElementById("pdfFrame").src = url;
     };
     
@@ -371,7 +313,6 @@ ${output}
       let pdfPath = "tracce/default.pdf"; 
       
       if (classe) {
-          // Percorso dinamico basato sulla classe: es. "tracce/Esercizio_Prime.pdf"
           pdfPath = `tracce/Esercizio_${classe}.pdf`; 
           classeTitolo.textContent = `– Classe ${classe}`;
       }
