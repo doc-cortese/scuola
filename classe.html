@@ -90,7 +90,8 @@
     /* Stili specifici per i pulsanti */
     #eseguiBtn { background-color: #004080; color: white; }
     #githubBtn { background-color: #333; color: white; }
-    #rtfBtn { background-color: #f7a81b; color: #004080; }
+    /* Nuovo stile per il pulsante Invia Drive */
+    #rtfBtn { background-color: #28a745; color: white; } 
     #ritornaBtn { background-color: #d9534f; color: white; }
 
     .button-row button:hover:not(:disabled) { opacity: 0.9; }
@@ -155,7 +156,7 @@
         <div class="button-row">
           <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
           <button id="githubBtn" onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
-          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive)</button>
+          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive)</button> 
           <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
         </div>
         
@@ -171,7 +172,7 @@
     const MIN_HEIGHT = 100; 
 
     // === LOGICA LOGOUT AUTOMATICO ===
-    const INACTIVITY_TIMEOUT = 200000; // 5 minuti
+    const INACTIVITY_TIMEOUT = 300000; // 5 minuti
     let activityTimer;
 
     function resetActivityTimer() {
@@ -324,7 +325,7 @@
 
 
     // ------------------------------------
-    // 4. FUNZIONI PRINCIPALI (Esecuzione, RTF, GitHub, CLOUD UPLOAD)
+    // 4. FUNZIONI PRINCIPALI (Esecuzione, GitHub, CLOUD UPLOAD)
     // ------------------------------------
 
     async function eseguiCodice() {
@@ -388,7 +389,7 @@ Traccia di Riferimento: ${tracciaNome}\\par
 }`;
         
         // ⚠️ SOSTITUISCI QUESTO URL CON L'URL DEL TUO WEB APP GOOGLE APPS SCRIPT ⚠️
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzSDuAqIxx_bAkDgbCW36wtLYo5Z2e4QjEYtVAtm-b-nrxo6WtecgTdReIQ5MrneKFn/exec"; 
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxHQz3bGDBWyl6ZhXfXbOv6U-k3Td1fVDdK_NNx5ow/dev"; 
         
         document.getElementById("output").textContent = "Invio in corso a Google Drive...";
 
@@ -409,16 +410,30 @@ Traccia di Riferimento: ${tracciaNome}\\par
                     rtfContent: rtfContent
                 })
             });
+            
+            // Tentiamo di leggere il testo di risposta (potrebbe essere 'opaque' a causa di no-cors)
+            let responseText = "Risposta non letta (successo presunto)";
+            try {
+                responseText = await response.text(); 
+            } catch (e) {
+                // Errore nella lettura del testo (normale con 'no-cors')
+            }
 
-            document.getElementById("output").textContent = `Consegna inviata con successo a Google Drive!
-            (Il file è stato creato nella tua cartella Drive tramite Apps Script)`;
-
-            alert("✅ Consegna inviata con successo a Google Drive! Ricorda di verificare la cartella di destinazione che hai impostato in Google Apps Script.");
+            // Il Web App GAS risponde con un messaggio che inizia con "Successo" in caso di esito positivo
+            if (responseText.startsWith("Successo") || response.type === 'opaque') {
+                const finalMessage = responseText.startsWith("Successo") ? responseText : "Consegna inviata. (Nessun feedback esatto dal server, verifica Drive.)";
+                document.getElementById("output").textContent = finalMessage;
+                alert(`✅ Consegna inviata con successo a Google Drive!`);
+            } else {
+                 // Cattura eventuali errori che riescono a passare
+                 document.getElementById("output").textContent = `ERRORE (GAS Server): ${responseText}`;
+                 alert(`❌ Errore nell'invio a Google Drive: ${responseText}. Controlla i permessi e il log di Apps Script.`);
+            }
 
         } catch (error) {
-            console.error('Errore nell\'invio al server:', error);
-            document.getElementById("output").textContent = `ERRORE nell'invio a Google Drive. Controlla il tuo URL GAS e le impostazioni. Errore: ${error.message}`;
-            alert("❌ Errore nell'invio a Google Drive. Verifica che il tuo Google Apps Script sia attivo e l'URL sia corretto.");
+            console.error('Errore di Rete/Connessione:', error);
+            document.getElementById("output").textContent = `ERRORE di Rete/Connessione. Assicurati che l'URL di Apps Script sia corretto. Errore: ${error.message}`;
+            alert(`❌ Errore di connessione o URL Apps Script errato: ${error.message}`);
         }
     };
 
