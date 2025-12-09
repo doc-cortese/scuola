@@ -92,9 +92,10 @@
   <div id="traccia">
     <h2>Traccia <span id="classeTitolo"></span></h2>
     <select onchange="cambiaTraccia(this)">
-      <option value="tracce/Esercizio_03122025.pdf">Traccia Prime (Default)</option>
-      <option value="tracce/Esercizio_04122025.pdf">Traccia Seconda Opzionale</option>
-      <option value="tracce/Esercizi_regressione.pdf">Traccia Regressione</option>
+      <option value="tracce/default.pdf">Cambia Esercizio...</option>
+      <option value="tracce/Esercizio_03122025.pdf">Esercizio 03/12/2025</option>
+      <option value="tracce/Esercizio_04122025.pdf">Esercizio 04/12/2025</option>
+      <option value="tracce/Esercizi_regressione.pdf">Esercizi di Regressione</option>
     </select>
 
     <iframe id="pdfFrame" src=""></iframe>
@@ -108,8 +109,8 @@
     <input type="file" accept=".py" onchange="caricaFile(this)" />
     <div class="button-row">
       <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-      <button onclick="inviaCodice()">Invia a GitHub</button>
-      <button onclick="esportaPDF()">Esporta PDF</button>
+      <button onclick="inviaCodice()">Invia a Google Classroom</button> 
+      <button id="esportaBtn" onclick="esportaPDF()">Esporta PDF</button>
     </div>
     <pre id="output">Output...</pre>
   </div>
@@ -141,7 +142,7 @@
     async function initializePyodide() {
         document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
         try {
-            // 🔥 CHIAMATA CORRETTA: loadPyodide è ora una funzione globale
+            // ✅ CORREZIONE: Chiama direttamente la funzione globale loadPyodide()
             pyodide = await loadPyodide(); 
             pyodideReady = true;
             
@@ -155,7 +156,6 @@
             document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Controlla la console per i dettagli.";
         }
     }
-    // Avvia l'inizializzazione quando il DOM è pronto
     document.addEventListener("DOMContentLoaded", initializePyodide);
 
 
@@ -186,32 +186,34 @@
 
 
     /**
-     * Invia l'esercizio a un nuovo Issue sul repository GitHub.
+     * 🔥 NUOVA FUNZIONE: Invia l'esercizio tramite un URL pre-formattato per Google Classroom.
      */
     window.inviaCodice = function () {
-      const nome = document.getElementById("nomeStudente").value.trim();
-      const codice = editor.getValue();
-      const output = document.getElementById("output").textContent.trim();
-      
-      const tracciaUrl = document.getElementById("pdfFrame").src;
-      const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Non specificata"; 
-      
-      const dataOra = new Date().toLocaleString("it-IT");
+        const nome = document.getElementById("nomeStudente").value.trim();
+        const codice = editor.getValue();
+        const output = document.getElementById("output").textContent.trim();
+        
+        // Ottiene la classe dall'URL per identificazione
+        const urlParams = new URLSearchParams(window.location.search);
+        const classe = urlParams.get("classe") || "Non Specificata";
+        
+        const tracciaUrl = document.getElementById("pdfFrame").src;
+        const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
+        const dataOra = new Date().toLocaleString("it-IT");
 
-      if (!nome) return alert("Inserisci il tuo nome per inviare l'esercizio.");
+        if (!nome) return alert("Inserisci il tuo nome e cognome per inviare l'esercizio.");
 
-      // *********** AGGIORNA QUESTO PERCORSO CON IL TUO REPO ***********
-      const repo = "doc-cortese/esercizi2025"; 
-      // *************************************************
+        // Contenuto per il corpo del post/email
+        const corpoPost = `
+**Consegna Esercizio Python**
 
-      const titolo = `Esercizio di ${nome} – ${dataOra}`;
-      
-      const corpo = `
-## Studente: ${nome}
-**Data e ora:** ${dataOra}
-**Traccia selezionata:** ${tracciaNome}
+Studente: ${nome}
+Classe: ${classe}
+Data e ora: ${dataOra}
+Traccia: ${tracciaNome}
 
-### Codice Python:
+--------------------------------------
+### Codice:
 \`\`\`python
 ${codice}
 \`\`\`
@@ -221,11 +223,14 @@ ${codice}
 ${output}
 \`\`\`
 `;
-      const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpo)}`;
-      
-      window.open(url, "_blank");
-      
-      alert("La tua consegna è stata preparata! Clicca su 'Submit new issue' nella nuova finestra per completare l'invio.");
+        
+        // URL per la Condivisione su Google Classroom (crea un nuovo post)
+        // Passiamo l'URL della pagina e il contenuto pre-popolato
+        const urlClassroom = `https://classroom.google.com/share?url=${encodeURIComponent(window.location.href)}&content=${encodeURIComponent(corpoPost)}`;
+        
+        window.open(urlClassroom, "_blank");
+        
+        alert("La tua consegna è stata preparata per Google Classroom. Incolla il contenuto (codice e output) nel tuo post/commento di consegna.");
     };
 
 
@@ -252,8 +257,11 @@ ${output}
      * Esporta codice e output in un PDF
      */
     window.esportaPDF = function (stampa = false) {
-      const jsPDF = window.jspdf?.jsPDF;
-      if (!jsPDF) return alert("jsPDF non disponibile");
+      // ✅ Soluzione per jsPDF non disponibile: verifica corretta
+      const jsPDF = window.jspdf && window.jspdf.jsPDF;
+      if (typeof jsPDF === 'undefined') {
+          return alert("jsPDF non disponibile. Ricarica la pagina e riprova.");
+      }
 
       const doc = new jsPDF();
       const nome = document.getElementById("nomeStudente").value.trim();
@@ -294,10 +302,8 @@ ${output}
     // 4. GESTIONE URL E CLASSE
     // ------------------------------------
 
-    // Nel file classe.html, sezione 4. GESTIONE URL E CLASSE
-
     /**
-     * Imposta la traccia iniziale in base al parametro 'classe' nell'URL.
+     * 🔥 NUOVA LOGICA: Imposta la traccia iniziale in base al parametro 'classe' nell'URL (es. Prime -> Esercizio_Prime.pdf).
      */
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -305,16 +311,24 @@ ${output}
       const pdfFrame = document.getElementById("pdfFrame");
       const classeTitolo = document.getElementById("classeTitolo");
       
-      let pdfPath = "tracce/default.pdf"; // PDF di default in caso di errore
-
+      let pdfPath = "tracce/default.pdf"; // PDF di default
+      
       if (classe) {
-          // 🔥 NUOVA LOGICA DINAMICA: Crea il percorso in base al nome della classe (es. Prime)
-          // Assicurati che i tuoi file PDF abbiano nomi coerenti come: tracce/Esercizio_Prime.pdf
+          // Crea il percorso dinamico: es. "tracce/Esercizio_Prime.pdf"
           pdfPath = `tracce/Esercizio_${classe}.pdf`; 
           classeTitolo.textContent = `– Classe ${classe}`;
       }
       
       pdfFrame.src = pdfPath;
+      
+      // BONUS: Se l'editor è vuoto, cerca il nome salvato in locale
+      const nomeSalvato = localStorage.getItem("nomeStudente");
+      if (nomeSalvato) {
+          document.getElementById("nomeStudente").value = nomeSalvato;
+      }
+      document.getElementById("nomeStudente").addEventListener('input', (e) => {
+        localStorage.setItem("nomeStudente", e.target.value);
+      });
     });
   </script>
 </body>
