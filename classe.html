@@ -2,14 +2,15 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Editor Python con Pyodide (Versione Semplificata)</title>
+  <title>Editor Python con Pyodide (Layout Ridimensionabile)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script>
     window.require = { paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+  <script src="./libs/pyodide.js"></script>
 
   <style>
     body {
@@ -18,7 +19,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      overflow-y: hidden; 
+      overflow: hidden; /* Importante per il layout full-height */
       background-color: #f0f0f0;
     }
     #traccia, #editor {
@@ -26,9 +27,7 @@
       box-sizing: border-box;
       overflow-y: auto;
       background-color: white; 
-    }
-    #traccia {
-      border-right: 1px solid #ddd;
+      flex-grow: 1; /* Permette alle sezioni di espandersi */
     }
     #pdfFrame {
       width: 100%;
@@ -68,17 +67,18 @@
       transition: background-color 0.3s;
       font-weight: bold;
     }
+    
     /* Stili specifici per i pulsanti */
     #eseguiBtn {
-        background-color: #004080;
+        background-color: #004080; 
         color: white;
     }
     #githubBtn {
-        background-color: #333; /* Grigio scuro per GitHub */
+        background-color: #333; 
         color: white;
     }
     #rtfBtn {
-        background-color: #f7a81b; /* Giallo/Arancione per RTF */
+        background-color: #f7a81b; 
         color: #004080;
     }
 
@@ -103,21 +103,38 @@
         color: #004080;
     }
     
+    /* STILI RESIZABLE PANES */
     @media (min-width: 768px) {
-      body {
-        flex-direction: row;
-      }
-      #traccia, #editor {
-        width: 50%;
-        height: 100vh;
-      }
-      #pdfFrame {
-        height: calc(100vh - 150px);
-      }
-      #monaco {
-        height: calc(100vh - 400px); 
-      }
+        body {
+            flex-direction: row; /* Layout orizzontale su desktop */
+            cursor: default;
+        }
+        /* Rimuoviamo la larghezza fissa qui, usiamo flex-grow */
+        #traccia {
+            width: 50%; /* Larghezza iniziale */
+            min-width: 10%;
+        }
+        #editor {
+            width: 50%; /* Larghezza iniziale */
+            min-width: 10%;
+        }
+        #pdfFrame {
+            height: calc(100vh - 150px);
+        }
+        #monaco {
+            height: calc(100vh - 400px); 
+        }
+
+        /* Divisore Centrale */
+        #splitter {
+            width: 5px;
+            cursor: col-resize; /* Cursore per indicare il ridimensionamento orizzontale */
+            background-color: #ccc;
+            height: 100vh;
+            flex-shrink: 0; /* Impedisce che si rimpicciolisca */
+        }
     }
+    /* FINE STILI RESIZABLE PANES */
   </style>
 </head>
 
@@ -132,8 +149,8 @@
 
     <iframe id="pdfFrame" src=""></iframe>
   </div>
-
   
+  <div id="splitter"></div>
   <div id="editor">
     <h2>Editor Python</h2>
     <div id="monaco"></div>
@@ -153,6 +170,7 @@
     let editor;
     let pyodide;
     let pyodideReady = false; 
+    const MIN_WIDTH = 100; // Larghezza minima in pixel per le colonne
 
     // ------------------------------------
     // 1. INIZIALIZZAZIONE MONACO EDITOR
@@ -165,14 +183,62 @@
         automaticLayout: true
       });
 
-      // Salva il codice in locale ad ogni modifica
       editor.onDidChangeModelContent(() => {
         localStorage.setItem("codicePython", editor.getValue());
       });
     });
 
     // ------------------------------------
-    // 2. INIZIALIZZAZIONE PYODIDE
+    // 2. LOGICA RESIZABLE PANES (Nuova Sezione)
+    // ------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+        // ... (resto della logica DOMContentLoaded)
+        
+        // --- LOGICA RESIZE ---
+        if (window.innerWidth >= 768) { // Attiva solo su schermi desktop
+            const splitter = document.getElementById('splitter');
+            const traccia = document.getElementById('traccia');
+            const editorDiv = document.getElementById('editor');
+            let isDragging = false;
+            
+            splitter.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return; // Solo tasto sinistro
+                isDragging = true;
+                document.body.style.cursor = 'col-resize';
+                document.body.classList.add('no-select'); // Impedisce la selezione durante il drag
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const containerWidth = document.body.offsetWidth;
+                const newTracciaWidth = e.clientX;
+                const newEditorWidth = containerWidth - newTracciaWidth - splitter.offsetWidth;
+
+                if (newTracciaWidth > MIN_WIDTH && newEditorWidth > MIN_WIDTH) {
+                    traccia.style.width = newTracciaWidth + 'px';
+                    editorDiv.style.width = newEditorWidth + 'px';
+                    
+                    // Ricalcola il layout di Monaco quando ridimensionato
+                    if (editor) {
+                        editor.layout();
+                    }
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    document.body.style.cursor = 'default';
+                    document.body.classList.remove('no-select');
+                }
+            });
+        }
+        // --- FINE LOGICA RESIZE ---
+    });
+
+    // ------------------------------------
+    // 3. INIZIALIZZAZIONE PYODIDE
     // ------------------------------------
     async function initializePyodide() {
         document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
@@ -186,26 +252,24 @@
             document.getElementById("output").textContent = "Pyodide pronto. Scrivi il codice e premi Esegui.";
 
         } catch (e) {
-            console.error("Errore fatale nel caricamento di Pyodide:", e);
-            document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Controlla la console per i dettagli.";
+            console.error("Errore fatale nel caricamento di Pyodide. Verifica che i file siano in ./libs/.", e);
+            document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Verifica la cartella 'libs' su GitHub e riprova.";
         }
     }
     document.addEventListener("DOMContentLoaded", initializePyodide);
 
 
     // ------------------------------------
-    // 3. FUNZIONI PRINCIPALI
+    // 4. FUNZIONI PRINCIPALI (Esecuzione, RTF, GitHub)
     // ------------------------------------
 
-    /**
-     * Esegue il codice Python nell'editor tramite Pyodide.
-     */
+    /** Esegue il codice Python nell'editor tramite Pyodide. */
     async function eseguiCodice() {
       if (!pyodideReady) {
         document.getElementById("output").textContent = "Pyodide non è ancora pronto. Attendere.";
         return;
       }
-      
+      // ... (logica di esecuzione omessa per brevità, non è cambiata)
       document.getElementById("output").textContent = "Esecuzione in corso...";
       
       const codice = editor.getValue();
@@ -219,10 +283,9 @@
     window.eseguiCodice = eseguiCodice;
 
     
-    /**
-     * 🔥 NUOVA FUNZIONE: Esporta i dati come file RTF (Rich Text Format).
-     */
+    /** Esporta i dati come file RTF (Rich Text Format). */
     window.esportaRTF = function () {
+        // ... (logica di esportazione RTF omessa per brevità, non è cambiata)
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -236,8 +299,6 @@
 
         if (!nome) return alert("Inserisci il tuo nome e cognome per esportare il file.");
         
-        // --- Costruzione del contenuto in formato RTF (Rich Text Format) ---
-        // Le sequenze come \b, \par, \f1, etc. formattano il testo.
         const rtfContent = `{\\rtf1\\ansi\\deff0
 {\\fonttbl{\\f0 Arial;}{\\f1 Courier New;}}
 \\pard\\sa200\\sl276\\slmult1\\f0\\fs24 
@@ -270,14 +331,13 @@ Traccia di Riferimento: ${tracciaNome}\\par
         link.click();
         document.body.removeChild(link);
         
-        alert(`File RTF salvato con successo come "${fileName}" nella cartella Download! Lo puoi caricare su Drive o sul Modulo Google!`);
+        alert(`File RTF salvato con successo come "${fileName}" nella cartella Download!`);
     };
 
 
-    /**
-     * Invia l'esercizio a GitHub (Issue).
-     */
+    /** Invia l'esercizio a GitHub (Issue). */
     window.inviaCodice = function (destinazione) {
+        // ... (logica di invio GitHub omessa per brevità, non è cambiata)
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -317,7 +377,6 @@ ${output}
             // *************************************************
             const titolo = `Esercizio di ${nome} – ${dataOra} (Classe ${classe})`;
             
-            // Crea un link diretto per l'apertura di una Nuova Issue
             const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpoPost)}`;
             
             window.open(url, "_blank");
@@ -327,9 +386,7 @@ ${output}
     };
 
 
-    /**
-     * Carica un file .py locale nell'editor.
-     */
+    /** Carica un file .py locale nell'editor. */
     window.caricaFile = function (input) {
       const file = input.files[0];
       if (!file) return;
@@ -338,16 +395,14 @@ ${output}
       reader.readAsText(file);
     };
 
-    /**
-     * Cambia la traccia PDF visualizzata.
-     */
+    /** Cambia la traccia PDF visualizzata. */
     window.cambiaTraccia = function (select) {
-      const url = select.value + "?t=" + new Date().getTime(); // Aggiunge timestamp per evitare la cache
+      const url = select.value + "?t=" + new Date().getTime(); 
       document.getElementById("pdfFrame").src = url;
     };
     
     // ------------------------------------
-    // 4. GESTIONE URL E CLASSE
+    // 5. GESTIONE URL E CLASSE
     // ------------------------------------
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -359,7 +414,6 @@ ${output}
       let pdfPath = "tracce/default.pdf"; 
       
       if (classe) {
-          // Percorso dinamico basato sulla classe: es. "tracce/Esercizio_Prime.pdf"
           pdfPath = `tracce/Esercizio_${classe}.pdf`; 
           classeTitolo.textContent = `– Classe ${classe}`;
       }
@@ -375,6 +429,8 @@ ${output}
       nomeStudenteInput.addEventListener('input', (e) => {
         localStorage.setItem("nomeStudente", e.target.value);
       });
+      
+      // La logica di resize è ora all'interno del listener DOMContentLoaded ma separata
     });
   </script>
 </body>
