@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Editor Python con Pyodide (Layout Ridimensionabile)</title>
+  <title>Editor Python con Pyodide (Layout Bi-Dimensionale)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script>
@@ -28,18 +28,37 @@
       overflow-y: auto;
       background-color: white; 
       flex-grow: 1; 
+      display: flex;
+      flex-direction: column;
+      min-height: 0; 
     }
+    #traccia {
+        min-height: 0;
+    }
+
+    /* CONTENUTI INTERNI */
     #pdfFrame {
       width: 100%;
-      height: 300px;
+      height: 300px; 
       border: 1px solid #ccc;
       border-radius: 4px;
+      flex-shrink: 0; 
     }
     #monaco {
-      height: 250px;
+      height: 50%; 
       border: 1px solid #ccc;
       border-radius: 4px;
+      flex-grow: 1; 
+      min-height: 100px; 
     }
+    
+    #editor-controls {
+        flex-shrink: 0; 
+        overflow-y: auto; 
+        padding-top: 10px;
+    }
+
+    /* Stili generali */
     input[type="text"] {
       width: 100%;
       margin-top: 10px;
@@ -69,26 +88,14 @@
     }
     
     /* Stili specifici per i pulsanti */
-    #eseguiBtn {
-        background-color: #004080; 
-        color: white;
-    }
-    #githubBtn {
-        background-color: #333; 
-        color: white;
-    }
-    #rtfBtn {
-        background-color: #f7a81b; 
-        color: #004080;
-    }
+    #eseguiBtn { background-color: #004080; color: white; }
+    #githubBtn { background-color: #333; color: white; }
+    #rtfBtn { background-color: #f7a81b; color: #004080; }
+    /* NUOVO STILE */
+    #ritornaBtn { background-color: #d9534f; color: white; }
 
-    .button-row button:hover:not(:disabled) {
-        opacity: 0.9;
-    }
-    .button-row button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-    }
+    .button-row button:hover:not(:disabled) { opacity: 0.9; }
+    .button-row button:disabled { background-color: #ccc; cursor: not-allowed; }
     pre#output {
       background-color: #eee;
       padding: 15px;
@@ -99,41 +106,25 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    h2 {
-        color: #004080;
-    }
+    h2 { color: #004080; }
     
-    /* STILI RESIZABLE PANES */
+    /* === STILI RESIZABLE PANES (Desktop) === */
     @media (min-width: 768px) {
         body {
             flex-direction: row; 
             cursor: default;
         }
-        #traccia {
-            width: 50%; 
-            min-width: 10%;
-        }
-        #editor {
-            width: 50%; 
-            min-width: 10%;
-        }
-        #pdfFrame {
-            height: calc(100vh - 150px);
-        }
-        #monaco {
-            height: calc(100vh - 400px); 
-        }
+        #traccia { width: 50%; min-width: 10%; }
+        #editor { width: 50%; min-width: 10%; height: 100vh; }
+        #pdfFrame { height: calc(100vh - 150px); }
+        
+        /* 1. Divisore Orizzontale */
+        #splitter { width: 5px; cursor: col-resize; background-color: #ccc; height: 100vh; flex-shrink: 0; }
 
-        /* Divisore Centrale */
-        #splitter {
-            width: 5px;
-            cursor: col-resize; 
-            background-color: #ccc;
-            height: 100vh;
-            flex-shrink: 0; 
-        }
+        /* 2. Divisore Verticale */
+        #vertical-splitter { height: 5px; cursor: row-resize; background-color: #aaa; width: 100%; flex-shrink: 0; }
+        #monaco { height: 50%; flex-grow: 1; }
     }
-    /* FINE STILI RESIZABLE PANES */
   </style>
 </head>
 
@@ -155,16 +146,22 @@
   <div id="editor">
     <h2>Editor Python</h2>
     <div id="monaco"></div>
-    <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
-    <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" />
     
-    <div class="button-row">
-      <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-      <button id="githubBtn" onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
-      <button id="rtfBtn" onclick="esportaRTF()">Esporta Consegna (RTF)</button>
+    <div id="vertical-splitter"></div>
+
+    <div id="editor-controls">
+        <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
+        <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" />
+        
+        <div class="button-row">
+          <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
+          <button id="githubBtn" onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
+          <button id="rtfBtn" onclick="esportaRTF()">Esporta Consegna (RTF)</button>
+          <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
+        </div>
+        
+        <pre id="output">Output...</pre>
     </div>
-    
-    <pre id="output">Output...</pre>
   </div>
 
   <script>
@@ -172,6 +169,33 @@
     let pyodide;
     let pyodideReady = false; 
     const MIN_WIDTH = 100; 
+    const MIN_HEIGHT = 100; 
+
+    // === LOGICA LOGOUT AUTOMATICO ===
+    const INACTIVITY_TIMEOUT = 300000; // 5 minuti
+    let activityTimer;
+
+    function resetActivityTimer() {
+        clearTimeout(activityTimer);
+        activityTimer = setTimeout(() => {
+            logoutAutomatico();
+        }, INACTIVITY_TIMEOUT);
+    }
+
+    window.tornaAllaPaginaPrincipale = function () {
+        // Assume che l'index sia nella cartella superiore (scuola/index.html)
+        window.location.href = '../index.html'; 
+    }
+
+    function logoutAutomatico() {
+        if (editor) {
+            localStorage.setItem("codicePython", editor.getValue());
+        }
+        alert("Sei stato inattivo per 5 minuti. Verrai reindirizzato alla pagina principale per motivi di sicurezza e gestione delle risorse.");
+        tornaAllaPaginaPrincipale();
+    }
+    // ==================================
+
 
     // ------------------------------------
     // 1. INIZIALIZZAZIONE MONACO EDITOR
@@ -186,30 +210,37 @@
 
       editor.onDidChangeModelContent(() => {
         localStorage.setItem("codicePython", editor.getValue());
+        resetActivityTimer(); // Resetta il timer quando si digita
       });
     });
 
     // ------------------------------------
-    // 2. LOGICA RESIZABLE PANES
+    // 2. LOGICA RESIZABLE PANES 
     // ------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
         
-        // --- LOGICA RESIZE ---
+        // Avvia e monitora l'attività dell'utente
+        ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
+            document.addEventListener(eventName, resetActivityTimer, true);
+        });
+        resetActivityTimer(); // Inizia il timer
+        
         if (window.innerWidth >= 768) { 
+            // === RESIZE ORIZZONTALE (Traccia vs Editor) ===
             const splitter = document.getElementById('splitter');
             const traccia = document.getElementById('traccia');
             const editorDiv = document.getElementById('editor');
-            let isDragging = false;
+            let isDraggingHorizontal = false;
             
             splitter.addEventListener('mousedown', function(e) {
                 if (e.button !== 0) return; 
-                isDragging = true;
+                isDraggingHorizontal = true;
                 document.body.style.cursor = 'col-resize';
                 document.body.classList.add('no-select'); 
             });
 
             document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
+                if (!isDraggingHorizontal) return;
                 
                 const containerWidth = document.body.offsetWidth;
                 const newTracciaWidth = e.clientX;
@@ -218,22 +249,53 @@
                 if (newTracciaWidth > MIN_WIDTH && newEditorWidth > MIN_WIDTH) {
                     traccia.style.width = newTracciaWidth + 'px';
                     editorDiv.style.width = newEditorWidth + 'px';
-                    
                     if (editor) {
                         editor.layout();
                     }
                 }
             });
 
+            // === RESIZE VERTICALE (Monaco vs Controlli) ===
+            const verticalSplitter = document.getElementById('vertical-splitter');
+            const monacoDiv = document.getElementById('monaco');
+            const editorControlsDiv = document.getElementById('editor-controls');
+            let isDraggingVertical = false;
+
+            verticalSplitter.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                isDraggingVertical = true;
+                document.body.style.cursor = 'row-resize';
+                document.body.classList.add('no-select'); 
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDraggingVertical) return;
+                
+                const editorRect = editorDiv.getBoundingClientRect();
+                const newMonacoHeight = e.clientY - editorRect.top;
+                
+                if (newMonacoHeight > MIN_HEIGHT) {
+                    monacoDiv.style.height = newMonacoHeight + 'px';
+                    if (editor) {
+                        editor.layout();
+                    }
+                }
+            });
+
+
             document.addEventListener('mouseup', function() {
-                if (isDragging) {
-                    isDragging = false;
+                if (isDraggingHorizontal) {
+                    isDraggingHorizontal = false;
+                }
+                if (isDraggingVertical) {
+                    isDraggingVertical = false;
+                }
+                if (!isDraggingHorizontal && !isDraggingVertical) {
                     document.body.style.cursor = 'default';
                     document.body.classList.remove('no-select');
                 }
             });
         }
-        // --- FINE LOGICA RESIZE ---
     });
 
     // ------------------------------------
@@ -262,13 +324,13 @@
     // 4. FUNZIONI PRINCIPALI (Esecuzione, RTF, GitHub)
     // ------------------------------------
 
-    /** Esegue il codice Python nell'editor tramite Pyodide. */
     async function eseguiCodice() {
+      // ... (logica eseguiCodice)
       if (!pyodideReady) {
         document.getElementById("output").textContent = "Pyodide non è ancora pronto. Attendere.";
         return;
       }
-      
+      resetActivityTimer(); // Resetta il timer quando si esegue il codice
       document.getElementById("output").textContent = "Esecuzione in corso...";
       
       const codice = editor.getValue();
@@ -282,8 +344,8 @@
     window.eseguiCodice = eseguiCodice;
 
     
-    /** Esporta i dati come file RTF (Rich Text Format). */
     window.esportaRTF = function () {
+        resetActivityTimer(); // Resetta il timer quando si esporta
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -333,8 +395,8 @@ Traccia di Riferimento: ${tracciaNome}\\par
     };
 
 
-    /** Invia l'esercizio a GitHub (Issue). */
     window.inviaCodice = function (destinazione) {
+        resetActivityTimer(); // Resetta il timer quando si invia
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -369,9 +431,7 @@ ${output}
 `;
         
         if (destinazione === 'github') {
-             // *********** AGGIORNA QUESTO PERCORSO CON IL TUO REPO (scuola) ***********
             const repo = "doc-cortese/scuola"; 
-            // *************************************************
             const titolo = `Esercizio di ${nome} – ${dataOra} (Classe ${classe})`;
             
             const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpoPost)}`;
@@ -383,8 +443,8 @@ ${output}
     };
 
 
-    /** Carica un file .py locale nell'editor. */
     window.caricaFile = function (input) {
+      resetActivityTimer(); // Resetta il timer quando si carica
       const file = input.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -392,8 +452,8 @@ ${output}
       reader.readAsText(file);
     };
 
-    /** Cambia la traccia PDF visualizzata. */
     window.cambiaTraccia = function (select) {
+      resetActivityTimer(); // Resetta il timer quando si cambia traccia
       const url = select.value + "?t=" + new Date().getTime(); 
       document.getElementById("pdfFrame").src = url;
     };
@@ -417,7 +477,6 @@ ${output}
       
       pdfFrame.src = pdfPath;
       
-      // Carica e salva il nome dello studente
       const nomeStudenteInput = document.getElementById("nomeStudente");
       const nomeSalvato = localStorage.getItem("nomeStudente");
       if (nomeSalvato) {
@@ -425,6 +484,7 @@ ${output}
       }
       nomeStudenteInput.addEventListener('input', (e) => {
         localStorage.setItem("nomeStudente", e.target.value);
+        resetActivityTimer(); // Resetta il timer quando si modifica il nome
       });
       
     });
