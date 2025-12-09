@@ -10,8 +10,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
   <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 
   <style>
@@ -53,7 +51,7 @@
       margin-top: 10px;
     }
     .button-row button {
-      flex: 1 1 calc(50% - 10px);
+      flex: 1 1 auto; 
       padding: 10px;
       font-size: 15px;
       cursor: pointer;
@@ -81,9 +79,6 @@
       #monaco {
         height: calc(100vh - 350px);
       }
-      .button-row button {
-        flex: 1 1 auto;
-      }
     }
   </style>
 </head>
@@ -95,7 +90,6 @@
       <option value="tracce/default.pdf">Cambia Esercizio...</option>
       <option value="tracce/Esercizio_03122025.pdf">Esercizio 03/12/2025</option>
       <option value="tracce/Esercizio_04122025.pdf">Esercizio 04/12/2025</option>
-      <option value="tracce/Esercizi_regressione.pdf">Esercizi di Regressione</option>
     </select>
 
     <iframe id="pdfFrame" src=""></iframe>
@@ -109,8 +103,9 @@
     <input type="file" accept=".py" onchange="caricaFile(this)" />
     <div class="button-row">
       <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-      <button onclick="inviaCodice()">Invia a Google Classroom</button> 
-      <button id="esportaBtn" onclick="esportaPDF()">Esporta PDF</button>
+      <button onclick="inviaCodice('github')">Invia a GitHub</button>
+      <button onclick="inviaCodice('classroom')">Invia a Classroom</button>
+      <button onclick="esportaCSV()">Esporta CSV</button>
     </div>
     <pre id="output">Output...</pre>
   </div>
@@ -137,12 +132,11 @@
     });
 
     // ------------------------------------
-    // 2. INIZIALIZZAZIONE PYODIDE (ASINCRONA)
+    // 2. INIZIALIZZAZIONE PYODIDE
     // ------------------------------------
     async function initializePyodide() {
         document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
         try {
-            // ✅ CORREZIONE: Chiama direttamente la funzione globale loadPyodide()
             pyodide = await loadPyodide(); 
             pyodideReady = true;
             
@@ -184,16 +178,77 @@
     }
     window.eseguiCodice = eseguiCodice;
 
+    
+    /**
+     * Helper per formattare dati per il CSV (gestisce virgolette e newlines)
+     */
+    function escapeCsv(data) {
+        if (typeof data !== 'string') data = String(data);
+        // Sostituisce le virgolette interne con doppie virgolette, poi avvolge il tutto tra virgolette se necessario.
+        if (data.includes(';') || data.includes('\n') || data.includes('"')) {
+            return '"' + data.replace(/"/g, '""') + '"';
+        }
+        return data;
+    }
+
 
     /**
-     * 🔥 NUOVA FUNZIONE: Invia l'esercizio tramite un URL pre-formattato per Google Classroom.
+     * 🔥 NUOVA FUNZIONE: Esporta i dati come file CSV.
      */
-    window.inviaCodice = function () {
+    window.esportaCSV = function () {
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
         
-        // Ottiene la classe dall'URL per identificazione
+        const urlParams = new URLSearchParams(window.location.search);
+        const classe = urlParams.get("classe") || "N/D";
+        
+        const tracciaUrl = document.getElementById("pdfFrame").src;
+        const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
+        const dataOra = new Date().toLocaleString("it-IT");
+
+        if (!nome) return alert("Inserisci il tuo nome e cognome per esportare il file.");
+
+        // Intestazioni (usiamo il punto e virgola come separatore, comune in Italia)
+        const headers = ["Nome Studente", "Classe", "Data e Ora", "Traccia PDF", "Codice Python", "Output"];
+        
+        // Dati
+        const dataRow = [
+            nome,
+            classe,
+            dataOra,
+            tracciaNome,
+            codice,
+            output
+        ];
+        
+        // Costruzione del contenuto CSV
+        const csvContent = [
+            headers.map(escapeCsv).join(';'), 
+            dataRow.map(escapeCsv).join(';')
+        ].join('\n');
+
+        // Crea Blob e innesca il download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', `consegna_${nome || "studente"}_${classe}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        alert(`File CSV salvato con successo come "consegna_${nome || "studente"}_${classe}.csv" nella cartella Download!`);
+    };
+
+
+    /**
+     * Invia l'esercizio a GitHub (Issue) o a Classroom.
+     */
+    window.inviaCodice = function (destinazione) {
+        const nome = document.getElementById("nomeStudente").value.trim();
+        const codice = editor.getValue();
+        const output = document.getElementById("output").textContent.trim();
+        
         const urlParams = new URLSearchParams(window.location.search);
         const classe = urlParams.get("classe") || "Non Specificata";
         
@@ -203,7 +258,6 @@
 
         if (!nome) return alert("Inserisci il tuo nome e cognome per inviare l'esercizio.");
 
-        // Contenuto per il corpo del post/email
         const corpoPost = `
 **Consegna Esercizio Python**
 
@@ -224,13 +278,22 @@ ${output}
 \`\`\`
 `;
         
-        // URL per la Condivisione su Google Classroom (crea un nuovo post)
-        // Passiamo l'URL della pagina e il contenuto pre-popolato
-        const urlClassroom = `https://classroom.google.com/share?url=${encodeURIComponent(window.location.href)}&content=${encodeURIComponent(corpoPost)}`;
-        
-        window.open(urlClassroom, "_blank");
-        
-        alert("La tua consegna è stata preparata per Google Classroom. Incolla il contenuto (codice e output) nel tuo post/commento di consegna.");
+        if (destinazione === 'github') {
+             // *********** AGGIORNA QUESTO PERCORSO CON IL TUO REPO ***********
+            const repo = "doc-cortese/esercizi2025"; 
+            // *************************************************
+            const titolo = `Esercizio di ${nome} – ${dataOra} (Classe ${classe})`;
+            const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpoPost)}`;
+            
+            window.open(url, "_blank");
+            alert("Consegna preparata per GitHub. Clicca su 'Submit new issue' nella nuova finestra per completare l'invio.");
+
+        } else if (destinazione === 'classroom') {
+            const urlClassroom = `https://classroom.google.com/share?url=${encodeURIComponent(window.location.href)}&content=${encodeURIComponent(corpoPost)}`;
+            
+            window.open(urlClassroom, "_blank");
+            alert("Consegna preparata per Google Classroom. Incolla il contenuto (codice e output) nel tuo post/commento di consegna.");
+        }
     };
 
 
@@ -253,57 +316,12 @@ ${output}
       document.getElementById("pdfFrame").src = url;
     };
     
-    /**
-     * Esporta codice e output in un PDF
-     */
-    window.esportaPDF = function (stampa = false) {
-      // ✅ Soluzione per jsPDF non disponibile: verifica corretta
-      const jsPDF = window.jspdf && window.jspdf.jsPDF;
-      if (typeof jsPDF === 'undefined') {
-          return alert("jsPDF non disponibile. Ricarica la pagina e riprova.");
-      }
-
-      const doc = new jsPDF();
-      const nome = document.getElementById("nomeStudente").value.trim();
-      const codice = editor.getValue();
-      const output = document.getElementById("output").textContent.trim();
-      const dataOra = new Date().toLocaleString("it-IT");
-
-      doc.setFontSize(12);
-      doc.text(`Nome: ${nome}`, 10, 10);
-      doc.text(`Data e ora: ${dataOra}`, 10, 20);
-      doc.text("Codice Python:", 10, 30);
-      doc.setFont("Courier", "normal");
-      doc.setFontSize(10);
-      
-      const splitCodice = doc.splitTextToSize(codice, 180);
-      doc.text(splitCodice, 10, 40);
-      
-      const y = 40 + splitCodice.length * 5 + 10;
-      
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(12);
-      doc.text("Output:", 10, y);
-      doc.text(doc.splitTextToSize(output, 180), 10, y + 10);
-
-      if (stampa) {
-        const blob = doc.output("blob");
-        const url = URL.createObjectURL(blob);
-        const win = window.open(url);
-        win.onload = () => win.print();
-      } else {
-        doc.save(`esercizio_${nome || "studente"}.pdf`);
-      }
-    };
-    window.stampaPDF = () => window.esportaPDF(true);
-
-
     // ------------------------------------
     // 4. GESTIONE URL E CLASSE
     // ------------------------------------
 
     /**
-     * 🔥 NUOVA LOGICA: Imposta la traccia iniziale in base al parametro 'classe' nell'URL (es. Prime -> Esercizio_Prime.pdf).
+     * Imposta la traccia iniziale in base al parametro 'classe' nell'URL.
      */
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -311,7 +329,7 @@ ${output}
       const pdfFrame = document.getElementById("pdfFrame");
       const classeTitolo = document.getElementById("classeTitolo");
       
-      let pdfPath = "tracce/default.pdf"; // PDF di default
+      let pdfPath = "tracce/default.pdf"; 
       
       if (classe) {
           // Crea il percorso dinamico: es. "tracce/Esercizio_Prime.pdf"
@@ -321,7 +339,7 @@ ${output}
       
       pdfFrame.src = pdfPath;
       
-      // BONUS: Se l'editor è vuoto, cerca il nome salvato in locale
+      // Carica il nome salvato in locale e salva le modifiche
       const nomeSalvato = localStorage.getItem("nomeStudente");
       if (nomeSalvato) {
           document.getElementById("nomeStudente").value = nomeSalvato;
