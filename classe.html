@@ -155,7 +155,7 @@
         <div class="button-row">
           <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
           <button id="githubBtn" onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
-          <button id="rtfBtn" onclick="esportaRTF()">Esporta Consegna (RTF)</button>
+          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive)</button>
           <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
         </div>
         
@@ -187,7 +187,6 @@
     }
 
     function logoutAutomatico() {
-        // ATTENZIONE: Il codice Python NON viene salvato su ricarica/uscita per richiesta dell'utente.
         alert("Sei stato inattivo per 5 minuti. Verrai reindirizzato alla pagina principale per motivi di sicurezza e gestione delle risorse.");
         tornaAllaPaginaPrincipale();
     }
@@ -199,7 +198,7 @@
     // ------------------------------------
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('monaco'), {
-        // Codice Python viene SEMPRE inizializzato a quello di default, senza salvare in localStorage
+        // Azzeramento dell'editor ad ogni ricarica
         value: '# Scrivi qui il tuo codice Python.', 
         language: 'python',
         theme: 'vs-dark',
@@ -214,7 +213,6 @@
       // ===========================
 
       editor.onDidChangeModelContent(() => {
-        // Rimosso: localStorage.setItem("codicePython", editor.getValue());
         resetActivityTimer(); // Resetta il timer quando si digita
       });
     });
@@ -326,7 +324,7 @@
 
 
     // ------------------------------------
-    // 4. FUNZIONI PRINCIPALI (Esecuzione, RTF, GitHub)
+    // 4. FUNZIONI PRINCIPALI (Esecuzione, RTF, GitHub, CLOUD UPLOAD)
     // ------------------------------------
 
     async function eseguiCodice() {
@@ -348,7 +346,10 @@
     window.eseguiCodice = eseguiCodice;
 
     
-    window.esportaRTF = function () {
+    /**
+     * Invia la consegna direttamente a Google Drive tramite Google Apps Script (GAS).
+     */
+    window.inviaConsegnaDrive = async function () {
         resetActivityTimer(); 
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
@@ -361,8 +362,9 @@
         const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
         const dataOra = new Date().toLocaleString("it-IT");
 
-        if (!nome) return alert("Inserisci il tuo nome e cognome per esportare il file.");
+        if (!nome) return alert("Inserisci il tuo nome e cognome per inviare il file.");
         
+        // Generazione contenuto RTF (usiamo la stringa, non un Blob)
         const rtfContent = `{\\rtf1\\ansi\\deff0
 {\\fonttbl{\\f0 Arial;}{\\f1 Courier New;}}
 \\pard\\sa200\\sl276\\slmult1\\f0\\fs24 
@@ -385,17 +387,39 @@ Traccia di Riferimento: ${tracciaNome}\\par
 \\b -------------------------------------\\b0\\par
 }`;
         
-        const mimeType = 'application/rtf;charset=utf-8;';
-        const blob = new Blob([rtfContent], { type: mimeType });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        const fileName = `consegna_RTF_${nome.replace(/ /g, '_')}_${classe}.rtf`;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // ⚠️ SOSTITUISCI QUESTO URL CON L'URL DEL TUO WEB APP GOOGLE APPS SCRIPT ⚠️
+        const GAS_WEB_APP_URL = "https://script.google.com/a/macros/lscortese.com/s/AKfycbyPRX6Pg_Inm1MCr-tNcBdmx5I4AmLqWAnP8G1-R6E4LaX0uLWTv4W05xwgoqb6jP4b/exec"; 
         
-        alert(`File RTF salvato con successo come "${fileName}" nella cartella Download!`);
+        document.getElementById("output").textContent = "Invio in corso a Google Drive...";
+
+        try {
+            // Invio dei dati (rtfContent come stringa) al Web App GAS
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Necessario per l'invio semplice da client-side
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    nomeStudente: nome,
+                    classe: classe,
+                    tracciaNome: tracciaNome,
+                    dataOra: dataOra,
+                    rtfContent: rtfContent
+                })
+            });
+
+            document.getElementById("output").textContent = `Consegna inviata con successo a Google Drive!
+            (Il file è stato creato nella tua cartella Drive tramite Apps Script)`;
+
+            alert("✅ Consegna inviata con successo a Google Drive! Ricorda di verificare la cartella di destinazione che hai impostato in Google Apps Script.");
+
+        } catch (error) {
+            console.error('Errore nell\'invio al server:', error);
+            document.getElementById("output").textContent = `ERRORE nell'invio a Google Drive. Controlla il tuo URL GAS e le impostazioni. Errore: ${error.message}`;
+            alert("❌ Errore nell'invio a Google Drive. Verifica che il tuo Google Apps Script sia attivo e l'URL sia corretto.");
+        }
     };
 
 
@@ -482,7 +506,7 @@ ${output}
       pdfFrame.src = pdfPath;
       
       const nomeStudenteInput = document.getElementById("nomeStudente");
-      // Manteniamo il salvataggio del nome, solo il codice viene azzerato
+      // Manteniamo il salvataggio del nome
       const nomeSalvato = localStorage.getItem("nomeStudente");
       if (nomeSalvato) {
           nomeStudenteInput.value = nomeSalvato;
