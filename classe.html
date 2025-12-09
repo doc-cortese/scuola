@@ -187,9 +187,7 @@
     }
 
     function logoutAutomatico() {
-        if (editor) {
-            localStorage.setItem("codicePython", editor.getValue());
-        }
+        // ATTENZIONE: Il codice Python NON viene salvato su ricarica/uscita per richiesta dell'utente.
         alert("Sei stato inattivo per 5 minuti. Verrai reindirizzato alla pagina principale per motivi di sicurezza e gestione delle risorse.");
         tornaAllaPaginaPrincipale();
     }
@@ -201,21 +199,22 @@
     // ------------------------------------
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('monaco'), {
-        value: localStorage.getItem("codicePython") || '# Scrivi qui il tuo codice Python.',
+        // Codice Python viene SEMPRE inizializzato a quello di default, senza salvare in localStorage
+        value: '# Scrivi qui il tuo codice Python.', 
         language: 'python',
         theme: 'vs-dark',
         automaticLayout: true
       });
 
-      // === LOGICA ANTI-INCOLLA (NOVITÀ) ===
+      // === LOGICA ANTI-INCOLLA ===
       editor.getDomNode().addEventListener('paste', (e) => {
         e.preventDefault();
         alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
       });
-      // ==================================
+      // ===========================
 
       editor.onDidChangeModelContent(() => {
-        localStorage.setItem("codicePython", editor.getValue());
+        // Rimosso: localStorage.setItem("codicePython", editor.getValue());
         resetActivityTimer(); // Resetta il timer quando si digita
       });
     });
@@ -483,6 +482,7 @@ ${output}
       pdfFrame.src = pdfPath;
       
       const nomeStudenteInput = document.getElementById("nomeStudente");
+      // Manteniamo il salvataggio del nome, solo il codice viene azzerato
       const nomeSalvato = localStorage.getItem("nomeStudente");
       if (nomeSalvato) {
           nomeStudenteInput.value = nomeSalvato;
