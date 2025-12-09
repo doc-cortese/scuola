@@ -90,6 +90,23 @@
     h2 {
         color: #004080;
     }
+    
+    /* Stile per il selettore di formato */
+    #format-selector {
+        flex: 1 1 100%; /* Occupa una riga intera su schermi piccoli */
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+    }
+    #format-selector button {
+        flex-grow: 1;
+        background-color: #f7a81b;
+        color: #004080;
+    }
+    #format-selector button:hover {
+        background-color: #ffc107;
+    }
+
     @media (min-width: 768px) {
       body {
         flex-direction: row;
@@ -103,6 +120,9 @@
       }
       #monaco {
         height: calc(100vh - 400px); /* Regolato per far spazio agli input */
+      }
+      #format-selector {
+        flex: 1 1 auto; /* Torna ad affiancarsi agli altri pulsanti */
       }
     }
   </style>
@@ -129,10 +149,14 @@
     
     <div class="button-row">
       <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-      <button onclick="inviaCodice('github')">Invia Codice (GitHub)</button>
-      <button onclick="inviaCodice('classroom')">Invia Consegna (Classroom)</button>
-      <button onclick="esportaODS()">Esporta Dati (ODS)</button>
+      <button onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
     </div>
+    
+    <div class="button-row" id="format-selector">
+        <button onclick="esportaDOCX_ODF('docx')">Esporta Consegna (DOCX)</button>
+        <button onclick="esportaDOCX_ODF('odt')">Esporta Consegna (ODF)</button>
+    </div>
+    
     <pre id="output">Output...</pre>
   </div>
 
@@ -197,8 +221,6 @@
       
       const codice = editor.getValue();
       try {
-        // Valuta il codice; l'output stampato (print) va nella console, il risultato dell'ultima espressione viene catturato.
-        // Per catturare l'output di 'print', si può reindirizzare sys.stdout, ma runPythonAsync lo fa spesso in automatico o tramite result.
         const result = await pyodide.runPythonAsync(codice); 
         document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output visualizzato direttamente)";
       } catch (err) {
@@ -209,11 +231,9 @@
 
     
     /**
-     * 🔥 FUNZIONE AGGIORNATA: Esporta i dati come file ODS (Open Document Spreadsheet).
-     * Nota: Utilizziamo il formato tab-separated values (TSV) per simulare un foglio di calcolo, 
-     * il quale può essere facilmente aperto da LibreOffice Calc o Excel e salvato come .ods.
+     * 🔥 FUNZIONE AGGIORNATA: Esporta i dati come file DOCX o ODF (simulazione solo testo).
      */
-    window.esportaODS = function () {
+    window.esportaDOCX_ODF = function (format) {
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -226,37 +246,50 @@
         const dataOra = new Date().toLocaleString("it-IT");
 
         if (!nome) return alert("Inserisci il tuo nome e cognome per esportare il file.");
-
-        // Dati da includere, separati da tab (\t)
-        const content = [
-            ["Nome Studente", nome],
-            ["Classe", classe],
-            ["Data e Ora", dataOra],
-            ["Traccia PDF", tracciaNome],
-            ["Codice Python", codice.replace(/\n/g, ' ')], // Rimuove newlines dal codice per riga singola
-            ["Output", output.replace(/\n/g, ' ')]         // Rimuove newlines dall'output per riga singola
-        ].map(row => row.join('\t')).join('\n');
         
-        // Intestazione per ODS (TSV)
-        const ODS_CONTENT = "Testo della Consegna:\n" + content;
+        // Costruzione del contenuto testuale
+        const content = `
+CONSEGNA ESERCIZIO SVOLTO
+=====================================
+Studente: ${nome}
+Classe: ${classe}
+Data e Ora: ${dataOra}
+Traccia di Riferimento: ${tracciaNome}
+=====================================
+
+CODICE PYTHON
+-------------------------------------
+${codice}
+-------------------------------------
+
+OUTPUT DEL CODICE
+-------------------------------------
+${output}
+-------------------------------------
+        `.trim();
+        
+        // Tipo MIME in base al formato
+        const mimeType = 'text/plain;charset=utf-8;';
+        const extension = format === 'odt' ? 'odt' : 'docx';
 
         // Crea Blob e innesca il download
-        const blob = new Blob([ODS_CONTENT], { type: 'text/tab-separated-values;charset=utf-8;' });
+        const blob = new Blob([content], { type: mimeType });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', `consegna_${nome.replace(/ /g, '_')}_${classe}.ods`);
+        link.setAttribute('download', `consegna_${nome.replace(/ /g, '_')}_${classe}.${extension}`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        alert(`File ODS (Tabulato) salvato con successo come "consegna_${nome.replace(/ /g, '_')}_${classe}.ods" nella cartella Download!`);
+        alert(`File ${extension.toUpperCase()} (Testo Semplice) salvato con successo come "consegna_${nome.replace(/ /g, '_')}_${classe}.${extension}" nella cartella Download!`);
     };
 
 
     /**
-     * Invia l'esercizio a GitHub (Issue) o a Classroom.
+     * Invia l'esercizio a GitHub (Issue).
      */
     window.inviaCodice = function (destinazione) {
+        // ... (Logica di invio codice a GitHub Issue, come da versione precedente, mantenuta)
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
         const output = document.getElementById("output").textContent.trim();
@@ -302,13 +335,7 @@ ${output}
             window.open(url, "_blank");
             alert("Consegna preparata per GitHub. Clicca su 'Submit new issue' nella nuova finestra per completare l'invio al repository!");
 
-        } else if (destinazione === 'classroom') {
-            // Crea un link per Google Classroom. L'utente dovrà incollare il corpoPost.
-            const urlClassroom = `https://classroom.google.com/share?url=${encodeURIComponent(window.location.href)}&content=${encodeURIComponent(corpoPost)}`;
-            
-            window.open(urlClassroom, "_blank");
-            alert("Consegna preparata per Google Classroom. Incolla il contenuto (codice e output) nel tuo post/commento di consegna, se richiesto.");
-        }
+        } 
     };
 
 
@@ -335,10 +362,6 @@ ${output}
     // 4. GESTIONE URL E CLASSE
     // ------------------------------------
 
-    /**
-     * Imposta la traccia iniziale in base al parametro 'classe' nell'URL.
-     * Carica il nome dello studente salvato in locale.
-     */
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
       const classe = urlParams.get("classe");
