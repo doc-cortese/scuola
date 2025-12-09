@@ -294,6 +294,8 @@ ${output}
     // 4. GESTIONE URL E CLASSE
     // ------------------------------------
 
+    // Nel file classe.html, sezione 4. GESTIONE URL E CLASSE
+
     /**
      * Imposta la traccia iniziale in base al parametro 'classe' nell'URL.
      */
@@ -303,31 +305,16 @@ ${output}
       const pdfFrame = document.getElementById("pdfFrame");
       const classeTitolo = document.getElementById("classeTitolo");
       
-      let defaultPdf = "tracce/default.pdf";
-      let pdfPath = defaultPdf;
+      let pdfPath = "tracce/default.pdf"; // PDF di default in caso di errore
 
-      switch (classe) {
-        case "Quarte":
-          pdfPath = "tracce/Esercizio IVAsa 05112025.pdf";
-          break;
-        case "Prime":
-          pdfPath = "tracce/Esercizio_03122025.pdf";
-          break;
-        case "Seconde":
-          pdfPath = "tracce/Esercizio IIAsa 18112025.pdf";
-          break;
-        case "Terze":
-          pdfPath = "tracce/Esercizio IIIAsa 18112025.pdf";
-          break;
-        case "Quinte":
-          pdfPath = "tracce/Esercizio_bigdata.pdf";
-          break;
+      if (classe) {
+          // 🔥 NUOVA LOGICA DINAMICA: Crea il percorso in base al nome della classe (es. Prime)
+          // Assicurati che i tuoi file PDF abbiano nomi coerenti come: tracce/Esercizio_Prime.pdf
+          pdfPath = `tracce/Esercizio_${classe}.pdf`; 
+          classeTitolo.textContent = `– Classe ${classe}`;
       }
       
       pdfFrame.src = pdfPath;
-      if (classe) {
-          classeTitolo.textContent = `– Classe ${classe}`;
-      }
     });
   </script>
 </body>
