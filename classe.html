@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Editor Python con Pyodide (Layout Bi-Dimensionale)</title>
-  <meta name="viewport" content="width=device-width, initial-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script>
     window.require = { paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } };
@@ -164,6 +164,8 @@
     </div>
   </div>
 
+  <iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+
   <script>
     let editor;
     let pyodide;
@@ -206,12 +208,23 @@
         automaticLayout: true
       });
 
-      // === LOGICA ANTI-INCOLLA ===
+      // === LOGICA ANTI-INCOLLA: BLOCCO DEFINITIVO ===
+      // 1. Blocca la scorciatoia da tastiera (Ctrl+V / Cmd+V)
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, function() {
+          alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
+      });
+      
+      // 2. Blocca l'azione nativa (menu contestuale)
+      editor.addCommand('editor.action.clipboardPasteAction', function() {
+          alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
+      }, 'in-editor-context');
+      
+      // 3. Blocca l'evento DOM (per sicurezza)
       editor.getDomNode().addEventListener('paste', (e) => {
         e.preventDefault();
         alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
       });
-      // ===========================
+      // ===============================================
 
       editor.onDidChangeModelContent(() => {
         resetActivityTimer(); // Resetta il timer quando si digita
@@ -308,7 +321,6 @@
     async function initializePyodide() {
         document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
         try {
-            // Assumo che pyodide.js sia caricato correttamente (come nello snippet)
             pyodide = await loadPyodide(); 
             pyodideReady = true;
             
@@ -326,7 +338,7 @@
 
 
     // ------------------------------------
-    // 4. FUNZIONI PRINCIPALI 
+    // 4. FUNZIONI PRINCIPALI (Esecuzione, GitHub, CLOUD UPLOAD & DOWNLOAD)
     // ------------------------------------
 
     async function eseguiCodice() {
@@ -339,7 +351,6 @@
       
       const codice = editor.getValue();
       try {
-        // Cattura l'output di print() e l'eventuale valore di ritorno
         const result = await pyodide.runPythonAsync(codice); 
         document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output visualizzato direttamente)";
       } catch (err) {
@@ -423,9 +434,9 @@ Traccia di Riferimento: ${tracciaNome}\\par
 
 
     /**
-     * Invia la consegna direttamente a Google Drive e scarica il file in locale.
+     * Invia la consegna a Google Drive usando FORM/IFRAME (più affidabile) e scarica il file in locale.
      */
-    window.inviaConsegnaDrive = async function () {
+    window.inviaConsegnaDrive = function () {
         resetActivityTimer(); 
         
         const rtfData = generaRtfData();
@@ -434,58 +445,100 @@ Traccia di Riferimento: ${tracciaNome}\\par
         const { rtfContent, fileName, nome, classe, tracciaNome, dataOra } = rtfData;
 
         // ⚠️ SOSTITUISCI QUESTO URL CON L'URL DEL TUO WEB APP GOOGLE APPS SCRIPT ⚠️
-        const GAS_WEB_APP_URL = "https://script.google.com/a/macros/lscortese.com/s/AKfycbz_bodZsVLoLSRkw4F8NojFjkfBMzCg3qMa9vWFJuvEb5gnExDhcqm8K99ZM-uVLRYt/exec"; 
-       
-        document.getElementById("output").textContent = "Invio in corso a Google Drive...";
-
-        // 1. TENTATIVO DI UPLOAD SU DRIVE (parte problematica)
-        try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    nomeStudente: nome,
-                    classe: classe,
-                    tracciaNome: tracciaNome,
-                    dataOra: dataOra,
-                    rtfContent: rtfContent
-                })
-            });
-
-            // Se l'upload ha avuto successo (o se la risposta è opaca)
-            let responseText = "Risposta non letta (upload server completato o fallito, vedi log)";
-            try {
-                responseText = await response.text(); 
-            } catch (e) {
-                // Errore nella lettura del testo (normale con 'no-cors')
-            }
-
-            if (responseText.startsWith("Successo") || response.type === 'opaque') {
-                document.getElementById("output").textContent = `Upload su Drive terminato. ${responseText.startsWith("Successo") ? responseText : "(Verifica Drive)."}`;
-                alert(`✅ Consegna completata! File scaricato e (tentativo di) upload su Drive. Verifica il file locale: ${fileName}`);
-            } else {
-                 document.getElementById("output").textContent = `ERRORE (Upload Drive): ${responseText}`;
-                 alert(`❌ Errore nell'upload su Google Drive: ${responseText}. IL FILE È STATO SCARICATO IN LOCALE.`);
-            }
-
-        } catch (error) {
-            console.error('Errore di Rete/Connessione (Upload Drive):', error);
-            document.getElementById("output").textContent = `ERRORE di Rete (Upload Drive). Errore: ${error.message}.`;
-            alert(`❌ Errore di connessione a Google Drive. IL FILE È STATO SCARICATO IN LOCALE.`);
-        }
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; 
         
-        // 2. DOWNLOAD LOCALE (parte sempre funzionante)
+        
+        // 1. SCARICA IL FILE IN LOCALE (funzione di backup)
         downloadFileRtf(rtfContent, fileName);
+        
+        // 2. PREPARAZIONE PER L'UPLOAD TRAMITE FORM (parte server)
+        document.getElementById("output").textContent = "File scaricato. Tentativo di upload su Google Drive in corso...";
+
+        // Rimuovi eventuali form precedenti (per pulizia)
+        const oldForm = document.getElementById('gasForm');
+        if (oldForm) oldForm.remove();
+        
+        // Crea dinamicamente il form per l'invio
+        const form = document.createElement('form');
+        form.id = 'gasForm';
+        form.method = 'POST';
+        form.action = GAS_WEB_APP_URL;
+        form.target = 'gasTarget'; // Questo target punta all'iframe nascosto 'gasTarget'
+        form.style.display = 'none';
+
+        // Helper per aggiungere input nascosti
+        const addInput = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        };
+
+        // Aggiungi i dati richiesti dal doPost(e)
+        addInput('nomeStudente', nome);
+        addInput('classe', classe);
+        addInput('tracciaNome', tracciaNome);
+        addInput('dataOra', dataOra);
+        addInput('rtfContent', rtfContent); // Il contenuto RTF
+
+        document.body.appendChild(form);
+        
+        // Invia il form
+        form.submit();
+
+        // Messaggio di feedback all'utente (il download è già avvenuto)
+        alert(`✅ Consegna completata! Il file ${fileName} è stato SCARICATO e il tentativo di UPLOAD su Drive è stato avviato in background.`);
+        
+        document.getElementById("output").textContent = `Upload su Drive avviato in background. Se non vedi il file in Drive, consulta la pagina Esecuzioni di Apps Script. File scaricato in locale: ${fileName}`;
     };
 
 
     window.inviaCodice = function (destinazione) {
-        // ... (Omessa per brevità, la funzione GitHub rimane la stessa) ...
-        // Se necessario, la funzione è disponibile nel file originale classe (6).html
+        resetActivityTimer(); 
+        const nome = document.getElementById("nomeStudente").value.trim();
+        const codice = editor.getValue();
+        const output = document.getElementById("output").textContent.trim();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const classe = urlParams.get("classe") || "Non Specificata";
+        
+        const tracciaUrl = document.getElementById("pdfFrame").src;
+        const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
+        const dataOra = new Date().toLocaleString("it-IT");
+
+        if (!nome) return alert("Inserisci il tuo nome e cognome per inviare l'esercizio.");
+
+        const corpoPost = `
+**Consegna Esercizio Python**
+
+Studente: ${nome}
+Classe: ${classe}
+Data e ora: ${dataOra}
+Traccia: ${tracciaNome}
+
+--------------------------------------
+### Codice:
+\`\`\`python
+${codice}
+\`\`\`
+
+### Output:
+\`\`\`
+${output}
+\`\`\`
+`;
+        
+        if (destinazione === 'github') {
+            const repo = "doc-cortese/scuola"; 
+            const titolo = `Esercizio di ${nome} – ${dataOra} (Classe ${classe})`;
+            
+            const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpoPost)}`;
+            
+            window.open(url, "_blank");
+            alert("Consegna preparata per GitHub. Clicca su 'Submit new issue' nella nuova finestra per completare l'invio al repository!");
+
+        } 
     };
 
 
