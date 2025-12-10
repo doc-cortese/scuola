@@ -155,7 +155,7 @@
         
         <div class="button-row">
           <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-          <button id="githubBtn" onclick="inviaCodice('github')">Invia Codice (GitHub Issue)</button>
+          <button id="githubBtn" disabled>Invia Codice (GitHub Issue)</button>
           <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive & Download)</button> 
           <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
         </div>
@@ -172,6 +172,7 @@
     let pyodideReady = false; 
     const MIN_WIDTH = 100; 
     const MIN_HEIGHT = 100; 
+    const ZOOM_INCREMENT = 2; // Incremento di 2px ad ogni zoom
 
     // === LOGICA LOGOUT AUTOMATICO ===
     const INACTIVITY_TIMEOUT = 300000; // 5 minuti
@@ -205,7 +206,13 @@
         value: '# Scrivi qui il tuo codice Python.', 
         language: 'python',
         theme: 'vs-dark',
-        automaticLayout: true
+        automaticLayout: true,
+        // *** IMPOSTAZIONE PER LO ZOOM CON ROTTELLA ***
+        mouseWheelZoom: true,
+        // *** DISABILITA SCORCIATOIE NATIVE BROWSER ***
+        browserMouseWheel: false, 
+        // *** MANTIENI LA DIMENSIONE DEL FONT DI PARTENZA ***
+        fontSize: 14 // Dimensione di default
       });
 
       // === LOGICA ANTI-INCOLLA: BLOCCO DEFINITIVO ===
@@ -229,6 +236,27 @@
       editor.onDidChangeModelContent(() => {
         resetActivityTimer(); // Resetta il timer quando si digita
       });
+      
+      // === LOGICA ZOOM MANUALE (Rotellina del Mouse con Ctrl) ===
+      editor.getDomNode().addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+            e.preventDefault(); 
+            const currentSize = editor.getOption(monaco.editor.EditorOption.fontSize);
+            let newSize = currentSize;
+
+            if (e.deltaY < 0) { // Scroll up (Zoom in)
+                newSize = currentSize + ZOOM_INCREMENT;
+            } else if (e.deltaY > 0) { // Scroll down (Zoom out)
+                newSize = currentSize - ZOOM_INCREMENT;
+            }
+
+            // Limiti per il font size
+            newSize = Math.max(8, Math.min(40, newSize)); 
+
+            editor.updateOptions({ fontSize: newSize });
+        }
+      });
+      // ========================================================
     });
 
     // ------------------------------------
@@ -338,7 +366,7 @@
 
 
     // ------------------------------------
-    // 4. FUNZIONI PRINCIPALI (Esecuzione, GitHub, CLOUD UPLOAD & DOWNLOAD)
+    // 4. FUNZIONI PRINCIPALI (Esecuzione, CLOUD UPLOAD & DOWNLOAD)
     // ------------------------------------
 
     async function eseguiCodice() {
@@ -418,7 +446,7 @@ Traccia di Riferimento: ${tracciaNome}\\par
 
 
     /**
-     * FUNZIONE AGGIUNTA: Scarica la stringa RTF come file .rtf locale.
+     * FUNZIONE: Scarica la stringa RTF come file .rtf locale.
      */
     function downloadFileRtf(rtfContent, fileName) {
         const blob = new Blob([rtfContent], { type: 'application/rtf' });
@@ -445,7 +473,7 @@ Traccia di Riferimento: ${tracciaNome}\\par
         const { rtfContent, fileName, nome, classe, tracciaNome, dataOra } = rtfData;
 
         // ⚠️ SOSTITUISCI QUESTO URL CON L'URL DEL TUO WEB APP GOOGLE APPS SCRIPT ⚠️
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; 
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/INSERISCI_QUI_L_ID_DEPLOYMENT/exec"; 
         
         
         // 1. SCARICA IL FILE IN LOCALE (funzione di backup)
@@ -493,52 +521,10 @@ Traccia di Riferimento: ${tracciaNome}\\par
         document.getElementById("output").textContent = `Upload su Drive avviato in background. Se non vedi il file in Drive, consulta la pagina Esecuzioni di Apps Script. File scaricato in locale: ${fileName}`;
     };
 
-
+    // La funzione inviaCodice è stata rimossa, ma è rimasta per compatibilità nel caso volessi riattivarla
     window.inviaCodice = function (destinazione) {
-        resetActivityTimer(); 
-        const nome = document.getElementById("nomeStudente").value.trim();
-        const codice = editor.getValue();
-        const output = document.getElementById("output").textContent.trim();
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const classe = urlParams.get("classe") || "Non Specificata";
-        
-        const tracciaUrl = document.getElementById("pdfFrame").src;
-        const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
-        const dataOra = new Date().toLocaleString("it-IT");
-
-        if (!nome) return alert("Inserisci il tuo nome e cognome per inviare l'esercizio.");
-
-        const corpoPost = `
-**Consegna Esercizio Python**
-
-Studente: ${nome}
-Classe: ${classe}
-Data e ora: ${dataOra}
-Traccia: ${tracciaNome}
-
---------------------------------------
-### Codice:
-\`\`\`python
-${codice}
-\`\`\`
-
-### Output:
-\`\`\`
-${output}
-\`\`\`
-`;
-        
-        if (destinazione === 'github') {
-            const repo = "doc-cortese/scuola"; 
-            const titolo = `Esercizio di ${nome} – ${dataOra} (Classe ${classe})`;
-            
-            const url = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(titolo)}&body=${encodeURIComponent(corpoPost)}`;
-            
-            window.open(url, "_blank");
-            alert("Consegna preparata per GitHub. Clicca su 'Submit new issue' nella nuova finestra per completare l'invio al repository!");
-
-        } 
+        // Funzione disattivata, ma il pulsante è disabilitato direttamente nell'HTML
+        alert("La funzione di invio a GitHub è attualmente disattivata.");
     };
 
 
