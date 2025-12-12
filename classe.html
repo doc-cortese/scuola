@@ -131,10 +131,9 @@
 <body>
   <div id="traccia">
     <h2>Traccia <span id="classeTitolo"></span></h2>
-    <select onchange="cambiaTraccia(this)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-      <option value="tracce/default.pdf">Cambia Esercizio...</option>
-      <option value="tracce/Esercizio_03122025.pdf">Esercizio 03/12/2025</option>
-      <option value="tracce/Esercizio_04122025.pdf">Esercizio 04/12/2025</option>
+    
+    <select id="tracciaSelect" onchange="cambiaTraccia(this)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+      <option value="tracce/default.pdf">Seleziona un esercizio...</option>
     </select>
 
     <iframe id="pdfFrame" src=""></iframe>
@@ -172,7 +171,7 @@
     let pyodideReady = false; 
     const MIN_WIDTH = 100; 
     const MIN_HEIGHT = 100; 
-    const ZOOM_INCREMENT = 2; // Incremento di 2px ad ogni zoom
+    const ZOOM_INCREMENT = 2; 
 
     // === LOGICA LOGOUT AUTOMATICO ===
     const INACTIVITY_TIMEOUT = 300000; // 5 minuti
@@ -186,7 +185,6 @@
     }
 
     window.tornaAllaPaginaPrincipale = function () {
-        // Assume che l'index sia nella cartella superiore (scuola/index.html)
         window.location.href = '../index.html'; 
     }
 
@@ -196,37 +194,51 @@
     }
     // ==================================
 
+    // ------------------------------------
+    // *** NUOVA MAPPATURA ESERCIZI PER CLASSE ***
+    // (Aggiungi qui i tuoi file PDF per le Quarte, Quinte, ecc.)
+    // ------------------------------------
+    const EXERCISES_BY_CLASS = {
+        'Terze': [
+            // Esercizio caricato dall'utente
+            { file: 'Esercizio_Terze.pdf', title: 'Esercizio Analisi Fisica' },
+            { file: 'Esercizio_03122025.pdf', title: 'Esercizio 3 Dicembre (A)' }
+        ],
+        'Quarte': [
+            // Esempio: Devi creare questi file nella cartella 'tracce/'
+            { file: 'Esercizio_Quarte_1.pdf', title: 'Esercizio Algoritmi Avanzati' },
+            { file: 'Esercizio_Quarte_2.pdf', title: 'Esercizio Classi e Oggetti' }
+        ],
+        // Aggiungi le altre classi qui: es. 'Quinte': [...]
+        
+        // Esercizi di fallback/generici (usati se la classe non è riconosciuta)
+        'default': [
+            { file: 'default.pdf', title: 'Esercizio Base' },
+            { file: 'Esercizio_04122025.pdf', title: 'Esercizio 4 Dicembre (B)' }
+        ]
+    };
 
     // ------------------------------------
     // 1. INIZIALIZZAZIONE MONACO EDITOR
     // ------------------------------------
     require(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('monaco'), {
-        // Azzeramento dell'editor ad ogni ricarica
         value: '# Scrivi qui il tuo codice Python.', 
         language: 'python',
         theme: 'vs-dark',
         automaticLayout: true,
-        // *** IMPOSTAZIONE PER LO ZOOM CON ROTELLA ***
         mouseWheelZoom: true,
-        // *** DISABILITA SCORCIATOIE NATIVE BROWSER ***
         browserMouseWheel: false, 
-        // *** MANTIENI LA DIMENSIONE DEL FONT DI PARTENZA ***
-        fontSize: 14 // Dimensione di default
+        fontSize: 14 
       });
 
       // === LOGICA ANTI-INCOLLA: BLOCCO DEFINITIVO ===
-      // 1. Blocca la scorciatoia da tastiera (Ctrl+V / Cmd+V)
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, function() {
           alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
       });
-      
-      // 2. Blocca l'azione nativa (menu contestuale)
       editor.addCommand('editor.action.clipboardPasteAction', function() {
           alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
       }, 'in-editor-context');
-      
-      // 3. Blocca l'evento DOM (per sicurezza)
       editor.getDomNode().addEventListener('paste', (e) => {
         e.preventDefault();
         alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
@@ -234,7 +246,7 @@
       // ===============================================
 
       editor.onDidChangeModelContent(() => {
-        resetActivityTimer(); // Resetta il timer quando si digita
+        resetActivityTimer(); 
       });
       
       // === LOGICA ZOOM MANUALE (Rotellina del Mouse con Ctrl) ===
@@ -250,7 +262,6 @@
                 newSize = currentSize - ZOOM_INCREMENT;
             }
 
-            // Limiti per il font size
             newSize = Math.max(8, Math.min(40, newSize)); 
 
             editor.updateOptions({ fontSize: newSize });
@@ -261,17 +272,16 @@
 
     // ------------------------------------
     // 2. LOGICA RESIZABLE PANES 
+    // (Non modificata, gestisce solo il layout)
     // ------------------------------------
     document.addEventListener("DOMContentLoaded", () => {
         
-        // Avvia e monitora l'attività dell'utente
         ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
             document.addEventListener(eventName, resetActivityTimer, true);
         });
-        resetActivityTimer(); // Inizia il timer
+        resetActivityTimer(); 
         
         if (window.innerWidth >= 768) { 
-            // === RESIZE ORIZZONTALE (Traccia vs Editor) ===
             const splitter = document.getElementById('splitter');
             const traccia = document.getElementById('traccia');
             const editorDiv = document.getElementById('editor');
@@ -300,10 +310,8 @@
                 }
             });
 
-            // === RESIZE VERTICALE (Monaco vs Controlli) ===
             const verticalSplitter = document.getElementById('vertical-splitter');
             const monacoDiv = document.getElementById('monaco');
-            const editorControlsDiv = document.getElementById('editor-controls');
             let isDraggingVertical = false;
 
             verticalSplitter.addEventListener('mousedown', function(e) {
@@ -344,7 +352,7 @@
     });
 
     // ------------------------------------
-    // 3. INIZIALIZZAZIONE PYODIDE
+    // 3. INIZIALIZZAZIONE PYODIDE (Non modificata)
     // ------------------------------------
     async function initializePyodide() {
         document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
@@ -388,10 +396,6 @@
     window.eseguiCodice = eseguiCodice;
 
     
-    /**
-     * Helper: Genera la stringa RTF per la consegna.
-     * @returns {Object} Un oggetto contenente rtfContent (stringa RTF), fileName e i metadati.
-     */
     function generaRtfData() {
         const nome = document.getElementById("nomeStudente").value.trim();
         const codice = editor.getValue();
@@ -409,16 +413,13 @@
             return null;
         }
 
-        // Prepara un nome file univoco e leggibile
         const dataOraFormattata = new Date().toLocaleString("it-IT").replace(/:/g, '-').replace(/\//g, '_').replace(/, /g, '_').replace(/ /g, '_');
-        const fileName = `Consegna_${nome.replace(/ /g, '_')}_${classe}_${dataOraFormattata}.rtf`;
+        const fileNameBase = `${nome.replace(/ /g, '_')}_${classe}_${dataOraFormattata}`;
+        const fileNameRtf = `Consegna_${fileNameBase}.rtf`;
 
-
-        // Funzione per escapare caratteri speciali RTF
         const escapeRtf = (text) => 
             text.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par\n');
         
-        // Generazione contenuto RTF
         const rtfContent = `{\\rtf1\\ansi\\deff0
 {\\fonttbl{\\f0 Arial;}{\\f1 Courier New;}}
 \\pard\\sa200\\sl276\\slmult1\\f0\\fs24 
@@ -441,13 +442,10 @@ Traccia di Riferimento: ${tracciaNome}\\par
 \\b -------------------------------------\\b0\\par
 }`;
 
-        return { rtfContent, fileName, nome, classe, tracciaNome, dataOra };
+        return { rtfContent, fileNameRtf, pyContent: codice, fileNameBase, nome, classe, tracciaNome, dataOra };
     }
 
 
-    /**
-     * FUNZIONE: Scarica la stringa RTF come file .rtf locale.
-     */
     function downloadFileRtf(rtfContent, fileName) {
         const blob = new Blob([rtfContent], { type: 'application/rtf' });
         const url = URL.createObjectURL(blob);
@@ -461,40 +459,34 @@ Traccia di Riferimento: ${tracciaNome}\\par
     }
 
 
-    /**
-     * Invia la consegna a Google Drive usando FORM/IFRAME (più affidabile) e scarica il file in locale.
-     */
     window.inviaConsegnaDrive = function () {
         resetActivityTimer(); 
         
         const rtfData = generaRtfData();
-        if (!rtfData) return; // Uscita se manca il nome
+        if (!rtfData) return; 
 
-        const { rtfContent, fileName, nome, classe, tracciaNome, dataOra } = rtfData;
+        const { rtfContent, fileNameRtf, pyContent, nome, classe, tracciaNome, dataOra } = rtfData;
 
         // ⚠️ SOSTITUISCI QUESTO URL CON L'URL DEL TUO WEB APP GOOGLE APPS SCRIPT ⚠️
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; 
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/INSERISCI_QUI_L_ID_DEPLOYMENT/exec"; 
         
         
-        // 1. SCARICA IL FILE IN LOCALE (funzione di backup)
-        downloadFileRtf(rtfContent, fileName);
+        // 1. SCARICA IL FILE RTF IN LOCALE
+        downloadFileRtf(rtfContent, fileNameRtf);
         
-        // 2. PREPARAZIONE PER L'UPLOAD TRAMITE FORM (parte server)
-        document.getElementById("output").textContent = "File scaricato. Tentativo di upload su Google Drive in corso...";
+        // 2. PREPARAZIONE PER L'UPLOAD TRAMITE FORM
+        document.getElementById("output").textContent = "File scaricato. Tentativo di upload di RTF e Codice Python su Google Drive in corso...";
 
-        // Rimuovi eventuali form precedenti (per pulizia)
         const oldForm = document.getElementById('gasForm');
         if (oldForm) oldForm.remove();
         
-        // Crea dinamicamente il form per l'invio
         const form = document.createElement('form');
         form.id = 'gasForm';
         form.method = 'POST';
         form.action = GAS_WEB_APP_URL;
-        form.target = 'gasTarget'; // Questo target punta all'iframe nascosto 'gasTarget'
+        form.target = 'gasTarget'; 
         form.style.display = 'none';
 
-        // Helper per aggiungere input nascosti
         const addInput = (name, value) => {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -503,28 +495,21 @@ Traccia di Riferimento: ${tracciaNome}\\par
             form.appendChild(input);
         };
 
-        // Aggiungi i dati richiesti dal doPost(e)
         addInput('nomeStudente', nome);
         addInput('classe', classe);
         addInput('tracciaNome', tracciaNome);
         addInput('dataOra', dataOra);
-        addInput('rtfContent', rtfContent); // Il contenuto RTF
+        addInput('rtfContent', rtfContent); 
+        addInput('pyContent', pyContent);   
+        
 
         document.body.appendChild(form);
         
-        // Invia il form
         form.submit();
 
-        // Messaggio di feedback all'utente (il download è già avvenuto)
-        alert(`✅ Consegna completata! Il file ${fileName} è stato SCARICATO e il tentativo di UPLOAD su Drive è stato avviato in background.`);
+        alert(`✅ Consegna completata! Il file ${fileNameRtf} è stato SCARICATO e il tentativo di UPLOAD di RTF + PY su Drive è stato avviato.`);
         
-        document.getElementById("output").textContent = `Upload su Drive avviato in background. Se non vedi il file in Drive, consulta la pagina Esecuzioni di Apps Script. File scaricato in locale: ${fileName}`;
-    };
-
-    // La funzione inviaCodice è stata rimossa, ma è rimasta per compatibilità nel caso volessi riattivarla
-    window.inviaCodice = function (destinazione) {
-        // Funzione disattivata, ma il pulsante è disabilitato direttamente nell'HTML
-        alert("La funzione di invio a GitHub è attualmente disattivata.");
+        document.getElementById("output").textContent = `Upload su Drive avviato in background. Verranno creati due file: .rtf e .py. File di backup scaricato: ${fileNameRtf}`;
     };
 
 
@@ -537,33 +522,59 @@ Traccia di Riferimento: ${tracciaNome}\\par
       reader.readAsText(file);
     };
 
+    /**
+     * Funzione chiamata quando l'utente seleziona un'altra traccia dal menu a tendina.
+     */
     window.cambiaTraccia = function (select) {
       resetActivityTimer(); 
+      // Aggiunge timestamp per forzare il ricaricamento del PDF
       const url = select.value + "?t=" + new Date().getTime(); 
       document.getElementById("pdfFrame").src = url;
     };
     
     // ------------------------------------
-    // 5. GESTIONE URL E CLASSE
+    // 5. GESTIONE URL E CLASSE (Logica Dinamica)
     // ------------------------------------
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const classe = urlParams.get("classe");
+      const classeRaw = urlParams.get("classe");
       const pdfFrame = document.getElementById("pdfFrame");
       const classeTitolo = document.getElementById("classeTitolo");
+      const tracciaSelect = document.getElementById("tracciaSelect");
       
       let pdfPath = "tracce/default.pdf"; 
       
-      if (classe) {
-          pdfPath = `tracce/Esercizio_${classe}.pdf`; 
-          classeTitolo.textContent = `– Classe ${classe}`;
+      // Capitalizza la classe per la ricerca nella mappatura, altrimenti usa 'default'
+      const classKey = classeRaw ? classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1) : 'default';
+      const availableExercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
+      
+      // 1. Genera le opzioni del menu a tendina
+      // Rimuovi l'opzione "Seleziona un esercizio..." prima di riempire (se presente)
+      tracciaSelect.innerHTML = ''; 
+
+      availableExercises.forEach(exercise => {
+          const option = document.createElement('option');
+          option.value = `tracce/${exercise.file}`;
+          option.textContent = exercise.title;
+          tracciaSelect.appendChild(option);
+      });
+      
+      // 2. Imposta la traccia iniziale
+      if (classeRaw) {
+          // Usa il primo esercizio specifico della classe come default iniziale
+          const firstExercisePath = availableExercises[0] ? `tracce/${availableExercises[0].file}` : "tracce/default.pdf";
+          pdfPath = firstExercisePath;
+          classeTitolo.textContent = `– Classe ${classKey}`; // Es. "– Classe Terze"
+          
+          // Seleziona l'opzione corretta nel menu a tendina
+          tracciaSelect.value = firstExercisePath;
       }
       
       pdfFrame.src = pdfPath;
       
+      // 3. Carica e salva il nome dello studente
       const nomeStudenteInput = document.getElementById("nomeStudente");
-      // Manteniamo il salvataggio del nome
       const nomeSalvato = localStorage.getItem("nomeStudente");
       if (nomeSalvato) {
           nomeStudenteInput.value = nomeSalvato;
