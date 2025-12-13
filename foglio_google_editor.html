@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Traccia Esercizio con Foglio Google (Layout Bi-Dimensionale)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden; 
+      background-color: #f0f0f0;
+    }
+    #traccia, #sheet-container {
+      padding: 15px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      background-color: white; 
+      flex-grow: 1; 
+      display: flex;
+      flex-direction: column;
+      min-height: 0; 
+    }
+    #traccia {
+        min-height: 0;
+    }
+
+    /* CONTENUTI INTERNI */
+    #pdfFrame {
+      width: 100%;
+      height: 300px; 
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      flex-shrink: 0; 
+    }
+    
+    /* Nuovo contenitore per il Foglio Google */
+    #google-sheet {
+      height: 70%; /* Altezza più grande per il foglio */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      flex-grow: 1; 
+      min-height: 100px; 
+      width: 100%;
+    }
+    
+    #sheet-controls {
+        flex-shrink: 0; 
+        overflow-y: auto; 
+        padding-top: 10px;
+    }
+
+    /* Stili generali */
+    input[type="text"] {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[type="file"] {
+        margin-top: 10px;
+        /* Rimosso, non più necessario per caricare file PY */
+        display: none; 
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .button-row button {
+      flex: 1 1 auto; 
+      padding: 12px 10px;
+      font-size: 15px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      font-weight: bold;
+    }
+    
+    /* Stili specifici per i pulsanti */
+    /* Rimosso #eseguiBtn e #githubBtn, sostituito con stile generico */
+    #rtfBtn { background-color: #28a745; color: white; } /* Invia Consegna */
+    #ritornaBtn { background-color: #d9534f; color: white; } /* Esci */
+
+    .button-row button:hover:not(:disabled) { opacity: 0.9; }
+    .button-row button:disabled { background-color: #ccc; cursor: not-allowed; }
+    pre#output {
+      background-color: #eee;
+      padding: 15px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    h2 { color: #004080; }
+    
+    /* === STILI RESIZABLE PANES (Desktop) === */
+    @media (min-width: 768px) {
+        body {
+            flex-direction: row; 
+            cursor: default;
+        }
+        #traccia { width: 50%; min-width: 10%; }
+        #sheet-container { width: 50%; min-width: 10%; height: 100vh; }
+        #pdfFrame { height: calc(100vh - 150px); }
+        
+        /* 1. Divisore Orizzontale */
+        #splitter { width: 5px; cursor: col-resize; background-color: #ccc; height: 100vh; flex-shrink: 0; }
+
+        /* 2. Divisore Verticale */
+        /* Rimosso il divisore verticale */
+        #google-sheet { height: 100%; flex-grow: 1; } 
+    }
+  </style>
+</head>
+
+<body>
+  <div id="traccia">
+    <h2>Traccia <span id="classeTitolo"></span></h2>
+    
+    <select id="tracciaSelect" onchange="cambiaTraccia(this)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+      <option value="tracce/default.pdf">Seleziona un esercizio...</option>
+    </select>
+
+    <iframe id="pdfFrame" src=""></iframe>
+  </div>
+  
+  <div id="splitter"></div>
+
+  
+  <div id="sheet-container">
+    <h2>Foglio Google (Elaborazione Dati)</h2>
+    
+    <iframe 
+        id="google-sheet" 
+        src="https://docs.google.com/spreadsheets/d/ID_DEL_TUO_FOGLIO/edit?usp=sharing&amp;embedded=true" 
+        frameborder="0"
+        title="Google Sheet incorporato"
+    ></iframe>
+    
+    <div id="sheet-controls">
+        <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
+        <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" style="display:none;" />
+        
+        <div class="button-row">
+          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive & Download Link)</button> 
+          <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
+        </div>
+        
+        <pre id="output">Stato: Pronto. Assicurati che il tuo Foglio Google sia pubblico o condivisibile per la consegna.</pre>
+    </div>
+  </div>
+
+  <iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+
+  <script>
+    // === CONFIGURAZIONE ===
+    const GOOGLE_SHEET_ID = "ID_DEL_TUO_FOGLIO"; // <--- SOSTITUISCI CON L'ID DEL TUO FOGLIO!
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; // <--- SOSTITUISCI CON IL TUO URL GAS
+    const MIN_WIDTH = 100; 
+    const INACTIVITY_TIMEOUT = 300000; // 5 minuti
+
+    // === LOGICA LOGOUT AUTOMATICO ===
+    let activityTimer;
+
+    function resetActivityTimer() {
+        clearTimeout(activityTimer);
+        activityTimer = setTimeout(() => {
+            logoutAutomatico();
+        }, INACTIVITY_TIMEOUT);
+    }
+
+    window.tornaAllaPaginaPrincipale = function () {
+        window.location.href = '../index.html'; 
+    }
+
+    function logoutAutomatico() {
+        alert("Sei stato inattivo per 5 minuti. Verrai reindirizzato alla pagina principale per motivi di sicurezza e gestione delle risorse.");
+        tornaAllaPaginaPrincipale();
+    }
+    // ==================================
+
+    // ------------------------------------
+    // *** MAPPATURA ESERCIZI PER CLASSE ***
+    // ------------------------------------
+    const EXERCISES_BY_CLASS = {
+        'Terze': [
+            { file: 'Esercizio_Terze_1.pdf', title: 'Esercizio Analisi Fisica' }
+        ],
+        'Quarte': [
+            { file: 'Esercizio_Quarte_1.pdf', title: 'Esercizio Algoritmi Avanzati' }
+        ],
+        'default': [
+            { file: 'default.pdf', title: 'Esercizio Base' }
+        ]
+    };
+    
+    /**
+     * Invia un record di consegna al Google Apps Script (GAS) contenente il link al Foglio Google.
+     * Necessita di un GAS configurato per ricevere i parametri e gestirli (es. creare una copia del foglio o registrarne il link).
+     */
+    window.inviaConsegnaDrive = function () {
+        resetActivityTimer(); 
+        
+        const nome = document.getElementById("nomeStudente").value.trim();
+        const outputStatus = document.getElementById("output");
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const classe = urlParams.get("classe") || "ND";
+        
+        const tracciaUrl = document.getElementById("pdfFrame").src;
+        const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
+        const dataOra = new Date().toLocaleString("it-IT");
+        
+        const sheetLink = document.getElementById("google-sheet").src.replace("&embedded=true", ""); // Prende il link completo senza il parametro embed
+        
+        if (!nome) {
+            alert("Inserisci il tuo nome e cognome per inviare il file.");
+            return;
+        }
+
+        outputStatus.textContent = "Preparazione per l'upload del link a Google Drive in corso...";
+
+        const oldForm = document.getElementById('gasForm');
+        if (oldForm) oldForm.remove();
+        
+        const form = document.createElement('form');
+        form.id = 'gasForm';
+        form.method = 'POST';
+        form.action = GAS_WEB_APP_URL;
+        form.target = 'gasTarget'; 
+        form.style.display = 'none';
+
+        const addInput = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        };
+
+        addInput('nomeStudente', nome);
+        addInput('classe', classe);
+        addInput('tracciaNome', tracciaNome);
+        addInput('dataOra', dataOra);
+        // Parametri specifici per la consegna con Google Sheet
+        addInput('sheetLink', sheetLink); 
+        addInput('sheetId', GOOGLE_SHEET_ID); // Opzionale, per permettere al GAS di copiare il foglio
+        addInput('azione', 'consegnaFoglio'); 
+        
+
+        document.body.appendChild(form);
+        
+        form.submit();
+
+        alert(`✅ Consegna avviata! Verrà inviato il link del Foglio Google a Drive.`);
+        
+        outputStatus.textContent = `Upload del link su Drive avviato in background. Link inviato: ${sheetLink}`;
+    };
+
+    /**
+     * Funzione chiamata quando l'utente seleziona un'altra traccia dal menu a tendina.
+     */
+    window.cambiaTraccia = function (select) {
+      resetActivityTimer(); 
+      // Aggiunge timestamp per forzare il ricaricamento del PDF
+      const url = select.value + "?t=" + new Date().getTime(); 
+      document.getElementById("pdfFrame").src = url;
+    };
+    
+    // ------------------------------------
+    // 1. LOGICA RESIZABLE PANES & CONTROLLO ATTIVITÀ
+    // ------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        // Setup timer attività
+        ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
+            document.addEventListener(eventName, resetActivityTimer, true);
+        });
+        resetActivityTimer(); 
+        
+        // Imposta l'URL del Foglio Google
+        const googleSheetFrame = document.getElementById("google-sheet");
+        // Nota: Assicurati che l'URL abbia i permessi di visualizzazione (es. "anyone with the link can view")
+        googleSheetFrame.src = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?usp=sharing&embedded=true`;
+        
+        // Logica Resizable (Solo Orizzontale)
+        if (window.innerWidth >= 768) { 
+            const splitter = document.getElementById('splitter');
+            const traccia = document.getElementById('traccia');
+            const sheetDiv = document.getElementById('sheet-container');
+            let isDraggingHorizontal = false;
+            
+            splitter.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return; 
+                isDraggingHorizontal = true;
+                document.body.style.cursor = 'col-resize';
+                document.body.classList.add('no-select'); 
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDraggingHorizontal) return;
+                
+                const containerWidth = document.body.offsetWidth;
+                const newTracciaWidth = e.clientX;
+                const newSheetWidth = containerWidth - newTracciaWidth - splitter.offsetWidth;
+
+                if (newTracciaWidth > MIN_WIDTH && newSheetWidth > MIN_WIDTH) {
+                    traccia.style.width = newTracciaWidth + 'px';
+                    sheetDiv.style.width = newSheetWidth + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isDraggingHorizontal) {
+                    isDraggingHorizontal = false;
+                    document.body.style.cursor = 'default';
+                    document.body.classList.remove('no-select');
+                }
+            });
+        }
+
+        // ------------------------------------
+        // 2. GESTIONE URL E CLASSE (Logica Dinamica)
+        // ------------------------------------
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const classeRaw = urlParams.get("classe");
+        const pdfFrame = document.getElementById("pdfFrame");
+        const classeTitolo = document.getElementById("classeTitolo");
+        const tracciaSelect = document.getElementById("tracciaSelect");
+        
+        let pdfPath = "tracce/default.pdf"; 
+        
+        const classKey = classeRaw ? classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1) : 'default';
+        const availableExercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
+        
+        // 1. Genera le opzioni del menu a tendina
+        tracciaSelect.innerHTML = ''; 
+
+        availableExercises.forEach(exercise => {
+            const option = document.createElement('option');
+            option.value = `tracce/${exercise.file}`;
+            option.textContent = exercise.title;
+            tracciaSelect.appendChild(option);
+        });
+        
+        // 2. Imposta la traccia iniziale
+        if (classeRaw) {
+            const firstExercisePath = availableExercises[0] ? `tracce/${availableExercises[0].file}` : "tracce/default.pdf";
+            pdfPath = firstExercisePath;
+            classeTitolo.textContent = `– Classe ${classKey}`; 
+            
+            tracciaSelect.value = firstExercisePath;
+        }
+        
+        pdfFrame.src = pdfPath;
+        
+        // 3. Carica e salva il nome dello studente
+        const nomeStudenteInput = document.getElementById("nomeStudente");
+        const nomeSalvato = localStorage.getItem("nomeStudente");
+        if (nomeSalvato) {
+            nomeStudenteInput.value = nomeSalvato;
+        }
+        nomeStudenteInput.addEventListener('input', (e) => {
+          localStorage.setItem("nomeStudente", e.target.value);
+          resetActivityTimer(); 
+        });
+        
+      });
+  </script>
+</body>
+</html>
