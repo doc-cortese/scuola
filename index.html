@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"</title>
+  <style>
+    /* Stili Istituzionali UNINA-inspired */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #000;
+    }
+
+    /* Header e Barra di Navigazione */
+    .top-bar {
+      background-color: #004080;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-lsc {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+
+    .lsc-initials {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .profile-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .prof-name {
+      margin-right: 20px;
+      font-weight: 400;
+      font-size: 16px;
+    }
+
+    .icon-button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    /* Barra di Ricerca */
+    #search-container {
+      background-color: #e0e0e0;
+      padding: 10px 20px;
+      display: none; /* Inizialmente nascosta */
+      flex-direction: column;
+    }
+
+    #searchInput {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    #resultsCount {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Contenuto Principale */
+    .main-content {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      color: #004080;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 10px;
+    }
+
+    /* Lista dei Corsi */
+    .course-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .course-list li {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap; /* Permette il wrap sui piccoli schermi */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .course-title-container {
+      flex-grow: 1;
+      min-width: 250px;
+    }
+
+    .course-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #004080;
+      text-decoration: none;
+      display: block;
+    }
+
+    .course-title:hover {
+      text-decoration: underline;
+    }
+
+    .course-description {
+      display: block;
+      margin: 5px 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .course-update {
+      display: block;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .course-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px; /* Spazio sul mobile */
+    }
+
+    .action-button {
+      display: inline-block;
+      padding: 10px 15px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      text-align: center;
+      transition: background-color 0.3s;
+      min-width: 100px;
+    }
+
+    .action-materiale {
+      background-color: #004080;
+      color: white;
+    }
+
+    .action-materiale:hover {
+      background-color: #0056b3;
+    }
+
+    /* Stile per il pulsante Esercizi, ora usato per l'editor fogli */
+    .action-esercizi {
+      background-color: #28a745; 
+      color: white;
+    }
+    
+    .action-esercizi:hover {
+      background-color: #218838;
+    }
+    
+    /* Stile per il pulsante Codice Python (simulato) */
+    .action-py {
+      background-color: #ffc107; 
+      color: #333;
+    }
+
+    .action-py:hover {
+      background-color: #e0a800;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 30px;
+      border-top: 1px solid #ccc;
+      color: #555;
+      font-size: 14px;
+    }
+
+    /* Media Queries per reattività */
+    @media (max-width: 768px) {
+      .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .profile-info {
+        margin-top: 10px;
+      }
+      .prof-name {
+        margin-right: 10px;
+      }
+      
+      .course-list li {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .course-actions {
+        width: 100%;
+        justify-content: space-around;
+        margin-top: 15px;
+      }
+      
+      .action-button {
+        flex: 1 1 0; /* Distribuisce equamente i pulsanti */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="logo-container">
+      <div class="logo-lsc">
+        <span class="lsc-initials">L.S.C.</span>
+      </div>
+      <span class="logo-text">Prof. Antonio Adinolfi</span>
+    </div>
+    <div class="profile-info">
+      <span class="prof-name">Liceo Scientifico "N. Cortese"</span>
+      <button class="icon-button" onclick="toggleSearch()" title="Cerca Corsi">🔍</button>
+      <button class="icon-button" onclick="salvaStato()" title="Salva Stato">💾</button>
+    </div>
+  </div>
+
+  <div id="search-container">
+    <input type="text" id="searchInput" oninput="performSearch()" placeholder="Cerca per anno o parola chiave (es. 'terza', 'sql')...">
+    <span id="resultsCount"></span>
+  </div>
+
+  <div class="main-content">
+    <h1>Corsi e Materiale Didattico</h1>
+
+    <ul class="course-list" id="courseList">
+      
+      <li data-classe="Prime" data-keywords="prima,anno,programmazione,base">
+        <div class="course-title-container">
+          <a href="classe.html?classe=Prime" class="course-title">PRIMO ANNO</a>
+          <span class="course-description">Materiale didattico per le Classi Prime</span>
+          <span class="course-update">Ultimo Aggiornamento: 02/09/2025</span>
+        </div>
+        <div class="course-actions">
+          <a href="classe.html?classe=Prime" class="action-button action-materiale">Materiale</a>
+          <a href="foglio_google_editor.html?classe=Prime&sheetId=PRIMO_ANNO_ID" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+          <a href="editor.html?classe=Prime" target="_blank" class="action-button action-py">Codice Python</a>
+        </div>
+      </li>
+
+      <li data-classe="Seconde" data-keywords="seconda,anno,algoritmi,logica">
+        <div class="course-title-container">
+          <a href="classe.html?classe=Seconde" class="course-title">SECONDO ANNO</a>
+          <span class="course-description">Materiale didattico per le Classi Seconde</span>
+          <span class="course-update">Ultimo Aggiornamento: 28/08/2025</span>
+        </div>
+        <div class="course-actions">
+          <a href="classe.html?classe=Seconde" class="action-button action-materiale">Materiale</a>
+          <a href="foglio_google_editor.html?classe=Seconde&sheetId=SECONDO_ANNO_ID" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+          <a href="editor.html?classe=Seconde" target="_blank" class="action-button action-py">Codice Python</a>
+        </div>
+      </li>
+
+      <li data-classe="Terze" data-keywords="terza,anno,strutture,dati,web,html,css">
+        <div class="course-title-container">
+          <a href="classe.html?classe=Terze" class="course-title">TERZO ANNO</a>
+          <span class="course-description">Materiale didattico per le Classi Terze</span>
+          <span class="course-update">Ultimo Aggiornamento: 05/09/2025</span>
+        </div>
+        <div class="course-actions">
+          <a href="classe.html?classe=Terze" class="action-button action-materiale">Materiale</a>
+          <a href="foglio_google_editor.html?classe=Terze&sheetId=16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+          <a href="editor.html?classe=Terze" target="_blank" class="action-button action-py">Codice Python</a>
+        </div>
+      </li>
+
+      <li data-classe="Quarte" data-keywords="quarta,anno,database,sql,javascript,reti">
+        <div class="course-title-container">
+          <a href="classe.html?classe=Quarte" class="course-title">QUARTO ANNO</a>
+          <span class="course-description">Materiale didattico per le Classi Quarte</span>
+          <span class="course-update">Ultimo Aggiornamento: 10/09/2025</span>
+        </div>
+        <div class="course-actions">
+          <a href="classe.html?classe=Quarte" class="action-button action-materiale">Materiale</a>
+          <a href="foglio_google_editor.html?classe=Quarte&sheetId=QUARTO_ANNO_ID" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+          <a href="editor.html?classe=Quarte" target="_blank" class="action-button action-py">Codice Python</a>
+        </div>
+      </li>
+
+      <li data-classe="Quinte" data-keywords="quinta,anno,java,progetto,maturità">
+        <div class="course-title-container">
+          <a href="classe.html?classe=Quinte" class="course-title">QUINTO ANNO</a>
+          <span class="course-description">Materiale didattico per le Classi Quinte</span>
+          <span class="course-update">Ultimo Aggiornamento: 15/09/2025</span>
+        </div>
+        <div class="course-actions">
+          <a href="classe.html?classe=Quinte" class="action-button action-materiale">Materiale</a>
+          <a href="foglio_google_editor.html?classe=Quinte&sheetId=QUINTO_ANNO_ID" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+          <a href="editor.html?classe=Quinte" target="_blank" class="action-button action-py">Codice Python</a>
+        </div>
+      </li>
+    </ul>
+
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2024 Prof. Antonio Adinolfi. Tutti i diritti riservati.</p>
+  </div>
+
+  <script>
+    // Funzione per salvare lo stato (placeholder)
+    function salvaStato() {
+        alert("Stato salvato con successo.");
+    }
+
+
+    // Funzione per mostrare/nascondere la barra di ricerca
+    function toggleSearch() {
+        const searchContainer = document.getElementById('search-container');
+        const isVisible = searchContainer.style.display === 'flex';
+        searchContainer.style.display = isVisible ? 'none' : 'flex';
+        
+        if (isVisible) {
+            document.getElementById('searchInput').value = '';
+            performSearch(); // Resetta i filtri
+        } else {
+            document.getElementById('searchInput').focus();
+        }
+    }
+
+    // Funzione per eseguire la ricerca (Filtra gli elementi della lista)
+    function performSearch() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const items = document.querySelectorAll('#courseList li');
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const courseTitleLink = item.querySelector('.course-title');
+            const linkText = courseTitleLink ? courseTitleLink.textContent.toLowerCase() : '';
+            const keywords = item.getAttribute('data-keywords') ? item.getAttribute('data-keywords').toLowerCase() : '';
+            
+            const isMatch = (linkText.includes(query) || keywords.includes(query));
+            
+            // Imposta lo stile 'flex' solo se il container è 'flex'
+            item.style.display = isMatch ? 'flex' : 'none'; 
+            if (isMatch) {
+                visibleCount++;
+            }
+        });
+        
+        const totalCount = items.length;
+        document.getElementById('resultsCount').textContent = `Risultati: ${visibleCount} di ${totalCount}`;
+    }
+  </script>
+</body>
+</html>
