@@ -165,10 +165,14 @@
 
   <script>
     // === CONFIGURAZIONE ===
-    const GOOGLE_SHEET_ID = "ID_DEL_TUO_FOGLIO"; // <--- SOSTITUISCI CON L'ID DEL TUO FOGLIO!
+    // CORREZIONE: Ho sostituito il placeholder con l'ID che veniva hardcoded in modo errato e lo uso come fallback/default.
+    const DEFAULT_SHEET_ID = "16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg"; 
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; // <--- SOSTITUISCI CON IL TUO URL GAS
     const MIN_WIDTH = 100; 
     const INACTIVITY_TIMEOUT = 300000; // 5 minuti
+    
+    // Variabile globale per l'ID del foglio corrente, inizializzata al default, poi aggiornata nel DOMContentLoaded.
+    let currentSheetId = DEFAULT_SHEET_ID;
 
     // === LOGICA LOGOUT AUTOMATICO ===
     let activityTimer;
@@ -181,7 +185,8 @@
     }
 
     window.tornaAllaPaginaPrincipale = function () {
-        window.location.href = '../index.html'; 
+        // CORREZIONE: Torna alla pagina principale (index.html)
+        window.location.href = 'index.html'; 
     }
 
     function logoutAutomatico() {
@@ -215,6 +220,7 @@
         const nome = document.getElementById("nomeStudente").value.trim();
         const outputStatus = document.getElementById("output");
         
+        // Recupero i parametri URL qui, se necessario, o mi affido alla variabile globale
         const urlParams = new URLSearchParams(window.location.search);
         const classe = urlParams.get("classe") || "ND";
         
@@ -255,7 +261,8 @@
         addInput('dataOra', dataOra);
         // Parametri specifici per la consegna con Google Sheet
         addInput('sheetLink', sheetLink); 
-        addInput('sheetId', GOOGLE_SHEET_ID); // Opzionale, per permettere al GAS di copiare il foglio
+        // Uso la variabile globale aggiornata (o il default)
+        addInput('sheetId', currentSheetId); 
         addInput('azione', 'consegnaFoglio'); 
         
 
@@ -289,10 +296,35 @@
         });
         resetActivityTimer(); 
         
-        // Imposta l'URL del Foglio Google
+        // ------------------------------------
+        // 2. GESTIONE URL E CLASSE (Logica Dinamica)
+        // ------------------------------------
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const classeRaw = urlParams.get("classe");
+        const sheetIdFromUrl = urlParams.get("sheetId"); // Recupera l'ID del foglio dall'URL
+        
+        const pdfFrame = document.getElementById("pdfFrame");
+        const classeTitolo = document.getElementById("classeTitolo");
+        const tracciaSelect = document.getElementById("tracciaSelect");
+        
+        let pdfPath = "tracce/default.pdf"; 
+        
+        const classKey = classeRaw ? classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1) : 'default';
+        const availableExercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
+        
+        
+        // Imposta l'URL del Foglio Google - CORREZIONE DEL BUG
         const googleSheetFrame = document.getElementById("google-sheet");
-        // Nota: Assicurati che l'URL abbia i permessi di visualizzazione (es. "anyone with the link can view")
-        googleSheetFrame.src = `https://docs.google.com/spreadsheets/d/${16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg}/edit?usp=sharing&embedded=true`;
+        
+        // Aggiorna la variabile globale con l'ID passato nell'URL o il default.
+        if (sheetIdFromUrl) {
+            currentSheetId = sheetIdFromUrl; 
+        }
+
+        // CORREZIONE SINTATTICA E LOGICA: Imposta l'iframe con l'ID come stringa
+        googleSheetFrame.src = `https://docs.google.com/spreadsheets/d/${currentSheetId}/edit?usp=sharing&embedded=true`;
+
         
         // Logica Resizable (Solo Orizzontale)
         if (window.innerWidth >= 768) { 
@@ -330,20 +362,6 @@
             });
         }
 
-        // ------------------------------------
-        // 2. GESTIONE URL E CLASSE (Logica Dinamica)
-        // ------------------------------------
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const classeRaw = urlParams.get("classe");
-        const pdfFrame = document.getElementById("pdfFrame");
-        const classeTitolo = document.getElementById("classeTitolo");
-        const tracciaSelect = document.getElementById("tracciaSelect");
-        
-        let pdfPath = "tracce/default.pdf"; 
-        
-        const classKey = classeRaw ? classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1) : 'default';
-        const availableExercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
         
         // 1. Genera le opzioni del menu a tendina
         tracciaSelect.innerHTML = ''; 
