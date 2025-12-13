@@ -255,7 +255,7 @@
       border-bottom: 1px solid #ccc;
     }
 
-    /* === NUOVI STILI LISTA CLASSI SCALABILE === */
+    /* === STILI AGGIUNTIVI PER LA LISTA CLASSI MODIFICATA === */
     .course-list {
       list-style: none;
       padding: 0 20px;
@@ -274,21 +274,19 @@
         border-bottom: none;
     }
 
-    .course-list a.course-title {
+    .course-title-container {
+        flex-grow: 1;
+    }
+    
+    .course-title-container a.course-title {
       text-decoration: none;
       color: #004080; 
       font-weight: bold;
       font-size: 16px;
     }
     
-    .course-list a.course-title:hover {
+    .course-title-container a.course-title:hover {
         text-decoration: underline;
-    }
-    
-    .course-info {
-        display: flex;
-        flex-direction: column;
-        text-align: right;
     }
     
     .course-description {
@@ -305,6 +303,38 @@
         margin-top: 4px;
     }
 
+    .course-actions {
+        display: flex;
+        gap: 10px; /* Spazio tra i pulsanti */
+        flex-shrink: 0;
+    }
+
+    .course-actions .action-button {
+        padding: 8px 12px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        border-radius: 4px;
+        transition: opacity 0.3s;
+        white-space: nowrap; /* Evita il wrap del testo del pulsante */
+    }
+
+    .action-materiale {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+    }
+
+    .action-esercizi {
+        background-color: #28a745;
+        color: white;
+        border: 1px solid #28a745;
+    }
+    
+    .course-actions .action-button:hover {
+        opacity: 0.8;
+    }
+    
     /* Login Google */
     #login {
       text-align: center;
@@ -431,38 +461,58 @@
         <div class="content-box-inner">
             <ul class="course-list" id="courseList">
                 <li data-classe="Prime" data-keywords="prima,anno,programmazione,base">
-                    <a href="classe.html?classe=Prime" class="course-title">PRIMO ANNO</a>
-                    <div class="course-info">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Prime" class="course-title">PRIMO ANNO</a>
                         <span class="course-description">Materiale didattico per le Classi Prime</span>
                         <span class="course-update">Ultimo Aggiornamento: 02/09/2025</span>
                     </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Prime" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/PRIMO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
                 </li>
                 <li data-classe="Seconde" data-keywords="seconda,anno,algoritmi,logica">
-                    <a href="classe.html?classe=Seconde" class="course-title">SECONDO ANNO</a>
-                    <div class="course-info">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Seconde" class="course-title">SECONDO ANNO</a>
                         <span class="course-description">Materiale didattico per le Classi Seconde</span>
                         <span class="course-update">Ultimo Aggiornamento: 28/08/2025</span>
                     </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Seconde" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/SECONDO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
                 </li>
                 <li data-classe="Terze" data-keywords="terza,anno,strutture,dati,web,html,css">
-                    <a href="classe.html?classe=Terze" class="course-title">TERZO ANNO</a>
-                    <div class="course-info">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Terze" class="course-title">TERZO ANNO</a>
                         <span class="course-description">Materiale didattico per le Classi Terze</span>
                         <span class="course-update">Ultimo Aggiornamento: 05/09/2025</span>
                     </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Terze" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/TERZO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
                 </li>
                 <li data-classe="Quarte" data-keywords="quarta,anno,database,sql,javascript,reti">
-                    <a href="classe.html?classe=Quarte" class="course-title">QUARTO ANNO</a>
-                    <div class="course-info">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Quarte" class="course-title">QUARTO ANNO</a>
                         <span class="course-description">Materiale didattico per le Classi Quarte</span>
                         <span class="course-update">Ultimo Aggiornamento: 10/09/2025</span>
                     </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Quarte" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/QUARTO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
                 </li>
                 <li data-classe="Quinte" data-keywords="quinta,anno,java,progetto,maturità">
-                    <a href="classe.html?classe=Quinte" class="course-title">QUINTO ANNO</a>
-                    <div class="course-info">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Quinte" class="course-title">QUINTO ANNO</a>
                         <span class="course-description">Materiale didattico per le Classi Quinte</span>
                         <span class="course-update">Ultimo Aggiornamento: 15/09/2025</span>
+                    </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Quinte" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/QUINTO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
                     </div>
                 </li>
             </ul>
@@ -558,7 +608,8 @@ function performSearch() {
         
         const isMatch = (linkText.includes(query) || keywords.includes(query));
         
-        item.style.display = isMatch ? 'flex' : 'none';
+        // Modificato per visualizzare l'elemento li come 'flex'
+        item.style.display = isMatch ? 'flex' : 'none'; 
         if (isMatch) {
             visibleCount++;
         }
@@ -572,7 +623,3 @@ function performSearch() {
 </body>
 
 </html>
-
-
-
-
