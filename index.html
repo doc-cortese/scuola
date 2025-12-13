@@ -345,7 +345,8 @@
     // Funzione per mostrare/nascondere la barra di ricerca
     function toggleSearch() {
         const searchContainer = document.getElementById('search-container');
-        const isVisible = searchContainer.style.display === 'flex';
+        // Usiamo 'flex' perché lo stile CSS lo definisce come flex-direction: column
+        const isVisible = searchContainer.style.display === 'flex'; 
         searchContainer.style.display = isVisible ? 'none' : 'flex';
         
         if (isVisible) {
@@ -369,7 +370,7 @@
             
             const isMatch = (linkText.includes(query) || keywords.includes(query));
             
-            // Imposta lo stile 'flex' solo se il container è 'flex'
+            // Imposta lo stile 'flex' se c'è corrispondenza, 'none' altrimenti.
             item.style.display = isMatch ? 'flex' : 'none'; 
             if (isMatch) {
                 visibleCount++;
