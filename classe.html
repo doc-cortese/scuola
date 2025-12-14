@@ -1,590 +1,625 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <title>Editor Python con Pyodide (Layout Bi-Dimensionale)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <script>
-    window.require = { paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
-
-  <script src="./libs/pyodide.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"</title>
   <style>
+    /* Stili Istituzionali UNINA-inspired */
     body {
       margin: 0;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden; 
+      font-family: Arial, sans-serif;
       background-color: #f0f0f0;
-    }
-    #traccia, #editor {
-      padding: 15px;
-      box-sizing: border-box;
-      overflow-y: auto;
-      background-color: white; 
-      flex-grow: 1; 
-      display: flex;
-      flex-direction: column;
-      min-height: 0; 
-    }
-    #traccia {
-        min-height: 0;
+      color: #000;
     }
 
-    /* CONTENUTI INTERNI */
-    #pdfFrame {
-      width: 100%;
-      height: 300px; 
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      flex-shrink: 0; 
-    }
-    #monaco {
-      height: 50%; 
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      flex-grow: 1; 
-      min-height: 100px; 
-    }
-    
-    #editor-controls {
-        flex-shrink: 0; 
-        overflow-y: auto; 
-        padding-top: 10px;
+    /* Header e Barra di Navigazione */
+    .top-bar {
+      background-color: #004080;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    /* Stili generali */
-    input[type="text"] {
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    input[type="file"] {
-        margin-top: 10px;
-    }
-    .button-row {
+    .logo-container {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
+      align-items: center;
     }
-    .button-row button {
-      flex: 1 1 auto; 
-      padding: 12px 10px;
-      font-size: 15px;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-      transition: background-color 0.3s;
+
+    .logo-lsc {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+
+    .lsc-initials {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .lsc-l { color: #cc00cc; }
+    .lsc-s { color: #007bff; }
+    .lsc-c { color: #ff6600; }
+
+    .lsc-separator {
+      height: 45px;
+      width: 2px;
+      background-color: white;
+      margin: 0 10px;
+    }
+
+    .logo-text {
+      font-size: 14px;
+      line-height: 1.2;
       font-weight: bold;
     }
     
-    /* Stili specifici per i pulsanti */
-    #eseguiBtn { background-color: #004080; color: white; }
-    #githubBtn { background-color: #333; color: white; }
-    /* Nuovo stile per il pulsante Invia Drive */
-    #rtfBtn { background-color: #28a745; color: white; } 
-    #ritornaBtn { background-color: #d9534f; color: white; }
-
-    .button-row button:hover:not(:disabled) { opacity: 0.9; }
-    .button-row button:disabled { background-color: #ccc; cursor: not-allowed; }
-    pre#output {
-      background-color: #eee;
-      padding: 15px;
-      margin-top: 10px;
-      white-space: pre-wrap;
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+    .logo-text small {
+        font-weight: normal;
+        display: block;
     }
-    h2 { color: #004080; }
-    
-    /* === STILI RESIZABLE PANES (Desktop) === */
-    @media (min-width: 768px) {
-        body {
-            flex-direction: row; 
-            cursor: default;
-        }
-        #traccia { width: 50%; min-width: 10%; }
-        #editor { width: 50%; min-width: 10%; height: 100vh; }
-        #pdfFrame { height: calc(100vh - 150px); }
-        
-        /* 1. Divisore Orizzontale */
-        #splitter { width: 5px; cursor: col-resize; background-color: #ccc; height: 100vh; flex-shrink: 0; }
 
-        /* 2. Divisore Verticale */
-        #vertical-splitter { height: 5px; cursor: row-resize; background-color: #aaa; width: 100%; flex-shrink: 0; }
-        #monaco { height: 50%; flex-grow: 1; }
+    .top-menu a {
+      color: white;
+      text-decoration: none;
+      margin-left: 15px;
+      font-size: 13px;
+      padding: 5px 10px;
+      border: 1px solid transparent;
+      transition: background-color 0.3s;
+      cursor: pointer;
+    }
+    
+    #loggedInInfo {
+        display: flex;
+        align-items: center;
+    }
+    
+    #userName {
+        margin-right: 10px;
+        font-weight: bold;
+        font-size: 13px;
+        color: white;
+    }
+
+    .top-menu a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .top-menu .accesso-docenti {
+        background-color: #f7a81b;
+        border: 1px solid #f7a81b;
+        color: #004080;
+        font-weight: bold;
+    }
+    
+    .top-menu .nav-link { /* Stile per i link standard */
+        background-color: transparent;
+        border: 1px solid transparent;
+        color: white;
+        font-weight: normal;
+    }
+
+
+    /* Area principale del docente */
+    header {
+      background-color: #fff;
+      padding: 20px;
+      border-bottom: 2px solid #ccc;
+      text-align: left;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #004080;
+    }
+
+    header h2 {
+      margin: 5px 0 0;
+      font-size: 16px;
+      font-weight: normal;
+      color: #333;
+    }
+    
+    /* Barra di Ricerca */
+    #search-container {
+        padding: 10px 0;
+        background-color: #f7f7f7;
+        border-bottom: 1px solid #ddd;
+        display: none;
+    }
+    
+    #search-input {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    #search-input input[type="text"] {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    #search-input button {
+        padding: 10px 15px;
+        background-color: #004080;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    #search-input button:hover {
+        background-color: #0056b3;
+    }
+
+
+    main {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* === STILI SEZIONE DOCENTE === */
+    .docente-profile-container {
+      display: flex;
+      gap: 20px;
+      padding: 15px 20px;
+    }
+
+    .profile-img-container {
+      flex-shrink: 0;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #004080;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden; 
+    }
+    
+    .profile-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; 
+    }
+
+    .profile-details {
+      flex-grow: 1;
+    }
+
+    .profile-details h3 {
+      margin: 0 0 5px 0;
+      color: #004080;
+      font-size: 18px;
+    }
+
+    .profile-details p {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .profile-details .bio {
+        font-style: italic;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .orario-ricevimento {
+        padding: 5px 0;
+        border-top: 1px solid #eee;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+    
+    .social-links a {
+        display: inline-block;
+        margin-right: 10px;
+        text-decoration: none;
+        color: #004080;
+        font-weight: bold;
+    }
+    
+    /* Sezioni Insegnamenti */
+    .content-box {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 25px;
+      border-left: 5px solid #004080;
+    }
+    
+    .content-box-inner {
+        padding: 0; 
+    }
+
+    .section-title {
+      background-color: #e0e0e0;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      border-bottom: 1px solid #ccc;
+    }
+
+    /* === STILI AGGIUNTIVI PER LA LISTA CLASSI MODIFICATA === */
+    .course-list {
+      list-style: none;
+      padding: 0 20px;
+      margin-top: 10px;
+    }
+
+    .course-list li {
+      padding: 12px 0;
+      border-bottom: 1px dotted #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .course-list li:last-child {
+        border-bottom: none;
+    }
+
+    .course-title-container {
+        flex-grow: 1;
+    }
+    
+    .course-title-container a.course-title {
+      text-decoration: none;
+      color: #004080; 
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .course-title-container a.course-title:hover {
+        text-decoration: underline;
+    }
+    
+    .course-description {
+        color: #666;
+        font-size: 12px;
+        display: block;
+        margin-top: 2px;
+    }
+    
+    .course-update {
+        color: #999;
+        font-size: 11px;
+        font-style: italic;
+        margin-top: 4px;
+    }
+
+    .course-actions {
+        display: flex;
+        gap: 10px; /* Spazio tra i pulsanti */
+        flex-shrink: 0;
+    }
+
+    .course-actions .action-button {
+        padding: 8px 12px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        border-radius: 4px;
+        transition: opacity 0.3s;
+        white-space: nowrap; /* Evita il wrap del testo del pulsante */
+    }
+
+    .action-materiale {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+    }
+
+    .action-esercizi {
+        background-color: #28a745;
+        color: white;
+        border: 1px solid #28a745;
+    }
+    
+    .course-actions .action-button:hover {
+        opacity: 0.8;
+    }
+    
+    /* Login Google */
+    #login {
+      text-align: center;
+      margin-top: 50px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    #login p {
+        color: #333;
+        font-weight: bold;
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #666;
+      background-color: #e0e0e0;
+      margin-top: 40px;
+    }
+
+    footer a {
+      color: #004080;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    
+    #contenutoProtetto {
+        display: none; 
+    }
+    #welcomeMessage {
+        display: none;
     }
   </style>
 </head>
-
 <body>
-  <div id="traccia">
-    <h2>Traccia <span id="classeTitolo"></span></h2>
-    
-    <select id="tracciaSelect" onchange="cambiaTraccia(this)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-      <option value="tracce/default.pdf">Seleziona un esercizio...</option>
-    </select>
 
-    <iframe id="pdfFrame" src=""></iframe>
-  </div>
-  
-  <div id="splitter"></div>
-
-  
-  <div id="editor">
-    <h2>Editor Python</h2>
-    <div id="monaco"></div>
-    
-    <div id="vertical-splitter"></div>
-
-    <div id="editor-controls">
-        <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
-        <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" />
-        
-        <div class="button-row">
-          <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-          <button id="githubBtn" disabled>Invia Codice (GitHub Issue)</button>
-          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive & Download)</button> 
-          <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
+<div class="top-bar">
+    <div class="logo-container">
+        <div class="logo-lsc">
+            <span class="lsc-initials lsc-l">L</span>
+            <span class="lsc-initials lsc-s">S</span>
+            <span class="lsc-initials lsc-c">C</span>
+            <div class="lsc-separator"></div>
         </div>
-        
-        <pre id="output">Output...</pre>
+        <div class="logo-text">
+            LICEO SCIENTIFICO<br>
+            <small>NINO CORTESE</small>
+        </div>
     </div>
+    <div class="top-menu">
+        <a id="search-toggle" onclick="toggleSearch()">CERCA</a>
+        <a href="mailto:antonioadinolfi@lscortese.com">CONTATTI</a>
+        
+        <a href="studenti.html" class="nav-link">ACCESSO STUDENTI</a> 
+        <a href="docenti.html" class="nav-link" id="acessoDocentiLink">ACCESSO DOCENTI</a> 
+        
+        <div id="loggedInInfo" style="display: none;">
+            <span id="userName"></span>
+            <a href="#" id="logoutButton" onclick="handleLogout()" class="accesso-docenti" style="margin-left: 15px;">ESCI</a>
+        </div>
+    </div>
+</div>
+
+<div id="search-container">
+    <div id="search-input">
+        <input type="text" id="searchInput" placeholder="Cerca classi o argomenti...">
+        <button onclick="performSearch()">Cerca</button>
+    </div>
+</div>
+
+<header>
+  <h1>Prof. Antonio Adinolfi</h1>
+  <h2>Liceo Scientifico "N. Cortese" - Materiale Didattico</h2>
+</header>
+
+<main>
+    
+    <div id="welcomeMessage" style="padding: 15px; margin-bottom: 25px; background-color: #e6f0ff; border-left: 5px solid #004080; color: #004080; font-weight: bold; border-radius: 4px;">
+        Bentornato! Stai visualizzando i materiali didattici riservati.
+    </div>
+  
+    <div class="section-title">Docente</div>
+    <div class="content-box">
+        <div class="docente-profile-container">
+            <div class="profile-img-container">
+                <img src="./immagini/foto_adinolfi.jpg" alt="Prof. Antonio Adinolfi"> 
+                </div>
+            
+            <div class="profile-details">
+                <h3>Prof. Antonio Adinolfi</h3>
+                <p>
+                    DIPARTIMENTO DI **INFORMATICA E TECNOLOGIE DIGITALI**
+                </p>
+                
+                <p class="bio">
+                    Docente specializzato in sviluppo web, algoritmi avanzati e didattica con piattaforme cloud.
+                </p>
+                
+                <div class="social-links">
+                    <span style="font-weight: bold;">Risorse:</span>
+                    <a href="https://github.com/tuo-profilo-github" target="_blank">GitHub</a> | 
+                    <a href="https://linkedin.com/in/tuo-profilo" target="_blank">LinkedIn</a> |
+                    <a href="https://classroom.google.com" target="_blank">Google Classroom</a>
+                </div>
+                
+                <div class="orario-ricevimento">
+                    <strong>Orario di Ricevimento:</strong> Mercoledì, 10:00 - 11:00 (su prenotazione)
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <div id="contenutoProtetto">
+    <div class="section-title">Insegnamenti (Classi)</div>
+    <div class="content-box">
+        <div class="content-box-inner">
+            <ul class="course-list" id="courseList">
+                <li data-classe="Prime" data-keywords="prima,anno,programmazione,base">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Prime" class="course-title">PRIMO ANNO</a>
+                        <span class="course-description">Materiale didattico per le Classi Prime</span>
+                        <span class="course-update">Ultimo Aggiornamento: 02/09/2025</span>
+                    </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Prime" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/PRIMO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
+                </li>
+                <li data-classe="Seconde" data-keywords="seconda,anno,algoritmi,logica">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Seconde" class="course-title">SECONDO ANNO</a>
+                        <span class="course-description">Materiale didattico per le Classi Seconde</span>
+                        <span class="course-update">Ultimo Aggiornamento: 28/08/2025</span>
+                    </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Seconde" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/SECONDO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
+                </li>
+                <li data-classe="Terze" data-keywords="terza,anno,strutture,dati,web,html,css">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Terze" class="course-title">TERZO ANNO</a>
+                        <span class="course-description">Materiale didattico per le Classi Terze</span>
+                        <span class="course-update">Ultimo Aggiornamento: 05/09/2025</span>
+                    </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Terze" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/16re9H3f09ertgWUN02Tvs8EiykE65mwF1Rk1w32fC/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
+                </li>
+                <li data-classe="Quarte" data-keywords="quarta,anno,database,sql,javascript,reti">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Quarte" class="course-title">QUARTO ANNO</a>
+                        <span class="course-description">Materiale didattico per le Classi Quarte</span>
+                        <span class="course-update">Ultimo Aggiornamento: 10/09/2025</span>
+                    </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Quarte" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/QUARTO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
+                </li>
+                <li data-classe="Quinte" data-keywords="quinta,anno,java,progetto,maturità">
+                    <div class="course-title-container">
+                        <a href="classe.html?classe=Quinte" class="course-title">QUINTO ANNO</a>
+                        <span class="course-description">Materiale didattico per le Classi Quinte</span>
+                        <span class="course-update">Ultimo Aggiornamento: 15/09/2025</span>
+                    </div>
+                    <div class="course-actions">
+                        <a href="classe.html?classe=Quinte" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/QUINTO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Fogli</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <p style="text-align: right; font-size: 12px; color: #666;" id="resultsCount">Risultati 1-5 di 5</p>
+</div>
+</main>
+
+<div id="login">
+  <p>Accedi con il tuo account Google della scuola</p>
+  <div id="g_id_onload"
+       data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="false">
   </div>
+  <div class="g_id_signin" data-type="standard"></div>
+</div>
 
-  <iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+<footer>
+  &copy; 2025 Prof. Antonio Adinolfi – Liceo Scientifico "N. Cortese". Tutti i diritti riservati.<br>
+  <a href="https://www.liceoscientificocortese.edu.it/la-scuola/" target="_blank">Sito ufficiale del Liceo</a> | 
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">Licenza Creative Commons BY-NC-SA 4.0</a>
+</footer>
 
-  <script>
-    let editor;
-    let pyodide;
-    let pyodideReady = false; 
-    const MIN_WIDTH = 100; 
-    const MIN_HEIGHT = 100; 
-    const ZOOM_INCREMENT = 2; 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 
-    // === LOGICA LOGOUT AUTOMATICO ===
-    const INACTIVITY_TIMEOUT = 300000; // 5 minuti
-    let activityTimer;
+<script>
+// Funzione aggiornata per gestire il login
+function handleCredentialResponse(response) {
+  // Funzione per decodificare il JWT, gestisce compatibilità
+  const jwt_decode_external = window.jwt_decode || (data => JSON.parse(atob(data.split('.')[1])));
+  
+  const data = jwt_decode_external(response.credential);
+  const email = data.email;
+  const userName = data.name || "Docente"; 
 
-    function resetActivityTimer() {
-        clearTimeout(activityTimer);
-        activityTimer = setTimeout(() => {
-            logoutAutomatico();
-        }, INACTIVITY_TIMEOUT);
-    }
-
-    window.tornaAllaPaginaPrincipale = function () {
-        window.location.href = '../index.html'; 
-    }
-
-    function logoutAutomatico() {
-        alert("Sei stato inattivo per 5 minuti. Verrai reindirizzato alla pagina principale per motivi di sicurezza e gestione delle risorse.");
-        tornaAllaPaginaPrincipale();
-    }
-    // ==================================
-
-    // ------------------------------------
-    // *** NUOVA MAPPATURA ESERCIZI PER CLASSE ***
-    // (Aggiungi qui i tuoi file PDF per le Quarte, Quinte, ecc.)
-    // ------------------------------------
-    const EXERCISES_BY_CLASS = {
-        'Terze': [
-            // Esercizio caricato dall'utente
-            { file: 'Esercizio_Terze_1.pdf', title: 'Esercizio Analisi Fisica' }
-            
-        ],
-        'Quarte': [
-            // Esempio: Devi creare questi file nella cartella 'tracce/'
-            { file: 'Esercizio_Quarte_1.pdf', title: 'Esercizio Algoritmi Avanzati' }
-            
-        ],
-        // Aggiungi le altre classi qui: es. 'Quinte': [...]
-        
-        // Esercizi di fallback/generici (usati se la classe non è riconosciuta)
-        'default': [
-            { file: 'default.pdf', title: 'Esercizio Base' }
-            
-        ]
-    };
-
-    // ------------------------------------
-    // 1. INIZIALIZZAZIONE MONACO EDITOR
-    // ------------------------------------
-    require(['vs/editor/editor.main'], function () {
-      editor = monaco.editor.create(document.getElementById('monaco'), {
-        value: '# Scrivi qui il tuo codice Python.', 
-        language: 'python',
-        theme: 'vs-dark',
-        automaticLayout: true,
-        mouseWheelZoom: true,
-        browserMouseWheel: false, 
-        fontSize: 14 
-      });
-
-      // === LOGICA ANTI-INCOLLA: BLOCCO DEFINITIVO ===
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, function() {
-          alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
-      });
-      editor.addCommand('editor.action.clipboardPasteAction', function() {
-          alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
-      }, 'in-editor-context');
-      editor.getDomNode().addEventListener('paste', (e) => {
-        e.preventDefault();
-        alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
-      });
-      // ===============================================
-
-      editor.onDidChangeModelContent(() => {
-        resetActivityTimer(); 
-      });
-      
-      // === LOGICA ZOOM MANUALE (Rotellina del Mouse con Ctrl) ===
-      editor.getDomNode().addEventListener('wheel', (e) => {
-        if (e.ctrlKey) {
-            e.preventDefault(); 
-            const currentSize = editor.getOption(monaco.editor.EditorOption.fontSize);
-            let newSize = currentSize;
-
-            if (e.deltaY < 0) { // Scroll up (Zoom in)
-                newSize = currentSize + ZOOM_INCREMENT;
-            } else if (e.deltaY > 0) { // Scroll down (Zoom out)
-                newSize = currentSize - ZOOM_INCREMENT;
-            }
-
-            newSize = Math.max(8, Math.min(40, newSize)); 
-
-            editor.updateOptions({ fontSize: newSize });
-        }
-      });
-      // ========================================================
-    });
-
-    // ------------------------------------
-    // 2. LOGICA RESIZABLE PANES 
-    // (Non modificata, gestisce solo il layout)
-    // ------------------------------------
-    document.addEventListener("DOMContentLoaded", () => {
-        
-        ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
-            document.addEventListener(eventName, resetActivityTimer, true);
-        });
-        resetActivityTimer(); 
-        
-        if (window.innerWidth >= 768) { 
-            const splitter = document.getElementById('splitter');
-            const traccia = document.getElementById('traccia');
-            const editorDiv = document.getElementById('editor');
-            let isDraggingHorizontal = false;
-            
-            splitter.addEventListener('mousedown', function(e) {
-                if (e.button !== 0) return; 
-                isDraggingHorizontal = true;
-                document.body.style.cursor = 'col-resize';
-                document.body.classList.add('no-select'); 
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDraggingHorizontal) return;
-                
-                const containerWidth = document.body.offsetWidth;
-                const newTracciaWidth = e.clientX;
-                const newEditorWidth = containerWidth - newTracciaWidth - splitter.offsetWidth;
-
-                if (newTracciaWidth > MIN_WIDTH && newEditorWidth > MIN_WIDTH) {
-                    traccia.style.width = newTracciaWidth + 'px';
-                    editorDiv.style.width = newEditorWidth + 'px';
-                    if (editor) {
-                        editor.layout();
-                    }
-                }
-            });
-
-            const verticalSplitter = document.getElementById('vertical-splitter');
-            const monacoDiv = document.getElementById('monaco');
-            let isDraggingVertical = false;
-
-            verticalSplitter.addEventListener('mousedown', function(e) {
-                if (e.button !== 0) return;
-                isDraggingVertical = true;
-                document.body.style.cursor = 'row-resize';
-                document.body.classList.add('no-select'); 
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDraggingVertical) return;
-                
-                const editorRect = editorDiv.getBoundingClientRect();
-                const newMonacoHeight = e.clientY - editorRect.top;
-                
-                if (newMonacoHeight > MIN_HEIGHT) {
-                    monacoDiv.style.height = newMonacoHeight + 'px';
-                    if (editor) {
-                        editor.layout();
-                    }
-                }
-            });
-
-
-            document.addEventListener('mouseup', function() {
-                if (isDraggingHorizontal) {
-                    isDraggingHorizontal = false;
-                }
-                if (isDraggingVertical) {
-                    isDraggingVertical = false;
-                }
-                if (!isDraggingHorizontal && !isDraggingVertical) {
-                    document.body.style.cursor = 'default';
-                    document.body.classList.remove('no-select');
-                }
-            });
-        }
-    });
-
-    // ------------------------------------
-    // 3. INIZIALIZZAZIONE PYODIDE (Non modificata)
-    // ------------------------------------
-    async function initializePyodide() {
-        document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
-        try {
-            pyodide = await loadPyodide(); 
-            pyodideReady = true;
-            
-            const eseguiBtn = document.getElementById("eseguiBtn");
-            eseguiBtn.disabled = false;
-            eseguiBtn.textContent = "Esegui Codice";
-            document.getElementById("output").textContent = "Pyodide pronto. Scrivi il codice e premi Esegui.";
-
-        } catch (e) {
-            console.error("Errore fatale nel caricamento di Pyodide. Verifica che i file siano in ./libs/.", e);
-            document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Verifica la cartella 'libs' e riprova.";
-        }
-    }
-    document.addEventListener("DOMContentLoaded", initializePyodide);
-
-
-    // ------------------------------------
-    // 4. FUNZIONI PRINCIPALI (Esecuzione, CLOUD UPLOAD & DOWNLOAD)
-    // ------------------------------------
-
-    async function eseguiCodice() {
-      if (!pyodideReady) {
-        document.getElementById("output").textContent = "Pyodide non è ancora pronto. Attendere.";
-        return;
-      }
-      resetActivityTimer(); 
-      document.getElementById("output").textContent = "Esecuzione in corso...";
-      
-      const codice = editor.getValue();
-      try {
-        const result = await pyodide.runPythonAsync(codice); 
-        document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output visualizzato direttamente)";
-      } catch (err) {
-        document.getElementById("output").textContent = "ERRORE:\n" + err;
-      }
-    }
-    window.eseguiCodice = eseguiCodice;
-
+  // Verifica che l'email appartenga al dominio della scuola
+  if (email.endsWith("@lscortese.com")) {
+    document.getElementById("contenutoProtetto").style.display = "block";
+    document.getElementById("welcomeMessage").style.display = "block";
     
-    function generaRtfData() {
-        const nome = document.getElementById("nomeStudente").value.trim();
-        const codice = editor.getValue();
-        const output = document.getElementById("output").textContent.trim();
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const classe = urlParams.get("classe") || "ND";
-        
-        const tracciaUrl = document.getElementById("pdfFrame").src;
-        const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
-        const dataOra = new Date().toLocaleString("it-IT");
-
-        if (!nome) {
-            alert("Inserisci il tuo nome e cognome per inviare il file.");
-            return null;
-        }
-
-        const dataOraFormattata = new Date().toLocaleString("it-IT").replace(/:/g, '-').replace(/\//g, '_').replace(/, /g, '_').replace(/ /g, '_');
-        const fileNameBase = `${nome.replace(/ /g, '_')}_${classe}_${dataOraFormattata}`;
-        const fileNameRtf = `Consegna_${fileNameBase}.rtf`;
-
-        const escapeRtf = (text) => 
-            text.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par\n');
-        
-        const rtfContent = `{\\rtf1\\ansi\\deff0
-{\\fonttbl{\\f0 Arial;}{\\f1 Courier New;}}
-\\pard\\sa200\\sl276\\slmult1\\f0\\fs24 
-\\b CONSEGNA ESERCIZIO SVOLTO\\b0\\par
-\\b =====================================\\b0\\par
-Studente: ${nome}\\par
-Classe: ${classe}\\par
-Data e Ora: ${dataOra}\\par
-Traccia di Riferimento: ${tracciaNome}\\par
-\\b =====================================\\b0\\par
-\\par
-\\b CODICE PYTHON\\b0\\par
-\\b -------------------------------------\\b0\\par
-{\\f1\\fs20 ${escapeRtf(codice)}}\\par
-\\b -------------------------------------\\b0\\par
-\\par
-\\b OUTPUT DEL CODICE\\b0\\par
-\\b -------------------------------------\\b0\\par
-{\\f1\\fs20 ${escapeRtf(output)}}\\par
-\\b -------------------------------------\\b0\\par
-}`;
-
-        return { rtfContent, fileNameRtf, pyContent: codice, fileNameBase, nome, classe, tracciaNome, dataOra };
-    }
-
-
-    function downloadFileRtf(rtfContent, fileName) {
-        const blob = new Blob([rtfContent], { type: 'application/rtf' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-
-    window.inviaConsegnaDrive = function () {
-        resetActivityTimer(); 
-        
-        const rtfData = generaRtfData();
-        if (!rtfData) return; 
-
-        const { rtfContent, fileNameRtf, pyContent, nome, classe, tracciaNome, dataOra } = rtfData;
-
-        // ⚠️ SOSTITUISCI QUESTO URL CON L'URL DEL TUO WEB APP GOOGLE APPS SCRIPT ⚠️
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; 
-        
-        
-        // 1. SCARICA IL FILE RTF IN LOCALE
-        downloadFileRtf(rtfContent, fileNameRtf);
-        
-        // 2. PREPARAZIONE PER L'UPLOAD TRAMITE FORM
-        document.getElementById("output").textContent = "File scaricato. Tentativo di upload di RTF e Codice Python su Google Drive in corso...";
-
-        const oldForm = document.getElementById('gasForm');
-        if (oldForm) oldForm.remove();
-        
-        const form = document.createElement('form');
-        form.id = 'gasForm';
-        form.method = 'POST';
-        form.action = GAS_WEB_APP_URL;
-        form.target = 'gasTarget'; 
-        form.style.display = 'none';
-
-        const addInput = (name, value) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
-        };
-
-        addInput('nomeStudente', nome);
-        addInput('classe', classe);
-        addInput('tracciaNome', tracciaNome);
-        addInput('dataOra', dataOra);
-        addInput('rtfContent', rtfContent); 
-        addInput('pyContent', pyContent);   
-        
-
-        document.body.appendChild(form);
-        
-        form.submit();
-
-        alert(`✅ Consegna completata! Il file ${fileNameRtf} è stato SCARICATO e il tentativo di UPLOAD di RTF + PY su Drive è stato avviato.`);
-        
-        document.getElementById("output").textContent = `Upload su Drive avviato in background. Verranno creati due file: .rtf e .py. File di backup scaricato: ${fileNameRtf}`;
-    };
-
-
-    window.caricaFile = function (input) {
-      resetActivityTimer(); 
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => editor.setValue(e.target.result);
-      reader.readAsText(file);
-    };
-
-    /**
-     * Funzione chiamata quando l'utente seleziona un'altra traccia dal menu a tendina.
-     */
-    window.cambiaTraccia = function (select) {
-      resetActivityTimer(); 
-      // Aggiunge timestamp per forzare il ricaricamento del PDF
-      const url = select.value + "?t=" + new Date().getTime(); 
-      document.getElementById("pdfFrame").src = url;
-    };
+    document.getElementById("login").style.display = "none";
     
-    // ------------------------------------
-    // 5. GESTIONE URL E CLASSE (Logica Dinamica)
-    // ------------------------------------
+    // Nasconde il link "ACCESSO DOCENTI" standard e mostra le info utente
+    document.getElementById("acessoDocentiLink").style.display = "none";
+    document.getElementById("userName").textContent = `Ciao, ${userName.split(' ')[0]}!`;
+    document.getElementById("loggedInInfo").style.display = "flex";
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const classeRaw = urlParams.get("classe");
-      const pdfFrame = document.getElementById("pdfFrame");
-      const classeTitolo = document.getElementById("classeTitolo");
-      const tracciaSelect = document.getElementById("tracciaSelect");
-      
-      let pdfPath = "tracce/default.pdf"; 
-      
-      // Capitalizza la classe per la ricerca nella mappatura, altrimenti usa 'default'
-      const classKey = classeRaw ? classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1) : 'default';
-      const availableExercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
-      
-      // 1. Genera le opzioni del menu a tendina
-      // Rimuovi l'opzione "Seleziona un esercizio..." prima di riempire (se presente)
-      tracciaSelect.innerHTML = ''; 
+  } else {
+    alert("Accesso consentito solo agli account della scuola (@lscortese.com)!");
+  }
+}
 
-      availableExercises.forEach(exercise => {
-          const option = document.createElement('option');
-          option.value = `tracce/${exercise.file}`;
-          option.textContent = exercise.title;
-          tracciaSelect.appendChild(option);
-      });
-      
-      // 2. Imposta la traccia iniziale
-      if (classeRaw) {
-          // Usa il primo esercizio specifico della classe come default iniziale
-          const firstExercisePath = availableExercises[0] ? `tracce/${availableExercises[0].file}` : "tracce/default.pdf";
-          pdfPath = firstExercisePath;
-          classeTitolo.textContent = `– Classe ${classKey}`; // Es. "– Classe Terze"
-          
-          // Seleziona l'opzione corretta nel menu a tendina
-          tracciaSelect.value = firstExercisePath;
-      }
-      
-      pdfFrame.src = pdfPath;
-      
-      // 3. Carica e salva il nome dello studente
-      const nomeStudenteInput = document.getElementById("nomeStudente");
-      const nomeSalvato = localStorage.getItem("nomeStudente");
-      if (nomeSalvato) {
-          nomeStudenteInput.value = nomeSalvato;
-      }
-      nomeStudenteInput.addEventListener('input', (e) => {
-        localStorage.setItem("nomeStudente", e.target.value);
-        resetActivityTimer(); 
-      });
-      
+// Funzione per gestire il logout
+function handleLogout() {
+    document.getElementById("contenutoProtetto").style.display = "none";
+    document.getElementById("welcomeMessage").style.display = "none";
+    
+    document.getElementById("login").style.display = "block";
+    
+    document.getElementById("acessoDocentiLink").style.display = "block";
+    document.getElementById("loggedInInfo").style.display = "none";
+
+    alert("Logout effettuato con successo.");
+}
+
+
+// Funzione per mostrare/nascondere la barra di ricerca
+function toggleSearch() {
+    const searchContainer = document.getElementById('search-container');
+    const isVisible = searchContainer.style.display === 'block';
+    searchContainer.style.display = isVisible ? 'none' : 'block';
+    
+    if (isVisible) {
+        document.getElementById('searchInput').value = '';
+        performSearch(); // Resetta i filtri
+    } else {
+        document.getElementById('searchInput').focus();
+    }
+}
+
+// Funzione per eseguire la ricerca (Filtra gli elementi della lista)
+function performSearch() {
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    const items = document.querySelectorAll('#courseList li');
+    let visibleCount = 0;
+
+    items.forEach(item => {
+        const linkText = item.querySelector('.course-title').textContent.toLowerCase();
+        const keywords = item.getAttribute('data-keywords').toLowerCase();
+        
+        const isMatch = (linkText.includes(query) || keywords.includes(query));
+        
+        // Modificato per visualizzare l'elemento li come 'flex' (per il layout con i pulsanti)
+        item.style.display = isMatch ? 'flex' : 'none'; 
+        if (isMatch) {
+            visibleCount++;
+        }
     });
-  </script>
+    
+    const totalCount = items.length;
+    document.getElementById('resultsCount').textContent = `Risultati 1-${visibleCount} di ${totalCount}`;
+}
+</script>
+
 </body>
+
 </html>
