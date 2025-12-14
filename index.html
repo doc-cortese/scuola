@@ -278,15 +278,13 @@
         flex-grow: 1;
     }
     
-    .course-title-container a.course-title {
+    /* Il titolo non è più un link, quindi usiamo solo il testo per il colore e lo stile */
+    .course-title { 
       text-decoration: none;
       color: #004080; 
       font-weight: bold;
       font-size: 16px;
-    }
-    
-    .course-title-container a.course-title:hover {
-        text-decoration: underline;
+      cursor: default; /* Rimuove l'indicazione di link */
     }
     
     .course-description {
@@ -325,23 +323,10 @@
         border: 1px solid #007bff;
     }
 
-    /* Google Foglio (ex esercizi) */
     .action-esercizi {
         background-color: #28a745;
         color: white;
         border: 1px solid #28a745;
-    }
-    
-    /* Codice Python (ex editor) */
-    .action-py {
-      background-color: #ffc107; 
-      color: #333;
-      border: 1px solid #ffc107;
-    }
-
-    .action-py:hover {
-      background-color: #e0a800;
-      opacity: 0.9;
     }
     
     .course-actions .action-button:hover {
@@ -473,69 +458,59 @@
     <div class="content-box">
         <div class="content-box-inner">
             <ul class="course-list" id="courseList">
-                
                 <li data-classe="Prime" data-keywords="prima,anno,programmazione,base">
                     <div class="course-title-container">
-                        <a href="classe.html?classe=Prime" class="course-title">PRIMO ANNO</a>
+                        <span class="course-title">PRIMO ANNO</span>
                         <span class="course-description">Materiale didattico per le Classi Prime</span>
                         <span class="course-update">Ultimo Aggiornamento: 02/09/2025</span>
                     </div>
                     <div class="course-actions">
-                        <a href="classe.html?classe=Prime" class="action-button action-materiale">Materiale</a>
-                        <a href="foglio_google_editor.html?classe=Prime&sheetId=PRIMO_ANNO_ID" target="_blank" class="action-button action-esercizi">Google Foglio</a>
-                        <a href="classe.html?classe=Prime" target="_blank" class="action-button action-py">Codice Python</a>
+                        <a href="materiale_didattico.html?classe=Prime" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/PRIMO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Google Sheets</a>
                     </div>
                 </li>
-                
                 <li data-classe="Seconde" data-keywords="seconda,anno,algoritmi,logica">
                     <div class="course-title-container">
-                        <a href="classe.html?classe=Seconde" class="course-title">SECONDO ANNO</a>
+                        <span class="course-title">SECONDO ANNO</span>
                         <span class="course-description">Materiale didattico per le Classi Seconde</span>
                         <span class="course-update">Ultimo Aggiornamento: 28/08/2025</span>
                     </div>
                     <div class="course-actions">
-                        <a href="classe.html?classe=Seconde" class="action-button action-materiale">Materiale</a>
-                        <a href="foglio_google_editor.html?classe=Seconde&sheetId=SECONDO_ANNO_ID" target="_blank" class="action-button action-esercizi">Google Foglio</a>
-                        <a href="classe.html?classe=Seconde" target="_blank" class="action-button action-py">Codice Python</a>
+                        <a href="materiale_didattico.html?classe=Seconde" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/SECONDO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Google Sheets</a>
                     </div>
                 </li>
-                
                 <li data-classe="Terze" data-keywords="terza,anno,strutture,dati,web,html,css">
                     <div class="course-title-container">
-                        <a href="classe.html?classe=Terze" class="course-title">TERZO ANNO</a>
+                        <span class="course-title">TERZO ANNO</span>
                         <span class="course-description">Materiale didattico per le Classi Terze</span>
                         <span class="course-update">Ultimo Aggiornamento: 05/09/2025</span>
                     </div>
                     <div class="course-actions">
-                        <a href="classe.html?classe=Terze" class="action-button action-materiale">Materiale</a>
-                        <a href="foglio_google_editor.html?classe=Terze&sheetId=16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg" target="_blank" class="action-button action-esercizi">Google Foglio</a>
-                        <a href="classe.html?classe=Terze" target="_blank" class="action-button action-py">Codice Python</a>
+                        <a href="materiale_didattico.html?classe=Terze" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/16re9H3f09ertgWUN02Tvs8EiykE65mwF1Rk1w32fC/edit" target="_blank" class="action-button action-esercizi">Esercizi Google Sheets</a>
                     </div>
                 </li>
-                
                 <li data-classe="Quarte" data-keywords="quarta,anno,database,sql,javascript,reti">
                     <div class="course-title-container">
-                        <a href="classe.html?classe=Quarte" class="course-title">QUARTO ANNO</a>
+                        <span class="course-title">QUARTO ANNO</span>
                         <span class="course-description">Materiale didattico per le Classi Quarte</span>
                         <span class="course-update">Ultimo Aggiornamento: 10/09/2025</span>
                     </div>
                     <div class="course-actions">
-                        <a href="classe.html?classe=Quarte" class="action-button action-materiale">Materiale</a>
-                        <a href="foglio_google_editor.html?classe=Quarte&sheetId=QUARTO_ANNO_ID" target="_blank" class="action-button action-esercizi">Google Foglio</a>
-                        <a href="classe.html?classe=Quarte" target="_blank" class="action-button action-py">Codice Python</a>
+                        <a href="materiale_didattico.html?classe=Quarte" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/QUARTO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Google Sheets</a>
                     </div>
                 </li>
-                
                 <li data-classe="Quinte" data-keywords="quinta,anno,java,progetto,maturità">
                     <div class="course-title-container">
-                        <a href="classe.html?classe=Quinte" class="course-title">QUINTO ANNO</a>
+                        <span class="course-title">QUINTO ANNO</span>
                         <span class="course-description">Materiale didattico per le Classi Quinte</span>
                         <span class="course-update">Ultimo Aggiornamento: 15/09/2025</span>
                     </div>
                     <div class="course-actions">
-                        <a href="classe.html?classe=Quinte" class="action-button action-materiale">Materiale</a>
-                        <a href="foglio_google_editor.html?classe=Quinte&sheetId=QUINTO_ANNO_ID" target="_blank" class="action-button action-esercizi">Google Foglio</a>
-                        <a href="classe.html?classe=Quinte" target="_blank" class="action-button action-py">Codice Python</a>
+                        <a href="materiale_didattico.html?classe=Quinte" class="action-button action-materiale">Materiale</a>
+                        <a href="https://docs.google.com/spreadsheets/d/QUINTO_ANNO_ID/edit" target="_blank" class="action-button action-esercizi">Esercizi Google Sheets</a>
                     </div>
                 </li>
             </ul>
@@ -583,6 +558,7 @@ function handleCredentialResponse(response) {
     
     // Nasconde il link "ACCESSO DOCENTI" standard e mostra le info utente
     document.getElementById("acessoDocentiLink").style.display = "none";
+    // Manteniamo il nome utente per coerenza con il messaggio precedente
     document.getElementById("userName").textContent = `Ciao, ${userName.split(' ')[0]}!`;
     document.getElementById("loggedInInfo").style.display = "flex";
 
@@ -626,12 +602,14 @@ function performSearch() {
     let visibleCount = 0;
 
     items.forEach(item => {
-        const linkText = item.querySelector('.course-title').textContent.toLowerCase();
+        // La ricerca ora si basa sul testo del titolo e sulle parole chiave (keywords)
+        const titleSpan = item.querySelector('.course-title');
+        const linkText = titleSpan ? titleSpan.textContent.toLowerCase() : '';
+
         const keywords = item.getAttribute('data-keywords').toLowerCase();
         
         const isMatch = (linkText.includes(query) || keywords.includes(query));
         
-        // Modificato per visualizzare l'elemento li come 'flex'
         item.style.display = isMatch ? 'flex' : 'none'; 
         if (isMatch) {
             visibleCount++;
