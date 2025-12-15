@@ -38,14 +38,33 @@
       flex-shrink: 0; 
     }
     
-    /* Nuovo contenitore per il Foglio Google */
-    #google-sheet {
-      height: 70%; /* Altezza più grande per il foglio */
+    /* Stili per il pulsante Crea Copia */
+    .action-button.copy-btn {
+        display: block; 
+        text-align: center; 
+        padding: 15px; 
+        margin-bottom: 10px; 
+        background-color: #28a745; 
+        color: white; 
+        text-decoration: none; 
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+    .action-button.copy-btn:hover {
+        background-color: #1e7e34;
+    }
+    
+    /* Iframe di visualizzazione (ora solo template) */
+    #google-sheet-view {
+      height: 40%; /* Altezza ridotta per lasciare spazio ai controlli */
       border: 1px solid #ccc;
       border-radius: 4px;
-      flex-grow: 1; 
+      flex-grow: 0; 
       min-height: 100px; 
       width: 100%;
+      margin-bottom: 15px;
     }
     
     #sheet-controls {
@@ -63,11 +82,13 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    input[type="file"] {
-        margin-top: 10px;
-        /* Rimosso, non più necessario per caricare file PY */
-        display: none; 
+    
+    /* Stile per il campo di invio link */
+    #linkCopiaPersonale {
+        border: 2px solid #007bff; /* Evidenziato in blu */
+        margin-bottom: 10px;
     }
+    
     .button-row {
       display: flex;
       flex-wrap: wrap;
@@ -86,8 +107,7 @@
     }
     
     /* Stili specifici per i pulsanti */
-    /* Rimosso #eseguiBtn e #githubBtn, sostituito con stile generico */
-    #rtfBtn { background-color: #28a745; color: white; } /* Invia Consegna */
+    #rtfBtn { background-color: #007bff; color: white; } /* Invia Consegna */
     #ritornaBtn { background-color: #d9534f; color: white; } /* Esci */
 
     .button-row button:hover:not(:disabled) { opacity: 0.9; }
@@ -116,10 +136,11 @@
         
         /* 1. Divisore Orizzontale */
         #splitter { width: 5px; cursor: col-resize; background-color: #ccc; height: 100vh; flex-shrink: 0; }
-
-        /* 2. Divisore Verticale */
-        /* Rimosso il divisore verticale */
-        #google-sheet { height: 100%; flex-grow: 1; } 
+        
+        /* Adatta l'altezza dell'iframe in modalità desktop */
+        #google-sheet-view {
+            height: 500px; /* Altezza fissa o dinamica se necessario */
+        }
     }
   </style>
 </head>
@@ -139,25 +160,35 @@
 
   
   <div id="sheet-container">
-    <h2>Foglio Google (Elaborazione Dati)</h2>
+    <h2>Foglio Google (Template)</h2>
+    
+    <p style="background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; font-weight: bold;">
+        ⚠️ IMPORTANTE: Clicca sul pulsante qui sotto per creare la tua COPIA PERSONALE del Foglio e lavorarci.
+        Dopo aver finito, incolla il link della tua copia nel campo "Link Copia Personale".
+    </p>
+
+    <a id="copySheetLink" target="_blank" class="action-button copy-btn" href="#">
+        ▶️ Apri e CREA COPIA PERSONALE del Foglio Template
+    </a>
     
     <iframe 
-        id="google-sheet" 
-        src="https://docs.google.com/spreadsheets/d/ID_DEL_TUO_FOGLIO/edit?usp=sharing&amp;embedded=true" 
+        id="google-sheet-view" 
+        src="" 
         frameborder="0"
-        title="Google Sheet incorporato"
+        title="Google Sheet Template (Sola Visualizzazione)"
     ></iframe>
     
     <div id="sheet-controls">
+        <input type="text" id="linkCopiaPersonale" placeholder="Incolla QUI il link del tuo Foglio Google (Copia Personale)" />
+        
         <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
-        <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" style="display:none;" />
         
         <div class="button-row">
-          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive & Download Link)</button> 
+          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna</button> 
           <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
         </div>
         
-        <pre id="output">Stato: Pronto. Assicurati che il tuo Foglio Google sia pubblico o condivisibile per la consegna.</pre>
+        <pre id="output">Stato: Pronto. Incolla il link della tua Copia Personale e procedi con la consegna.</pre>
     </div>
   </div>
 
@@ -165,13 +196,11 @@
 
   <script>
     // === CONFIGURAZIONE ===
-    // CORREZIONE: Ho sostituito il placeholder con l'ID che veniva hardcoded in modo errato e lo uso come fallback/default.
     const DEFAULT_SHEET_ID = "16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg"; 
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; // <--- SOSTITUISCI CON IL TUO URL GAS
     const MIN_WIDTH = 100; 
     const INACTIVITY_TIMEOUT = 300000; // 5 minuti
     
-    // Variabile globale per l'ID del foglio corrente, inizializzata al default, poi aggiornata nel DOMContentLoaded.
     let currentSheetId = DEFAULT_SHEET_ID;
 
     // === LOGICA LOGOUT AUTOMATICO ===
@@ -185,7 +214,6 @@
     }
 
     window.tornaAllaPaginaPrincipale = function () {
-        // CORREZIONE: Torna alla pagina principale (index.html)
         window.location.href = 'index.html'; 
     }
 
@@ -211,16 +239,15 @@
     };
     
     /**
-     * Invia un record di consegna al Google Apps Script (GAS) contenente il link al Foglio Google.
-     * Necessita di un GAS configurato per ricevere i parametri e gestirli (es. creare una copia del foglio o registrarne il link).
+     * Invia un record di consegna al Google Apps Script (GAS) contenente il link alla COPIA PERSONALE.
      */
     window.inviaConsegnaDrive = function () {
         resetActivityTimer(); 
         
         const nome = document.getElementById("nomeStudente").value.trim();
+        const linkCopia = document.getElementById("linkCopiaPersonale").value.trim(); // NUOVO CAMPO
         const outputStatus = document.getElementById("output");
         
-        // Recupero i parametri URL qui, se necessario, o mi affido alla variabile globale
         const urlParams = new URLSearchParams(window.location.search);
         const classe = urlParams.get("classe") || "ND";
         
@@ -228,12 +255,16 @@
         const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
         const dataOra = new Date().toLocaleString("it-IT");
         
-        const sheetLink = document.getElementById("google-sheet").src.replace("&embedded=true", ""); // Prende il link completo senza il parametro embed
-        
-        if (!nome) {
-            alert("Inserisci il tuo nome e cognome per inviare il file.");
+        if (!nome || !linkCopia) {
+            alert("⚠️ Devi inserire sia il tuo nome/cognome che il LINK della tua COPIA PERSONALE del Foglio Google per procedere!");
             return;
         }
+
+        if (!linkCopia.includes("docs.google.com/spreadsheets/d/")) {
+            alert("⚠️ Il link fornito non sembra essere un link valido di un Foglio Google. Assicurati di aver incollato il link corretto della tua copia.");
+            return;
+        }
+
 
         outputStatus.textContent = "Preparazione per l'upload del link a Google Drive in corso...";
 
@@ -255,24 +286,22 @@
             form.appendChild(input);
         };
 
+        // Parametri per la consegna
         addInput('nomeStudente', nome);
         addInput('classe', classe);
         addInput('tracciaNome', tracciaNome);
         addInput('dataOra', dataOra);
-        // Parametri specifici per la consegna con Google Sheet
-        addInput('sheetLink', sheetLink); 
-        // Uso la variabile globale aggiornata (o il default)
-        addInput('sheetId', currentSheetId); 
+        addInput('sheetLink', linkCopia); // <-- USA IL LINK INSERITO DALLO STUDENTE
+        addInput('templateSheetId', currentSheetId); // L'ID del template originale per riferimento
         addInput('azione', 'consegnaFoglio'); 
         
-
         document.body.appendChild(form);
         
         form.submit();
 
-        alert(`✅ Consegna avviata! Verrà inviato il link del Foglio Google a Drive.`);
+        alert(`✅ Consegna avviata! Verrà inviato il link del Foglio Google a Drive. Controlla il link inviato su Drive per sicurezza.`);
         
-        outputStatus.textContent = `Upload del link su Drive avviato in background. Link inviato: ${sheetLink}`;
+        outputStatus.textContent = `Upload del link su Drive avviato in background. Link della Copia Personale inviato: ${linkCopia}`;
     };
 
     /**
@@ -302,11 +331,13 @@
         
         const urlParams = new URLSearchParams(window.location.search);
         const classeRaw = urlParams.get("classe");
-        const sheetIdFromUrl = urlParams.get("sheetId"); // Recupera l'ID del foglio dall'URL
+        const sheetIdFromUrl = urlParams.get("sheetId"); 
         
         const pdfFrame = document.getElementById("pdfFrame");
         const classeTitolo = document.getElementById("classeTitolo");
         const tracciaSelect = document.getElementById("tracciaSelect");
+        const googleSheetViewFrame = document.getElementById("google-sheet-view"); // NUOVO RIFERIMENTO
+        const copySheetLinkElement = document.getElementById("copySheetLink"); // NUOVO RIFERIMENTO
         
         let pdfPath = "tracce/default.pdf"; 
         
@@ -314,19 +345,19 @@
         const availableExercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
         
         
-        // Imposta l'URL del Foglio Google - CORREZIONE DEL BUG
-        const googleSheetFrame = document.getElementById("google-sheet");
-        
         // Aggiorna la variabile globale con l'ID passato nell'URL o il default.
         if (sheetIdFromUrl) {
             currentSheetId = sheetIdFromUrl; 
         }
 
-        // CORREZIONE SINTATTICA E LOGICA: Imposta l'iframe con l'ID come stringa
-        googleSheetFrame.src = `https://docs.google.com/spreadsheets/d/${currentSheetId}/edit?usp=sharing&embedded=true`;
-
+        // 1. Imposta l'iframe per la VISUALIZZAZIONE del TEMPLATE (sola lettura)
+        googleSheetViewFrame.src = `https://docs.google.com/spreadsheets/d/${currentSheetId}/view?usp=sharing&embedded=true`;
         
-        // Logica Resizable (Solo Orizzontale)
+        // 2. Imposta il link del pulsante CREA COPIA PERSONALE (forza la copia)
+        copySheetLinkElement.href = `https://docs.google.com/spreadsheets/d/${currentSheetId}/copy`;
+
+
+        // Logica Resizable (Solo Orizzontale) - mantenuta inalterata
         if (window.innerWidth >= 768) { 
             const splitter = document.getElementById('splitter');
             const traccia = document.getElementById('traccia');
@@ -363,7 +394,7 @@
         }
 
         
-        // 1. Genera le opzioni del menu a tendina
+        // 3. Genera le opzioni del menu a tendina
         tracciaSelect.innerHTML = ''; 
 
         availableExercises.forEach(exercise => {
@@ -373,7 +404,7 @@
             tracciaSelect.appendChild(option);
         });
         
-        // 2. Imposta la traccia iniziale
+        // 4. Imposta la traccia iniziale
         if (classeRaw) {
             const firstExercisePath = availableExercises[0] ? `tracce/${availableExercises[0].file}` : "tracce/default.pdf";
             pdfPath = firstExercisePath;
@@ -384,7 +415,7 @@
         
         pdfFrame.src = pdfPath;
         
-        // 3. Carica e salva il nome dello studente
+        // 5. Carica e salva il nome dello studente
         const nomeStudenteInput = document.getElementById("nomeStudente");
         const nomeSalvato = localStorage.getItem("nomeStudente");
         if (nomeSalvato) {
