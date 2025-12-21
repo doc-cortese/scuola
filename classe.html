@@ -44,7 +44,6 @@
       background: white;
     }
 
-    /* Contenitore Traccia con Scroll per lo Zoom */
     #viewerContainer {
       flex-grow: 1;
       border: 1px solid #ccc;
@@ -57,9 +56,6 @@
       position: relative;
     }
 
-    #pdfFrame { width: 100%; height: 100%; border: none; }
-    
-    /* Immagine zoomabile indipendente */
     .traccia-img { 
       transition: width 0.2s ease-in-out;
       width: 100%; 
@@ -97,12 +93,12 @@
     <div class="controls">
       <select id="tracciaSelect" onchange="updateTraccia(this.value)"></select>
       <div id="imgZoomControls" style="display:none;">
-        <button class="btn-zoom-ui" title="Zoom In Immagine" onclick="zoomImage(1.2)">+</button>
-        <button class="btn-zoom-ui" title="Zoom Out Immagine" onclick="zoomImage(0.8)">-</button>
+        <button class="btn-zoom-ui" onclick="zoomImage(1.2)">+</button>
+        <button class="btn-zoom-ui" onclick="zoomImage(0.8)">-</button>
       </div>
     </div>
     <div id="viewerContainer">
-      <iframe id="pdfFrame" src=""></iframe>
+      <iframe id="pdfFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
     </div>
   </div>
 
@@ -136,8 +132,10 @@
   };
 
   let editor, pyodide, timeLeft = 300, currentImgWidth = 100;
+  
+  // Registrazione tempo di inizio
+  const startTime = new Date();
 
-  // ZOOM IMMAGINE INDIPENDENTE
   function zoomImage(step) {
     const img = document.querySelector('.traccia-img');
     if (img) {
@@ -162,18 +160,23 @@
     resetActivityTimer();
   }
 
-  // LOGICA INVIO DRIVE (RIPRISTINATA COMPLETA)
   window.inviaConsegnaDrive = function() {
     const nome = document.getElementById("nomeStudente").value.trim();
     if (!nome) return alert("Inserisci Nome e Cognome!");
+
+    const endTime = new Date();
+    const diffMs = endTime - startTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffSecs = Math.floor((diffMs % 60000) / 1000);
+    const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
 
     const codice = editor.getValue();
     const outputText = document.getElementById("output").textContent;
     const urlParams = new URLSearchParams(window.location.search);
     const classe = urlParams.get("classe") || "ND";
-    const dataOra = new Date().toLocaleString("it-IT");
 
-    const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par Data: ${dataOra}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
+    // Formattazione RTF con tempi di inizio, fine e totale
+    const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par\\par INIZIO PROVA: ${startTime.toLocaleString()}\\par FINE PROVA: ${endTime.toLocaleString()}\\par TEMPO TOTALE: ${tempoTotale}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
 
     const blob = new Blob([rtfContent], { type: 'application/rtf' });
     const a = document.createElement('a');
@@ -192,7 +195,7 @@
 
     add('nomeStudente', nome);
     add('classe', classe);
-    add('dataOra', dataOra);
+    add('dataOra', endTime.toLocaleString()); // Usiamo l'orario di fine come riferimento temporale
     add('rtfContent', rtfContent);
     add('pyContent', codice);
     
@@ -203,29 +206,22 @@
 
   function resetActivityTimer() { timeLeft = 300; }
 
-  // MODIFICA: Funzione Esci che pulisce la memoria
   function tornaAllaPaginaPrincipale() { 
     localStorage.removeItem("autoSaveCode");
     localStorage.removeItem("nomeStudente");
     window.location.href = '../index.html'; 
   }
 
-  // MONACO EDITOR SENZA SALVATAGGIO AUTOMATICO
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monaco-container'), {
       value: "# Scrivi qui il tuo codice Python\n",
       language: 'python',
       theme: 'vs-dark',
-      automaticLayout: true,
-      mouseWheelZoom: true
+      automaticLayout: true
     });
 
     editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
-    
-    // Aggiornato: Resetta solo il timer, non salva il codice nel localStorage
-    editor.onDidChangeModelContent(() => {
-      resetActivityTimer();
-    });
+    editor.onDidChangeModelContent(() => { resetActivityTimer(); });
   });
 
   async function runCode() {
@@ -235,27 +231,24 @@
       if (!pyodide) pyodide = await loadPyodide();
       document.getElementById('eseguiBtn').disabled = false;
       document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
-      
       await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
       await pyodide.runPythonAsync(editor.getValue());
       out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
-    } catch (e) { out.textContent = "Errore di Sintassi/Esecuzione:\n" + e; }
+    } catch (e) { out.textContent = "Errore:\n" + e; }
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
-    runCode(); // Inizializza pyodide
+    runCode();
     const urlParams = new URLSearchParams(window.location.search);
     const cl = urlParams.get('classe') || 'default';
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
     const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
-    
     const select = document.getElementById('tracciaSelect');
     exercises.forEach(ex => {
       const opt = document.createElement('option');
       opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
       select.appendChild(opt);
     });
-
     if (exercises.length > 0) updateTraccia(`tracce/${exercises[0].file}`);
 
     const ns = document.getElementById('nomeStudente');
