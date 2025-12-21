@@ -21,7 +21,7 @@
       --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-    body {
+   <body oncopy="return false" oncut="return false" onpaste="return false" oncontextmenu="return false;" style="user-select: none; -webkit-user-select: none;"> {
       margin: 0;
       font-family: 'Inter', -apple-system, sans-serif;
       background-color: var(--bg);
@@ -294,6 +294,31 @@
         .profile-card { flex-direction: column; text-align: center; }
         header { text-align: center; }
     }
+
+    /* Stili per i controlli dello zoom */
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .zoom-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: opacity 0.2s;
+    }
+    .zoom-btn:hover { opacity: 0.9; }
+    #courseList { transition: transform 0.2s ease-in-out; transform-origin: top center; }
+    
   </style>
 </head>
 <body>
@@ -358,6 +383,12 @@
     </div>
 
   <div id="contenutoProtetto" style="display:none;">
+    <div class="zoom-controls">
+        <span style="font-weight:800; color:var(--primary); font-size:14px;">DIMENSIONE SCHEDE:</span>
+        <button class="zoom-btn" onclick="adjustZoom(1.1)">Ingrandisci +</button>
+        <button class="zoom-btn" onclick="adjustZoom(0.9)">Rimpicciolisci -</button>
+        <button class="zoom-btn" onclick="resetZoom()" style="background:#64748b;">Reset</button>
+    </div>
     <div class="section-title">Insegnamenti e Classi</div>
     
     <ul class="course-grid" id="courseList">
@@ -503,6 +534,34 @@ function performSearch() {
     
     document.getElementById('resultsCount').textContent = `Mostrando ${visibleCount} classi su ${items.length}`;
 }
+  // === FUNZIONI DI ZOOM ===
+let zoomLevel = 1;
+function adjustZoom(factor) {
+    zoomLevel *= factor;
+    // Applica lo zoom alla griglia delle classi
+    const container = document.getElementById('courseList');
+    if (container) {
+        container.style.transform = `scale(${zoomLevel})`;
+    }
+}
+
+function resetZoom() {
+    zoomLevel = 1;
+    const container = document.getElementById('courseList');
+    if (container) {
+        container.style.transform = `scale(1)`;
+    }
+}
+
+// === BLOCCO SCORCIATOIE TASTIERA ===
+document.addEventListener('keydown', function(e) {
+    // Blocca Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+S, Ctrl+U
+    if ((e.ctrlKey || e.metaKey) && ['c','v','x','s','u'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        alert("Attenzione: le funzioni di copia e incolla sono disabilitate in questa pagina.");
+        return false;
+    }
+});
 </script>
 
 </body>
