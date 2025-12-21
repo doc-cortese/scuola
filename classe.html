@@ -13,6 +13,7 @@
   <script src="./libs/pyodide.js"></script>
 
   <style>
+    /* RESET E LAYOUT BASE */
     body {
       margin: 0;
       font-family: sans-serif;
@@ -22,6 +23,7 @@
       overflow: hidden; 
       background-color: #f0f0f0;
     }
+
     #traccia, #editor {
       padding: 15px;
       box-sizing: border-box;
@@ -32,559 +34,260 @@
       flex-direction: column;
       min-height: 0; 
     }
-    #traccia {
-        min-height: 0;
+
+    /* AREA VISUALIZZAZIONE TRACCIA (PDF o IMG) */
+    #viewerContainer {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      overflow: auto;
+      background-color: #fff;
+      display: flex;
+      justify-content: center;
     }
 
-    /* CONTENUTI INTERNI */
     #pdfFrame {
       width: 100%;
-      height: 300px; 
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      flex-shrink: 0; 
-    }
-    #monaco {
-      height: 50%; 
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      flex-grow: 1; 
-      min-height: 100px; 
-    }
-    
-    #editor-controls {
-        flex-shrink: 0; 
-        overflow-y: auto; 
-        padding-top: 10px;
+      height: 100%;
+      border: none;
+      display: block;
     }
 
-    /* Stili generali */
-    input[type="text"] {
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      font-size: 16px;
+    .traccia-img {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* LAYOUT DESKTOP */
+    @media (min-width: 768px) {
+      body { flex-direction: row; }
+      #traccia {
+        width: 40%; 
+        border-right: 2px solid #ccc;
+        height: 100vh;
+      }
+      #editor {
+        width: 60%;
+        height: 100vh;
+      }
+    }
+
+    .controls {
+      margin-bottom: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    select, input {
+      padding: 8px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      font-size: 14px;
     }
-    input[type="file"] {
-        margin-top: 10px;
-    }
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .button-row button {
-      flex: 1 1 auto; 
-      padding: 12px 10px;
-      font-size: 15px;
-      cursor: pointer;
+
+    button {
+      padding: 8px 15px;
       border: none;
       border-radius: 4px;
-      transition: background-color 0.3s;
+      cursor: pointer;
       font-weight: bold;
+      transition: opacity 0.2s;
     }
-    
-    /* Stili specifici per i pulsanti */
-    #eseguiBtn { background-color: #004080; color: white; }
-    #githubBtn { background-color: #333; color: white; }
-    /* Nuovo stile per il pulsante Invia Drive */
-    #rtfBtn { background-color: #28a745; color: white; } 
-    #ritornaBtn { background-color: #d9534f; color: white; }
 
-    .button-row button:hover:not(:disabled) { opacity: 0.9; }
-    .button-row button:disabled { background-color: #ccc; cursor: not-allowed; }
-    pre#output {
-      background-color: #eee;
-      padding: 15px;
-      margin-top: 10px;
-      white-space: pre-wrap;
-      max-height: 200px;
-      overflow-y: auto;
+    .btn-run { background-color: #28a745; color: white; }
+    .btn-run:hover { opacity: 0.9; }
+
+    #monaco-container {
+      flex-grow: 1;
       border: 1px solid #ccc;
       border-radius: 4px;
+      min-height: 200px;
     }
-    h2 { color: #004080; }
-    
-    /* === STILI RESIZABLE PANES (Desktop) === */
-    @media (min-width: 768px) {
-        body {
-            flex-direction: row; 
-            cursor: default;
-        }
-        #traccia { width: 50%; min-width: 10%; }
-        #editor { width: 50%; min-width: 10%; height: 100vh; }
-        #pdfFrame { height: calc(100vh - 150px); }
-        
-        /* 1. Divisore Orizzontale */
-        #splitter { width: 5px; cursor: col-resize; background-color: #ccc; height: 100vh; flex-shrink: 0; }
 
-        /* 2. Divisore Verticale */
-        #vertical-splitter { height: 5px; cursor: row-resize; background-color: #aaa; width: 100%; flex-shrink: 0; }
-        #monaco { height: 50%; flex-grow: 1; }
+    #output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 10px;
+      font-family: monospace;
+      border-radius: 4px;
+      margin-top: 10px;
+      flex-grow: 0.3; 
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-size: 13px;
+      border: 1px solid #333;
+    }
+
+    /* Timer Style */
+    #timerDisplay {
+        font-weight: bold;
+        color: #d9534f;
+        margin-left: auto;
     }
   </style>
 </head>
-
 <body>
+
   <div id="traccia">
-    <h2>Traccia <span id="classeTitolo"></span></h2>
-    
-    <select id="tracciaSelect" onchange="cambiaTraccia(this)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-      <option value="tracce/default.pdf">Seleziona un esercizio...</option>
-    </select>
-
-    <iframe id="pdfFrame" src=""></iframe>
-  </div>
-  
-  <div id="splitter"></div>
-
-  
-  <div id="editor">
-    <h2>Editor Python</h2>
-    <div id="monaco"></div>
-    
-    <div id="vertical-splitter"></div>
-
-    <div id="editor-controls">
-        <input type="text" id="nomeStudente" placeholder="Il tuo nome e cognome (necessario per la consegna)" />
-        <input type="file" accept=".py" onchange="caricaFile(this)" title="Carica un file Python (py) locale" />
-        
-        <div class="button-row">
-          <button id="eseguiBtn" onclick="eseguiCodice()" disabled>Caricamento Pyodide...</button> 
-          <button id="githubBtn" disabled>Invia Codice (GitHub Issue)</button>
-          <button id="rtfBtn" onclick="inviaConsegnaDrive()">Invia Consegna (Drive & Download)</button> 
-          <button id="ritornaBtn" onclick="tornaAllaPaginaPrincipale()">Esci</button>
-        </div>
-        
-        <pre id="output">Output...</pre>
+    <div class="controls">
+      <strong id="classeTitolo">Insegnamento</strong>
+      <select id="tracciaSelect" onchange="changeTraccia(this.value)">
+        </select>
+    </div>
+    <div id="viewerContainer">
+      <iframe id="pdfFrame" src=""></iframe>
     </div>
   </div>
 
-  <iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+  <div id="editor">
+    <div class="controls">
+      <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente" style="flex-grow: 1;">
+      <button class="btn-run" onclick="runCode()">Esegui Codice (Ctrl+Enter)</button>
+      <span id="timerDisplay"></span>
+    </div>
+    <div id="monaco-container"></div>
+    <div id="output">Inizializzazione sistema in corso...</div>
+  </div>
 
   <script>
-    let editor;
-    let pyodide;
-    let pyodideReady = false; 
-    const MIN_WIDTH = 100; 
-    const MIN_HEIGHT = 100; 
-    const ZOOM_INCREMENT = 2; 
-
-    // === LOGICA LOGOUT AUTOMATICO ===
-    const INACTIVITY_TIMEOUT = 300000; // 5 minuti
-    let activityTimer;
-
-    function resetActivityTimer() {
-        clearTimeout(activityTimer);
-        activityTimer = setTimeout(() => {
-            logoutAutomatico();
-        }, INACTIVITY_TIMEOUT);
-    }
-
-    window.tornaAllaPaginaPrincipale = function () {
-        window.location.href = '../index.html'; 
-    }
-
-    function logoutAutomatico() {
-        alert("Sei stato inattivo per 5 minuti. Verrai reindirizzato alla pagina principale per motivi di sicurezza e gestione delle risorse.");
-        tornaAllaPaginaPrincipale();
-    }
-    // ==================================
-
-    // ------------------------------------
-    // *** NUOVA MAPPATURA ESERCIZI PER CLASSE ***
-    // (Aggiungi qui i tuoi file PDF per le Quarte, Quinte, ecc.)
-    // ------------------------------------
+    // --- 1. CONFIGURAZIONE ESERCIZI ---
     const EXERCISES_BY_CLASS = {
         'Terze': [
-            // Esercizio caricato dall'utente
-            { file: 'Esercizio_Terze_12122025.htm', title: 'Esercizio Analisi Fisica' }
-            
+            { file: 'Esercizio_Terze_12122025.jpg', title: 'Esercizio Analisi Fisica (JPG)' },
+            { file: 'Esercizio_Terze_Python_Base.pdf', title: 'Fondamenti di Python' }
         ],
         'Quarte': [
-            // Esempio: Devi creare questi file nella cartella 'tracce/'
-            { file: 'Esercizio_Quarte_1.pdf', title: 'Esercizio Algoritmi Avanzati' }
-            
+            { file: 'Esercizio_Quarte_1.pdf', title: 'Database e SQL' }
         ],
-        // Aggiungi le altre classi qui: es. 'Quinte': [...]
-        
-        // Esercizi di fallback/generici (usati se la classe non è riconosciuta)
         'default': [
-            { file: 'default.pdf', title: 'Esercizio Base' }
-            
+            { file: 'default.pdf', title: 'Traccia Standard' }
         ]
     };
 
-    // ------------------------------------
-    // 1. INIZIALIZZAZIONE MONACO EDITOR
-    // ------------------------------------
-    require(['vs/editor/editor.main'], function () {
-      editor = monaco.editor.create(document.getElementById('monaco'), {
-        value: '# Scrivi qui il tuo codice Python.', 
-        language: 'python',
-        theme: 'vs-dark',
-        automaticLayout: true,
-        mouseWheelZoom: true,
-        browserMouseWheel: false, 
-        fontSize: 14 
-      });
+    let editor;
+    let pyodide;
+    let activityTimer;
+    const INACTIVITY_LIMIT = 300000; // 5 minuti
 
-      // === LOGICA ANTI-INCOLLA: BLOCCO DEFINITIVO ===
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, function() {
-          alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
-      });
-      editor.addCommand('editor.action.clipboardPasteAction', function() {
-          alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
-      }, 'in-editor-context');
-      editor.getDomNode().addEventListener('paste', (e) => {
-        e.preventDefault();
-        alert('🚫 L\'azione di Incolla (Paste) è stata disabilitata per incoraggiare la digitazione manuale e l\'apprendimento. Digitare il codice.');
-      });
-      // ===============================================
+    // --- 2. FUNZIONE CAMBIO VISUALIZZATORE (MODIFICATA) ---
+    function changeTraccia(filePath) {
+        const container = document.getElementById('viewerContainer');
+        const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(filePath);
 
-      editor.onDidChangeModelContent(() => {
-        resetActivityTimer(); 
-      });
-      
-      // === LOGICA ZOOM MANUALE (Rotellina del Mouse con Ctrl) ===
-      editor.getDomNode().addEventListener('wheel', (e) => {
-        if (e.ctrlKey) {
-            e.preventDefault(); 
-            const currentSize = editor.getOption(monaco.editor.EditorOption.fontSize);
-            let newSize = currentSize;
-
-            if (e.deltaY < 0) { // Scroll up (Zoom in)
-                newSize = currentSize + ZOOM_INCREMENT;
-            } else if (e.deltaY > 0) { // Scroll down (Zoom out)
-                newSize = currentSize - ZOOM_INCREMENT;
-            }
-
-            newSize = Math.max(8, Math.min(40, newSize)); 
-
-            editor.updateOptions({ fontSize: newSize });
+        if (isImage) {
+            container.innerHTML = `<img src="${filePath}" class="traccia-img" alt="Traccia Esercizio">`;
+        } else {
+            container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
         }
-      });
-      // ========================================================
-    });
-
-    // ------------------------------------
-    // 2. LOGICA RESIZABLE PANES 
-    // (Non modificata, gestisce solo il layout)
-    // ------------------------------------
-    document.addEventListener("DOMContentLoaded", () => {
-        
-        ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'].forEach(eventName => {
-            document.addEventListener(eventName, resetActivityTimer, true);
-        });
-        resetActivityTimer(); 
-        
-        if (window.innerWidth >= 768) { 
-            const splitter = document.getElementById('splitter');
-            const traccia = document.getElementById('traccia');
-            const editorDiv = document.getElementById('editor');
-            let isDraggingHorizontal = false;
-            
-            splitter.addEventListener('mousedown', function(e) {
-                if (e.button !== 0) return; 
-                isDraggingHorizontal = true;
-                document.body.style.cursor = 'col-resize';
-                document.body.classList.add('no-select'); 
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDraggingHorizontal) return;
-                
-                const containerWidth = document.body.offsetWidth;
-                const newTracciaWidth = e.clientX;
-                const newEditorWidth = containerWidth - newTracciaWidth - splitter.offsetWidth;
-
-                if (newTracciaWidth > MIN_WIDTH && newEditorWidth > MIN_WIDTH) {
-                    traccia.style.width = newTracciaWidth + 'px';
-                    editorDiv.style.width = newEditorWidth + 'px';
-                    if (editor) {
-                        editor.layout();
-                    }
-                }
-            });
-
-            const verticalSplitter = document.getElementById('vertical-splitter');
-            const monacoDiv = document.getElementById('monaco');
-            let isDraggingVertical = false;
-
-            verticalSplitter.addEventListener('mousedown', function(e) {
-                if (e.button !== 0) return;
-                isDraggingVertical = true;
-                document.body.style.cursor = 'row-resize';
-                document.body.classList.add('no-select'); 
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDraggingVertical) return;
-                
-                const editorRect = editorDiv.getBoundingClientRect();
-                const newMonacoHeight = e.clientY - editorRect.top;
-                
-                if (newMonacoHeight > MIN_HEIGHT) {
-                    monacoDiv.style.height = newMonacoHeight + 'px';
-                    if (editor) {
-                        editor.layout();
-                    }
-                }
-            });
-
-
-            document.addEventListener('mouseup', function() {
-                if (isDraggingHorizontal) {
-                    isDraggingHorizontal = false;
-                }
-                if (isDraggingVertical) {
-                    isDraggingVertical = false;
-                }
-                if (!isDraggingHorizontal && !isDraggingVertical) {
-                    document.body.style.cursor = 'default';
-                    document.body.classList.remove('no-select');
-                }
-            });
-        }
-    });
-
-    // ------------------------------------
-    // 3. INIZIALIZZAZIONE PYODIDE (Non modificata)
-    // ------------------------------------
-    async function initializePyodide() {
-        document.getElementById("output").textContent = "Inizializzazione Pyodide... attendere qualche secondo.";
-        try {
-            pyodide = await loadPyodide(); 
-            pyodideReady = true;
-            
-            const eseguiBtn = document.getElementById("eseguiBtn");
-            eseguiBtn.disabled = false;
-            eseguiBtn.textContent = "Esegui Codice";
-            document.getElementById("output").textContent = "Pyodide pronto. Scrivi il codice e premi Esegui.";
-
-        } catch (e) {
-            console.error("Errore fatale nel caricamento di Pyodide. Verifica che i file siano in ./libs/.", e);
-            document.getElementById("output").textContent = "ERRORE: Impossibile caricare Pyodide. Verifica la cartella 'libs' e riprova.";
-        }
+        resetActivityTimer();
     }
-    document.addEventListener("DOMContentLoaded", initializePyodide);
 
-
-    // ------------------------------------
-    // 4. FUNZIONI PRINCIPALI (Esecuzione, CLOUD UPLOAD & DOWNLOAD)
-    // ------------------------------------
-
-    async function eseguiCodice() {
-      if (!pyodideReady) {
-        document.getElementById("output").textContent = "Pyodide non è ancora pronto. Attendere.";
-        return;
-      }
-      resetActivityTimer(); 
-      document.getElementById("output").textContent = "Esecuzione in corso...";
-      
-      const codice = editor.getValue();
-      try {
-        const result = await pyodide.runPythonAsync(codice); 
-        document.getElementById("output").textContent = result ?? "Esecuzione completata (nessun output visualizzato direttamente)";
-      } catch (err) {
-        document.getElementById("output").textContent = "ERRORE:\n" + err;
-      }
+    // --- 3. GESTIONE INATTIVITÀ ---
+    function resetActivityTimer() {
+        clearTimeout(activityTimer);
+        activityTimer = setTimeout(() => {
+            alert("Sessione scaduta per inattività. Ricarica la pagina.");
+            location.reload();
+        }, INACTIVITY_LIMIT);
     }
-    window.eseguiCodice = eseguiCodice;
 
-    
-    function generaRtfData() {
-        const nome = document.getElementById("nomeStudente").value.trim();
-        const codice = editor.getValue();
-        const output = document.getElementById("output").textContent.trim();
-        
+    // --- 4. INIZIALIZZAZIONE ---
+    document.addEventListener("DOMContentLoaded", async () => {
         const urlParams = new URLSearchParams(window.location.search);
-        const classe = urlParams.get("classe") || "ND";
+        const classeRaw = urlParams.get('classe');
+        const classKey = classeRaw || 'default';
         
-        const tracciaUrl = document.getElementById("pdfFrame").src;
-        const tracciaNome = tracciaUrl.split("/").pop().split("?")[0] || "Default"; 
-        const dataOra = new Date().toLocaleString("it-IT");
+        const tracciaSelect = document.getElementById('tracciaSelect');
+        const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
+        
+        document.getElementById('classeTitolo').textContent = `– Classe ${classKey}`;
 
-        if (!nome) {
-            alert("Inserisci il tuo nome e cognome per inviare il file.");
-            return null;
+        // Popolamento Select
+        tracciaSelect.innerHTML = '';
+        exercises.forEach(ex => {
+            const opt = document.createElement('option');
+            opt.value = `tracce/${ex.file}`;
+            opt.textContent = ex.title;
+            tracciaSelect.appendChild(opt);
+        });
+
+        // Caricamento traccia iniziale
+        if (exercises.length > 0) {
+            changeTraccia(`tracce/${exercises[0].file}`);
         }
 
-        const dataOraFormattata = new Date().toLocaleString("it-IT").replace(/:/g, '-').replace(/\//g, '_').replace(/, /g, '_').replace(/ /g, '_');
-        const fileNameBase = `${nome.replace(/ /g, '_')}_${classe}_${dataOraFormattata}`;
-        const fileNameRtf = `Consegna_${fileNameBase}.rtf`;
+        // Recupero Nome Studente
+        const nomeInput = document.getElementById("nomeStudente");
+        nomeInput.value = localStorage.getItem("nomeStudente") || "";
+        nomeInput.addEventListener('input', (e) => {
+            localStorage.setItem("nomeStudente", e.target.value);
+            resetActivityTimer();
+        });
 
-        const escapeRtf = (text) => 
-            text.replace(/\\/g, '\\\\').replace(/{/g, '\\{').replace(/}/g, '\\}').replace(/\n/g, '\\par\n');
-        
-        const rtfContent = `{\\rtf1\\ansi\\deff0
-{\\fonttbl{\\f0 Arial;}{\\f1 Courier New;}}
-\\pard\\sa200\\sl276\\slmult1\\f0\\fs24 
-\\b CONSEGNA ESERCIZIO SVOLTO\\b0\\par
-\\b =====================================\\b0\\par
-Studente: ${nome}\\par
-Classe: ${classe}\\par
-Data e Ora: ${dataOra}\\par
-Traccia di Riferimento: ${tracciaNome}\\par
-\\b =====================================\\b0\\par
-\\par
-\\b CODICE PYTHON\\b0\\par
-\\b -------------------------------------\\b0\\par
-{\\f1\\fs20 ${escapeRtf(codice)}}\\par
-\\b -------------------------------------\\b0\\par
-\\par
-\\b OUTPUT DEL CODICE\\b0\\par
-\\b -------------------------------------\\b0\\par
-{\\f1\\fs20 ${escapeRtf(output)}}\\par
-\\b -------------------------------------\\b0\\par
-}`;
+        // Inizializzazione Monaco
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: "# Scrivi qui il tuo codice Python\n\nprint('Benvenuto nell\\'editor')",
+                language: 'python',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14
+            });
 
-        return { rtfContent, fileNameRtf, pyContent: codice, fileNameBase, nome, classe, tracciaNome, dataOra };
-    }
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, runCode);
+            editor.onDidChangeModelContent(resetActivityTimer);
+        });
 
+        // Inizializzazione Pyodide
+        const outputArea = document.getElementById('output');
+        try {
+            pyodide = await loadPyodide();
+            outputArea.textContent = "Python 3.10 pronto. Scrivi il codice e premi Esegui.";
+        } catch (err) {
+            outputArea.textContent = "Errore critico: Impossibile caricare Pyodide.";
+            console.error(err);
+        }
 
-    function downloadFileRtf(rtfContent, fileName) {
-        const blob = new Blob([rtfContent], { type: 'application/rtf' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-
-    window.inviaConsegnaDrive = function () {
-        resetActivityTimer(); 
-        
-        const rtfData = generaRtfData();
-        if (!rtfData) return; 
-
-        const { rtfContent, fileNameRtf, pyContent, nome, classe, tracciaNome, dataOra } = rtfData;
-
-        // ⚠️ SOSTITUISCI QUESTO URL CON L'URL DEL TUO WEB APP GOOGLE APPS SCRIPT ⚠️
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec"; 
-        
-        
-        // 1. SCARICA IL FILE RTF IN LOCALE
-        downloadFileRtf(rtfContent, fileNameRtf);
-        
-        // 2. PREPARAZIONE PER L'UPLOAD TRAMITE FORM
-        document.getElementById("output").textContent = "File scaricato. Tentativo di upload di RTF e Codice Python su Google Drive in corso...";
-
-        const oldForm = document.getElementById('gasForm');
-        if (oldForm) oldForm.remove();
-        
-        const form = document.createElement('form');
-        form.id = 'gasForm';
-        form.method = 'POST';
-        form.action = GAS_WEB_APP_URL;
-        form.target = 'gasTarget'; 
-        form.style.display = 'none';
-
-        const addInput = (name, value) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
-        };
-
-        addInput('nomeStudente', nome);
-        addInput('classe', classe);
-        addInput('tracciaNome', tracciaNome);
-        addInput('dataOra', dataOra);
-        addInput('rtfContent', rtfContent); 
-        addInput('pyContent', pyContent);   
-        
-
-        document.body.appendChild(form);
-        
-        form.submit();
-
-        alert(`✅ Consegna completata! Il file ${fileNameRtf} è stato SCARICATO e il tentativo di UPLOAD di RTF + PY su Drive è stato avviato.`);
-        
-        document.getElementById("output").textContent = `Upload su Drive avviato in background. Verranno creati due file: .rtf e .py. File di backup scaricato: ${fileNameRtf}`;
-    };
-
-
-    window.caricaFile = function (input) {
-      resetActivityTimer(); 
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => editor.setValue(e.target.result);
-      reader.readAsText(file);
-    };
-
-    /**
-     * Funzione chiamata quando l'utente seleziona un'altra traccia dal menu a tendina.
-     */
-    window.cambiaTraccia = function (select) {
-      resetActivityTimer(); 
-      // Aggiunge timestamp per forzare il ricaricamento del PDF
-      const url = select.value + "?t=" + new Date().getTime(); 
-      document.getElementById("pdfFrame").src = url;
-    };
-    
-    // ------------------------------------
-    // 5. GESTIONE URL E CLASSE (Logica Dinamica)
-    // ------------------------------------
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const classeRaw = urlParams.get("classe");
-      const pdfFrame = document.getElementById("pdfFrame");
-      const classeTitolo = document.getElementById("classeTitolo");
-      const tracciaSelect = document.getElementById("tracciaSelect");
-      
-      let pdfPath = "tracce/default.pdf"; 
-      
-      // Capitalizza la classe per la ricerca nella mappatura, altrimenti usa 'default'
-      const classKey = classeRaw ? classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1) : 'default';
-      const availableExercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
-      
-      // 1. Genera le opzioni del menu a tendina
-      // Rimuovi l'opzione "Seleziona un esercizio..." prima di riempire (se presente)
-      tracciaSelect.innerHTML = ''; 
-
-      availableExercises.forEach(exercise => {
-          const option = document.createElement('option');
-          option.value = `tracce/${exercise.file}`;
-          option.textContent = exercise.title;
-          tracciaSelect.appendChild(option);
-      });
-      
-      // 2. Imposta la traccia iniziale
-      if (classeRaw) {
-          // Usa il primo esercizio specifico della classe come default iniziale
-          const firstExercisePath = availableExercises[0] ? `tracce/${availableExercises[0].file}` : "tracce/default.pdf";
-          pdfPath = firstExercisePath;
-          classeTitolo.textContent = `– Classe ${classKey}`; // Es. "– Classe Terze"
-          
-          // Seleziona l'opzione corretta nel menu a tendina
-          tracciaSelect.value = firstExercisePath;
-      }
-      
-      pdfFrame.src = pdfPath;
-      
-      // 3. Carica e salva il nome dello studente
-      const nomeStudenteInput = document.getElementById("nomeStudente");
-      const nomeSalvato = localStorage.getItem("nomeStudente");
-      if (nomeSalvato) {
-          nomeStudenteInput.value = nomeSalvato;
-      }
-      nomeStudenteInput.addEventListener('input', (e) => {
-        localStorage.setItem("nomeStudente", e.target.value);
-        resetActivityTimer(); 
-      });
-      
+        resetActivityTimer();
     });
+
+    // --- 5. ESECUZIONE CODICE ---
+    async function runCode() {
+        const outputArea = document.getElementById('output');
+        const code = editor.getValue();
+        outputArea.textContent = "Esecuzione in corso...\n";
+        resetActivityTimer();
+
+        try {
+            // Reindirizzamento stdout
+            await pyodide.runPythonAsync(`
+                import sys
+                import io
+                sys.stdout = io.StringIO()
+                sys.stderr = io.StringIO()
+            `);
+
+            await pyodide.runPythonAsync(code);
+
+            const stdout = pyodide.runPython("sys.stdout.getvalue()");
+            const stderr = pyodide.runPython("sys.stderr.getvalue()");
+
+            outputArea.textContent = stdout;
+            if (stderr) {
+                outputArea.textContent += "\n--- ERRORI ---\n" + stderr;
+            }
+            if (!stdout && !stderr) {
+                outputArea.textContent = "Codice eseguito correttamente (nessun output).";
+            }
+        } catch (err) {
+            outputArea.textContent = "Errore di Runtime:\n" + err;
+        }
+    }
   </script>
 </body>
 </html>
