@@ -13,16 +13,15 @@
 
   <style>
     :root {
-      --primary-color: #004080; /* Blu Istituzionale */
-      --secondary-color: #4285F4;
-      --success-color: #28a745;
+      --primary-color: #004080;
+      --secondary-color: #28a745;
       --danger-color: #dc3545;
       --bg-color: #f8f9fa;
     }
 
     body {
       margin: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -30,17 +29,11 @@
       background-color: var(--bg-color);
     }
 
-    /* Layout Principale Bi-Dimensionale */
-    #main-layout {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
+    #main-layout { display: flex; flex-direction: column; height: 100vh; }
     @media (min-width: 768px) {
       #main-layout { flex-direction: row; }
-      #traccia { width: 40%; border-right: 2px solid #ddd; }
-      #editor-section { width: 60%; }
+      #traccia { width: 45%; border-right: 2px solid #ddd; }
+      #editor-section { width: 55%; }
     }
 
     #traccia, #editor-section {
@@ -51,7 +44,6 @@
       background: white;
     }
 
-    /* Area Visualizzazione Traccia */
     #viewerContainer {
       flex-grow: 1;
       border: 1px solid #ccc;
@@ -60,89 +52,36 @@
       background-color: #ffffff;
       display: flex;
       justify-content: center;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
     }
 
     #pdfFrame { width: 100%; height: 100%; border: none; }
     .traccia-img { max-width: 100%; height: auto; object-fit: contain; padding: 10px; }
 
-    /* Pannelli Controlli */
-    .controls {
-      margin-bottom: 12px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
+    .controls { margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .label-bold { font-weight: bold; color: var(--primary-color); }
 
-    input, select {
-      padding: 8px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    input:focus, select:focus { border-color: var(--secondary-color); }
+    input, select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
 
     button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
+      padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
+      font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
     }
 
-    button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    button:active { transform: translateY(0); }
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
 
-    .btn-run { background-color: var(--success-color); color: white; }
+    .btn-run { background-color: var(--primary-color); color: white; }
     .btn-drive { background-color: var(--secondary-color); color: white; }
-    .btn-save { background-color: #6c757d; color: white; }
     .btn-exit { background-color: var(--danger-color); color: white; }
     .btn-zoom { background-color: #e9ecef; border: 1px solid #adb5bd; color: #495057; }
 
-    /* Editor Monaco */
-    #monaco-container {
-      flex-grow: 1;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
+    #monaco-container { flex-grow: 1; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
 
-    /* Output Console */
     #output {
-      background: #1e1e1e;
-      color: #d4d4d4;
-      padding: 12px;
-      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
-      border-radius: 8px;
-      margin-top: 10px;
-      height: 150px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-size: 13px;
-      border: 1px solid #333;
+      background: #1e1e1e; color: #00ff00; padding: 12px; font-family: 'Consolas', monospace;
+      border-radius: 8px; margin-top: 10px; height: 150px; overflow-y: auto; white-space: pre-wrap;
     }
 
-    /* Timer Display */
-    #timerDisplay {
-      margin-left: auto;
-      color: var(--danger-color);
-      font-weight: bold;
-      background: #fff0f0;
-      padding: 5px 12px;
-      border-radius: 20px;
-      border: 1px solid #ffcccc;
-    }
+    #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; padding: 5px 12px; border: 1px solid #ffcccc; border-radius: 20px; }
   </style>
 </head>
 <body>
@@ -160,183 +99,161 @@
 
   <div id="editor-section">
     <div class="controls">
-      <input type="text" id="nomeStudente" placeholder="Inserisci Nome e Cognome Studente" style="flex-grow: 1;">
-      <button class="btn-zoom" title="Aumenta font" onclick="changeZoom(1.1)">A+</button>
-      <button class="btn-zoom" title="Diminuisci font" onclick="changeZoom(0.9)">A-</button>
+      <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente" style="flex-grow: 1;">
+      <button class="btn-zoom" title="Zoom In" onclick="changeZoom(1.2)">A+</button>
+      <button class="btn-zoom" title="Zoom Out" onclick="changeZoom(0.8)">A-</button>
       <span id="timerDisplay">05:00</span>
-      <button class="btn-exit" onclick="logout()">Esci</button>
+      <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
     </div>
 
     <div id="monaco-container"></div>
 
     <div class="controls" style="margin-top: 12px;">
-      <button class="btn-run" onclick="runCode()">▶ Esegui (Ctrl+Enter)</button>
-      <button class="btn-save" onclick="saveFileLocal()">💾 Salva .py</button>
-      <button class="btn-drive" onclick="sendToDrive()">☁️ Invia al Drive</button>
+      <button class="btn-run" id="eseguiBtn" onclick="runCode()" disabled>⌛ Caricamento...</button>
+      <button class="btn-drive" onclick="inviaConsegnaDrive()">☁️ Invia al Drive</button>
     </div>
-
-    <div id="output">Inizializzazione ambiente Python...</div>
+    <pre id="output">Inizializzazione Python...</pre>
   </div>
 </div>
 
+<iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+
 <script>
-  // 1. Configurazione Esercizi (Integrazione Immagine richiesta)
   const EXERCISES_BY_CLASS = {
     'Terze': [
-      { file: 'Esercizio_Terze_12122025.jpg', title: 'Analisi Fisica 12/12 (JPG)' },
-      { file: 'Esercizio_Terze_1.pdf', title: 'Esercizio Base (PDF)' }
+      { file: 'Esercizio_Terze_12122025.jpg', title: 'Analisi Fisica (JPG)' },
+      { file: 'Esercizio_Terze_1.pdf', title: 'Analisi Fisica (PDF)' }
     ],
-    'Quarte': [
-      { file: 'Esercizio_Quarte_1.pdf', title: 'Algoritmi e Database' }
-    ],
-    'default': [
-      { file: 'default.pdf', title: 'Traccia di Prova' }
-    ]
+    'Quarte': [{ file: 'Esercizio_Quarte_1.pdf', title: 'Algoritmi e Database' }],
+    'default': [{ file: 'default.pdf', title: 'Traccia' }]
   };
 
   let editor, pyodide, timeLeft = 300, currentFontSize = 14;
 
-  // 2. Logica Visualizzazione Dinamica (PDF / Immagini)
   function updateTraccia(filePath) {
     const container = document.getElementById('viewerContainer');
-    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(filePath);
-    
-    if (isImage) {
-      container.innerHTML = `<img src="${filePath}" class="traccia-img" alt="Traccia esercizio">`;
+    if (/\.(jpg|jpeg|png|gif)$/i.test(filePath)) {
+      container.innerHTML = `<img src="${filePath}" class="traccia-img">`;
     } else {
       container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
     }
     resetActivityTimer();
   }
 
-  // 3. Gestione Zoom Editor
   function changeZoom(multiplier) {
     currentFontSize = Math.round(currentFontSize * multiplier);
-    if (currentFontSize < 8) currentFontSize = 8;
-    if (currentFontSize > 40) currentFontSize = 40;
+    currentFontSize = Math.max(8, Math.min(40, currentFontSize));
     editor.updateOptions({ fontSize: currentFontSize });
   }
 
-  // 4. Salvataggio Locale (.py)
-  function saveFileLocal() {
-    const code = editor.getValue();
-    const nome = document.getElementById('nomeStudente').value || "esercizio";
-    const blob = new Blob([code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${nome.replace(/\s+/g, '_')}.py`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  // --- LOGICA DI INVIO RIPRISTINATA DAL FILE 10 CON IL TUO URL ---
+  window.inviaConsegnaDrive = function() {
+    const nome = document.getElementById("nomeStudente").value.trim();
+    if (!nome) return alert("Inserisci Nome e Cognome!");
 
-  // 5. Gestione Sessione e Timer
-  function logout() {
-    localStorage.removeItem("nomeStudente");
-    window.location.href = 'index.html';
-  }
+    const codice = editor.getValue();
+    const outputText = document.getElementById("output").textContent;
+    const urlParams = new URLSearchParams(window.location.search);
+    const classe = urlParams.get("classe") || "ND";
+    const dataOra = new Date().toLocaleString("it-IT");
+
+    // Generazione contenuto RTF per il Drive
+    const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par Data: ${dataOra}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
+
+    // Download locale di backup (come nel tuo file originale)
+    const blob = new Blob([rtfContent], { type: 'application/rtf' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
+    a.click();
+
+    // Invio al tuo Apps Script (URL riga 168 del tuo file 11)
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
+    
+    const form = document.createElement('form');
+    form.method = 'POST'; form.action = GAS_WEB_APP_URL; form.target = 'gasTarget';
+    
+    const addField = (n, v) => {
+      const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v;
+      form.appendChild(i);
+    };
+    addField('nomeStudente', nome);
+    addField('classe', classe);
+    addField('dataOra', dataOra);
+    addField('rtfContent', rtfContent);
+    addField('pyContent', codice);
+    
+    document.body.appendChild(form);
+    form.submit();
+    alert("✅ Consegna inviata al Drive del Prof. Adinolfi e backup scaricato!");
+  };
 
   function resetActivityTimer() { timeLeft = 300; }
+  function tornaAllaPaginaPrincipale() { window.location.href = '../index.html'; }
 
-  function initTimer() {
-    setInterval(() => {
-      if (timeLeft <= 0) logout();
-      timeLeft--;
-      const m = Math.floor(timeLeft / 60);
-      const s = timeLeft % 60;
-      document.getElementById('timerDisplay').textContent = 
-        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    }, 1000);
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(document.getElementById('monaco-container'), {
+      value: localStorage.getItem("autoSaveCode") || "# Scrivi qui il tuo codice\n",
+      language: 'python',
+      theme: 'vs-dark',
+      fontSize: currentFontSize,
+      automaticLayout: true,
+      mouseWheelZoom: true
+    });
+
+    // Blocco Incolla
+    editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
+
+    editor.onDidChangeModelContent(() => {
+      localStorage.setItem("autoSaveCode", editor.getValue());
+      resetActivityTimer();
+    });
+  });
+
+  async function runCode() {
+    const out = document.getElementById('output');
+    out.textContent = "Esecuzione...";
+    try {
+      if (!pyodide) pyodide = await loadPyodide();
+      document.getElementById('eseguiBtn').disabled = false;
+      document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
+      
+      await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
+      await pyodide.runPythonAsync(editor.getValue());
+      out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
+    } catch (e) { out.textContent = "Errore:\n" + e; }
   }
 
-  // 6. Logica Drive (Pulsante restaurato)
-  function sendToDrive() {
-    const nome = document.getElementById('nomeStudente').value;
-    if (!nome.trim()) return alert("Attenzione: Inserisci il tuo Nome e Cognome prima di inviare!");
-    
-    // Simula l'invio al docente
-    alert(`Ottimo lavoro ${nome}! Il tuo codice è stato preparato per l'invio al Drive del docente.`);
-    console.log("Dati invio:", { studente: nome, codice: editor.getValue() });
-  }
-
-  // 7. Inizializzazione Pagina
   document.addEventListener("DOMContentLoaded", async () => {
+    runCode(); // Inizializza pyodide
     const urlParams = new URLSearchParams(window.location.search);
-    const classKey = urlParams.get('classe') || 'default';
+    const classeRaw = urlParams.get('classe') || 'default';
+    const classKey = classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1);
     const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
     
     document.getElementById('classeTitolo').textContent = `– Classe ${classKey}`;
-    
-    // Popola Select
-    const tracciaSelect = document.getElementById('tracciaSelect');
+    const select = document.getElementById('tracciaSelect');
     exercises.forEach(ex => {
       const opt = document.createElement('option');
       opt.value = `tracce/${ex.file}`;
       opt.textContent = ex.title;
-      tracciaSelect.appendChild(opt);
+      select.appendChild(opt);
     });
 
     if (exercises.length > 0) updateTraccia(`tracce/${exercises[0].file}`);
 
-    // Carica Monaco Editor
-    require(['vs/editor/editor.main'], function () {
-      editor = monaco.editor.create(document.getElementById('monaco-container'), {
-        value: "# Scrivi il tuo codice Python qui\nprint('Benvenuto nell\\'editor')\n",
-        language: 'python',
-        theme: 'vs-dark',
-        fontSize: currentFontSize,
-        automaticLayout: true,
-        scrollBeyondLastLine: false,
-        minimap: { enabled: false }
-      });
-      
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, runCode);
-      editor.onDidChangeModelContent(resetActivityTimer);
-    });
-
-    // Carica Pyodide
-    try {
-      pyodide = await loadPyodide();
-      document.getElementById('output').textContent = "Python 3.10 pronto. Scrivi il codice e premi Esegui.";
-    } catch (err) {
-      document.getElementById('output').textContent = "Errore durante il caricamento di Python.";
-    }
-
-    // Gestione Nome Studente
     const ns = document.getElementById('nomeStudente');
     ns.value = localStorage.getItem("nomeStudente") || "";
-    ns.addEventListener('input', (e) => {
-      localStorage.setItem("nomeStudente", e.target.value);
-      resetActivityTimer();
-    });
+    ns.oninput = () => localStorage.setItem("nomeStudente", ns.value);
 
-    initTimer();
+    setInterval(() => {
+      if (timeLeft <= 0) tornaAllaPaginaPrincipale();
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60);
+      const s = timeLeft % 60;
+      document.getElementById('timerDisplay').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
   });
-
-  // 8. Esecuzione Codice
-  async function runCode() {
-    const output = document.getElementById('output');
-    const code = editor.getValue();
-    output.textContent = "In esecuzione...\n";
-    resetActivityTimer();
-
-    try {
-      await pyodide.runPythonAsync(`
-        import sys, io
-        sys.stdout = io.StringIO()
-        sys.stderr = io.StringIO()
-      `);
-      await pyodide.runPythonAsync(code);
-      const stdout = pyodide.runPython("sys.stdout.getvalue()");
-      const stderr = pyodide.runPython("sys.stderr.getvalue()");
-      
-      output.textContent = stdout + (stderr ? "\nErrori:\n" + stderr : "");
-      if (!stdout && !stderr) output.textContent = "Codice eseguito con successo (nessun output).";
-    } catch (err) {
-      output.textContent = "Errore di esecuzione:\n" + err;
-    }
-  }
 </script>
-
 </body>
 </html>
