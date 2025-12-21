@@ -5,25 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"</title>
   <style>
-    /* Stili Istituzionali UNINA-inspired */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif; /* Font più moderno */
-      background-color: #f4f7f9;
-      color: #333;
+    /* === VARIABILI E BASE === */
+    :root {
+      --primary-color: #004080;
+      --primary-glass: rgba(0, 64, 128, 0.85);
+      --accent-color: #f7a81b;
+      --bg-color: #f4f7f9;
+      --card-bg: #ffffff;
+      --text-main: #333;
+      --radius: 12px;
+      --shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
 
-    /* === NAVBAR INTERATTIVA AGGIORNATA === */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    /* === NAVBAR INTERATTIVA (STICKY + BLUR) === */
     .top-bar {
-      background-color: rgba(0, 64, 128, 0.85); /* Trasparenza per l'effetto blur */
-      backdrop-filter: blur(12px); /* Effetto sfocatura stile Apple */
-      -webkit-backdrop-filter: blur(12px); /* Supporto Safari */
+      background-color: var(--primary-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: white;
       padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      position: sticky; /* Navbar fissa durante lo scorrimento */
+      position: sticky;
       top: 0;
       z-index: 1000;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -55,19 +67,26 @@
     .lsc-separator {
       height: 45px;
       width: 2px;
-      background-color: rgba(255, 255, 255, 0.5);
-      margin: 0 10px;
+      background-color: rgba(255, 255, 255, 0.3);
+      margin: 0 15px;
     }
 
     .logo-text {
       font-size: 14px;
       line-height: 1.2;
       font-weight: bold;
+      text-transform: uppercase;
     }
     
     .logo-text small {
         font-weight: normal;
         display: block;
+        opacity: 0.9;
+    }
+
+    .top-menu {
+        display: flex;
+        align-items: center;
     }
 
     .top-menu a {
@@ -75,19 +94,19 @@
       text-decoration: none;
       margin-left: 15px;
       font-size: 13px;
-      padding: 8px 15px;
+      padding: 8px 16px;
       border-radius: 6px;
       transition: all 0.3s ease;
-      cursor: pointer;
+      font-weight: 500;
     }
-
+    
     .top-menu a:hover {
         background-color: rgba(255, 255, 255, 0.15);
     }
     
     .top-menu .accesso-docenti {
-        background-color: #f7a81b;
-        color: #004080;
+        background-color: var(--accent-color);
+        color: var(--primary-color);
         font-weight: bold;
     }
 
@@ -102,56 +121,93 @@
         font-size: 13px;
     }
 
-    /* Area principale */
+    /* === SEARCH BAR === */
+    #search-container {
+        padding: 15px 0;
+        background-color: rgba(255,255,255,0.8);
+        backdrop-filter: blur(5px);
+        border-bottom: 1px solid #ddd;
+        display: none; /* Gestito via JS */
+    }
+    
+    #search-input {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    #search-input input[type="text"] {
+        flex-grow: 1;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        outline: none;
+    }
+
+    /* === HEADER & MAIN === */
     header {
       background-color: #fff;
       padding: 40px 20px;
       border-bottom: 1px solid #e0e0e0;
-      text-align: center; /* Centrato per un look più moderno */
+      text-align: left;
     }
 
     header h1 {
       margin: 0;
-      font-size: 32px;
-      color: #004080;
+      font-size: 28px;
+      color: var(--primary-color);
     }
 
     header h2 {
-      margin: 10px 0 0;
-      font-size: 18px;
+      margin: 5px 0 0;
+      font-size: 16px;
       font-weight: normal;
       color: #666;
     }
 
     main {
-      max-width: 1000px;
-      margin: 40px auto;
+      max-width: 940px;
+      margin: 30px auto;
       padding: 0 20px;
     }
 
-    /* Profilo e Card */
+    /* === CARDS & SECTIONS === */
+    .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-left: 5px;
+    }
+
     .content-box {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-bottom: 30px;
-      border-left: 6px solid #004080;
+      border-left: 6px solid var(--primary-color);
       overflow: hidden;
     }
 
+    /* PROFILO */
     .docente-profile-container {
       display: flex;
-      gap: 30px;
+      gap: 25px;
       padding: 25px;
       align-items: center;
     }
 
     .profile-img-container {
       flex-shrink: 0;
-      width: 140px;
-      height: 140px;
+      width: 130px;
+      height: 130px;
       border-radius: 50%;
-      border: 4px solid #f0f0f0;
+      border: 4px solid #f0f4f8;
       overflow: hidden; 
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
@@ -163,12 +219,18 @@
     }
 
     .profile-details h3 {
-      margin: 0 0 10px 0;
-      color: #004080;
+      margin: 0 0 5px 0;
+      color: var(--primary-color);
       font-size: 22px;
     }
 
-    /* Insegnamenti List */
+    .bio {
+        font-style: italic;
+        color: #666;
+        margin: 10px 0;
+    }
+
+    /* LISTA CORSI */
     .course-list {
       list-style: none;
       padding: 0;
@@ -176,55 +238,81 @@
     }
 
     .course-list li {
-      padding: 20px;
+      padding: 20px 25px;
       border-bottom: 1px solid #f0f0f0;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: background 0.2s;
     }
-
-    .course-list li:hover {
-        background-color: #f9f9f9;
-    }
+    
+    .course-list li:hover { background-color: #fcfcfc; }
+    .course-list li:last-child { border-bottom: none; }
 
     .course-title {
       text-decoration: none;
-      color: #004080; 
+      color: var(--primary-color); 
       font-weight: bold;
       font-size: 18px;
+      display: block;
     }
     
-    .course-actions {
-        display: flex;
-        gap: 8px;
-    }
+    .course-description { color: #777; font-size: 13px; }
+    .course-update { color: #aaa; font-size: 11px; font-style: italic; display: block; margin-top: 4px; }
+
+    /* BOTTONI AZIONE */
+    .course-actions { display: flex; gap: 8px; }
 
     .action-button {
-        padding: 8px 16px;
+        padding: 10px 16px;
         text-decoration: none;
         font-size: 12px;
         font-weight: bold;
-        border-radius: 6px;
-        transition: transform 0.2s, opacity 0.2s;
+        border-radius: 8px;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .action-button:hover {
         transform: translateY(-2px);
-        opacity: 0.9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
     .action-materiale { background-color: #007bff; color: white; }
     .action-esercizi { background-color: #28a745; color: white; }
-    .action-py { background-color: #ffc107; color: #333; }
+    .action-py { background-color: var(--accent-color); color: #333; }
 
+    /* LOGIN & FOOTER */
+    #login {
+      text-align: center;
+      margin: 50px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 400px;
+    }
+    
     footer {
       text-align: center;
-      padding: 40px;
+      padding: 40px 20px;
       font-size: 13px;
-      color: #777;
+      color: #888;
       background-color: #fff;
       border-top: 1px solid #eee;
+      margin-top: 50px;
+    }
+
+    #welcomeMessage {
+        padding: 15px 25px;
+        margin-bottom: 25px;
+        background-color: #e6f0ff;
+        border-left: 5px solid var(--primary-color);
+        color: var(--primary-color);
+        font-weight: bold;
+        border-radius: 8px;
+        display: none;
     }
   </style>
 </head>
@@ -244,82 +332,190 @@
         </div>
     </div>
     <div class="top-menu">
+        <a href="#" onclick="toggleSearch()" title="Cerca materiale">🔍 CERCA</a>
         <a href="mailto:antonioadinolfi@lscortese.com">CONTATTI</a>
+               
         <div id="loggedInInfo" style="display: none;">
             <span id="userName"></span>
-            <a href="#" onclick="handleLogout()" class="accesso-docenti">ESCI</a>
+            <a href="#" id="logoutButton" onclick="handleLogout()" class="accesso-docenti">ESCI</a>
         </div>
-        <a href="#" id="loginBtnTrigger" class="accesso-docenti">AREA DOCENTI</a>
+    </div>
+</div>
+
+<div id="search-container">
+    <div id="search-input">
+        <input type="text" id="searchInput" placeholder="Cerca classi o argomenti (es. Python, SQL, Terze...)" onkeyup="performSearch()">
+        <button onclick="toggleSearch()" style="background:none; border:none; cursor:pointer; color:#666;">Chiudi</button>
     </div>
 </div>
 
 <header>
   <h1>Prof. Antonio Adinolfi</h1>
-  <h2>Materiale Didattico e Risorse Digitali</h2>
+  <h2>Liceo Scientifico "N. Cortese" - Risorse per la Didattica Digitale</h2>
 </header>
 
 <main>
-    <div id="welcomeMessage" style="display:none; padding: 15px; margin-bottom: 25px; background-color: #e6f0ff; border-left: 5px solid #004080; color: #004080; border-radius: 8px;">
+    <div id="welcomeMessage">
         Bentornato! Stai visualizzando i materiali didattici riservati.
     </div>
   
+    <div class="section-title">Profilo Docente</div>
     <div class="content-box">
         <div class="docente-profile-container">
             <div class="profile-img-container">
-                <img src="./immagini/foto_adinolfi.jpg" alt="Prof. Adinolfi"> 
+                <img src="./immagini/foto_adinolfi.jpg" alt="Prof. Antonio Adinolfi"> 
             </div>
             <div class="profile-details">
-                <h3>Prof. Antonio Adinolfi</h3>
-                <p>Dipartimento di Informatica e Tecnologie Digitali</p>
-                <div style="margin-top: 15px;">
-                    <a href="#" style="color:#004080; font-weight:bold; text-decoration:none;">GitHub</a> • 
-                    <a href="#" style="color:#004080; font-weight:bold; text-decoration:none;">LinkedIn</a>
+                <h3>Antonio Adinolfi</h3>
+                <p><strong>Dipartimento di Informatica</strong></p>
+                <p class="bio">Sviluppo software, algoritmi e tecnologie cloud applicate alla didattica.</p>
+                <div class="social-links">
+                    <a href="https://github.com/tuo-profilo-github" style="color:var(--primary-color); text-decoration:none; font-weight:bold;">GitHub</a> • 
+                    <a href="https://linkedin.com/in/tuo-profilo" style="color:var(--primary-color); text-decoration:none; font-weight:bold;">LinkedIn</a> • 
+                    <a href="https://classroom.google.com" style="color:var(--primary-color); text-decoration:none; font-weight:bold;">Google Classroom</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="contenutoProtetto">
-        <div class="content-box">
-            <ul class="course-list">
-                <li>
-                    <div>
-                        <a class="course-title">TERZO ANNO</a><br>
-                        <small style="color:#888">Sviluppo Web e Strutture Dati</small>
-                    </div>
-                    <div class="course-actions">
-                        <a href="#" class="action-button action-materiale">Materiale</a>
-                        <a href="#" class="action-button action-esercizi">Sheets</a>
-                        <a href="#" class="action-button action-py">Python</a>
-                    </div>
-                </li>
-                </ul>
-        </div>
+  <div id="contenutoProtetto" style="display: none;">
+    <div class="section-title">I Tuoi Insegnamenti</div>
+    <div class="content-box">
+        <ul class="course-list" id="courseList">
+            <li data-classe="Prime" data-keywords="prima,anno,programmazione,base">
+                <div>
+                    <a class="course-title">PRIMO ANNO</a>
+                    <span class="course-description">Fondamenti di Informatica e Algoritmi</span>
+                    <span class="course-update">Aggiornato il 02/09/2025</span>
+                </div>
+                <div class="course-actions">
+                    <a href="slide.html?classe=Prime" class="action-button action-materiale">Materiale</a>
+                    <a href="foglio_google_editor.html?classe=Prime&sheetId=16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg" class="action-button action-esercizi">Sheets</a>
+                    <a href="classe.html?classe=Prime" class="action-button action-py">Python</a>
+                </div>
+            </li>
+            
+            <li data-classe="Seconde" data-keywords="seconda,anno,algoritmi,logica">
+                <div>
+                    <a class="course-title">SECONDO ANNO</a>
+                    <span class="course-description">Logica e Programmazione Strutturata</span>
+                    <span class="course-update">Aggiornato il 28/08/2025</span>
+                </div>
+                <div class="course-actions">
+                    <a href="Materiale/Cominciamo%20a%20programmare.pdf" class="action-button action-materiale">Materiale</a>
+                    <a href="foglio_google_editor.html?classe=Seconde&sheetId=16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg" class="action-button action-esercizi">Sheets</a>
+                    <a href="classe.html?classe=Seconde" class="action-button action-py">Python</a>
+                </div>
+            </li>
+
+            <li data-classe="Terze" data-keywords="terza,anno,strutture,dati,web,html,css">
+                <div>
+                    <a class="course-title">TERZO ANNO</a>
+                    <span class="course-description">Strutture Dati e Sviluppo Web (HTML/CSS)</span>
+                    <span class="course-update">Aggiornato il 05/09/2025</span>
+                </div>
+                <div class="course-actions">
+                    <a href="Materiale/Le%20strutture%20dati%20in%20Python.pdf" class="action-button action-materiale">Materiale</a>
+                    <a href="foglio_google_editor.html?classe=Terze&sheetId=16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg" class="action-button action-esercizi">Sheets</a>
+                    <a href="classe.html?classe=Terze" class="action-button action-py">Python</a>
+                </div>
+            </li>
+
+            <li data-classe="Quarte" data-keywords="quarta,anno,database,sql,javascript,reti">
+                <div>
+                    <a class="course-title">QUARTO ANNO</a>
+                    <span class="course-description">Database SQL e Programmazione a Oggetti</span>
+                    <span class="course-update">Aggiornato il 10/09/2025</span>
+                </div>
+                <div class="course-actions">
+                    <a href="Materiale/Programmazione%20a%20oggetti.pdf" class="action-button action-materiale">Materiale</a>
+                    <a href="foglio_google_editor.html?classe=Quarte&sheetId=16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg" class="action-button action-esercizi">Sheets</a>
+                    <a href="classe.html?classe=Quarte" class="action-button action-py">Python</a>
+                </div>
+            </li>
+
+            <li data-classe="Quinte" data-keywords="quinta,anno,java,progetto,maturità">
+                <div>
+                    <a class="course-title">QUINTO ANNO</a>
+                    <span class="course-description">Sviluppo Progetti e Preparazione Esame</span>
+                    <span class="course-update">Aggiornato il 15/09/2025</span>
+                </div>
+                <div class="course-actions">
+                    <a href="slide.html?classe=Quinte" class="action-button action-materiale">Materiale</a>
+                    <a href="foglio_google_editor.html?classe=Quinte&sheetId=16re3MJ89ertgVUhM02TTkBoEykeG5mdfiRKiw3Z7cTg" class="action-button action-esercizi">Sheets</a>
+                    <a href="classe.html?classe=Quinte" class="action-button action-py">Python</a>
+                </div>
+            </li>
+        </ul>
     </div>
+    <p style="text-align: right; font-size: 12px; color: #999;" id="resultsCount">Risultati: 5 di 5</p>
+  </div>
 </main>
+
+<div id="login">
+  <p style="font-weight: bold; color: var(--primary-color);">Area Riservata</p>
+  <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Accedi con l'account @lscortese.com per consultare i materiali.</p>
+  <div id="g_id_onload"
+       data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="false">
+  </div>
+  <div class="g_id_signin" data-type="standard"></div>
+</div>
 
 <footer>
   &copy; 2025 Prof. Antonio Adinolfi – Liceo Scientifico "N. Cortese"<br>
-  <a href="#" style="color:#004080; text-decoration:none;">Sito Ufficiale del Liceo</a>
+  <a href="https://www.liceoscientificocortese.edu.it/" target="_blank" style="color:var(--primary-color); text-decoration:none;">Sito Web Istituzionale</a> | 
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color:var(--primary-color); text-decoration:none;">CC BY-NC-SA 4.0</a>
 </footer>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
 <script>
-    // Logica di esempio per simulare lo stato di login
-    window.onload = function() {
-        // Se l'utente fosse loggato:
-        // document.getElementById("contenutoProtetto").style.display = "block";
-        // document.getElementById("welcomeMessage").style.display = "block";
-    };
+// === GESTIONE LOGIN ===
+function handleCredentialResponse(response) {
+  const jwt_decode_external = window.jwt_decode || (data => JSON.parse(atob(data.split('.')[1])));
+  const data = jwt_decode_external(response.credential);
+  
+  if (data.email.endsWith("@lscortese.com")) {
+    document.getElementById("contenutoProtetto").style.display = "block";
+    document.getElementById("welcomeMessage").style.display = "block";
+    document.getElementById("login").style.display = "none";
+    document.getElementById("userName").textContent = `Ciao, ${data.given_name || 'Prof'}`;
+    document.getElementById("loggedInInfo").style.display = "flex";
+  } else {
+    alert("Accesso negato: usa l'account istituzionale della scuola!");
+  }
+}
+
+function handleLogout() {
+    location.reload(); // Semplice reset della sessione
+}
+
+// === GESTIONE RICERCA ===
+function toggleSearch() {
+    const sc = document.getElementById('search-container');
+    const isVisible = sc.style.display === 'block';
+    sc.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) document.getElementById('searchInput').focus();
+}
+
+function performSearch() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const items = document.querySelectorAll('#courseList li');
+    let count = 0;
+
+    items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        const keywords = item.getAttribute('data-keywords').toLowerCase();
+        const match = text.includes(query) || keywords.includes(query);
+        item.style.display = match ? 'flex' : 'none';
+        if (match) count++;
+    });
+    document.getElementById('resultsCount').textContent = `Risultati: ${count} di ${items.length}`;
+}
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
