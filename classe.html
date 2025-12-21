@@ -27,6 +27,9 @@
       height: 100vh;
       overflow: hidden;
       background-color: var(--bg-color);
+      /* Protezione: impedisce la selezione del testo nell'interfaccia */
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     #main-layout { display: flex; flex-direction: column; height: 100vh; }
@@ -77,41 +80,40 @@
     .btn-exit { background-color: var(--danger-color); color: white; }
     .btn-zoom-ui { background-color: #f0f0f0; border: 1px solid #ccc; font-size: 18px; width: 40px; }
 
-    #monaco-container { flex-grow: 1; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
+    /* Stili per la nuova Toolbar dello Zoom Codice */
+    .zoom-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .btn-z {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 4px 12px;
+      font-size: 14px;
+    }
+
+    #monaco-container { 
+        flex-grow: 1; 
+        border: 1px solid #ccc; 
+        border-radius: 0 0 8px 8px; 
+        overflow: hidden; 
+    }
+
     #output {
       background: #1e1e1e; color: #00ff00; padding: 12px; font-family: 'Consolas', monospace;
       border-radius: 8px; margin-top: 10px; height: 130px; overflow-y: auto; white-space: pre-wrap;
       font-size: 13px;
     }
     #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
-    /* Stile per i controlli dello zoom */
-    .zoom-toolbar {
-      background: #eee;
-      padding: 5px 10px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-bottom: none;
-    }
-    .btn-z {
-      padding: 2px 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    /* Identificativo per l'area di testo */
-    <div class="zoom-toolbar">
-    <span style="font-size: 12px; font-weight: bold;">ZOOM CODICE:</span>
-    <button class="btn-z" onclick="changeEditorZoom(2)">+</button>
-    <button class="btn-z" onclick="changeEditorZoom(-2)">-</button>
-    <button class="btn-z" onclick="resetEditorZoom()">Reset</button>
-    </div>
-    #python-editor {
-      transition: font-size 0.1s;
-    }
   </style>
 </head>
-<body oncopy="return false" oncut="return false" onpaste="return false" oncontextmenu="return false;">
+<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
 
 <div id="main-layout">
   <div id="traccia">
@@ -134,6 +136,12 @@
       <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
     </div>
 
+    <div class="zoom-toolbar">
+        <span style="font-size: 12px; font-weight: bold; color: var(--primary-color);">ZOOM CODICE:</span>
+        <button class="btn-z" onclick="changeEditorZoom(2)">+</button>
+        <button class="btn-z" onclick="changeEditorZoom(-2)">-</button>
+        <button class="btn-z" onclick="resetEditorZoom()" style="background:#64748b;">Reset</button>
+    </div>
     <div id="monaco-container"></div>
 
     <div class="controls" style="margin-top: 10px;">
@@ -157,9 +165,34 @@
   };
 
   let editor, pyodide, timeLeft = 300, currentImgWidth = 100;
+  let currentFontSize = 14; // Dimensione font iniziale dell'editor
   
-  // Registrazione tempo di inizio
   const startTime = new Date();
+
+  // === FUNZIONI ZOOM EDITOR ===
+  function changeEditorZoom(delta) {
+    currentFontSize += delta;
+    if (currentFontSize < 8) currentFontSize = 8;
+    if (currentFontSize > 40) currentFontSize = 40;
+    if (editor) {
+      editor.updateOptions({ fontSize: currentFontSize });
+    }
+  }
+
+  function resetEditorZoom() {
+    currentFontSize = 14;
+    if (editor) {
+      editor.updateOptions({ fontSize: 14 });
+    }
+  }
+
+  // === BLOCCO TASTIERA ANTI-COPIA ===
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && ['c','v','x','s','u'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        alert("Attenzione: Funzioni di copia/incolla disabilitate.");
+    }
+  });
 
   function zoomImage(step) {
     const img = document.querySelector('.traccia-img');
@@ -200,7 +233,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const classe = urlParams.get("classe") || "ND";
 
-    // Formattazione RTF con tempi di inizio, fine e totale
     const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par\\par INIZIO PROVA: ${startTime.toLocaleString()}\\par FINE PROVA: ${endTime.toLocaleString()}\\par TEMPO TOTALE: ${tempoTotale}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
 
     const blob = new Blob([rtfContent], { type: 'application/rtf' });
@@ -220,7 +252,7 @@
 
     add('nomeStudente', nome);
     add('classe', classe);
-    add('dataOra', endTime.toLocaleString()); // Usiamo l'orario di fine come riferimento temporale
+    add('dataOra', endTime.toLocaleString());
     add('rtfContent', rtfContent);
     add('pyContent', codice);
     
@@ -242,10 +274,17 @@
       value: "# Scrivi qui il tuo codice Python\n",
       language: 'python',
       theme: 'vs-dark',
-      automaticLayout: true
+      automaticLayout: true,
+      fontSize: 14,
+      contextmenu: false // Disabilita il menu contestuale interno di Monaco
     });
 
-    editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
+    // Blocco Paste specifico di Monaco
+    editor.onDidPaste((e) => { 
+        e.stopImmediatePropagation(); 
+        alert('🚫 Incolla disabilitato nell\'editor.'); 
+    });
+
     editor.onDidChangeModelContent(() => { resetActivityTimer(); });
   });
 
@@ -288,34 +327,6 @@
       document.getElementById('timerDisplay').textContent = `${m}:${s.toString().padStart(2, '0')}`;
     }, 1000);
   });
-  // Gestione Zoom specifica per l'area di testo
-let currentFontSize = 16; 
-
-function changeEditorZoom(amount) {
-    currentFontSize += amount;
-    if (currentFontSize < 8) currentFontSize = 8;
-    if (currentFontSize > 50) currentFontSize = 50;
-    const editor = document.getElementById('python-editor');
-    if (editor) {
-        editor.style.fontSize = currentFontSize + 'px';
-    }
-}
-
-function resetEditorZoom() {
-    currentFontSize = 16;
-    const editor = document.getElementById('python-editor');
-    if (editor) {
-        editor.style.fontSize = '16px';
-    }
-}
-
-// Blocco delle scorciatoie da tastiera (Ctrl+C, Ctrl+V, ecc.)
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && ['c','v','x','s','u'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-        alert("Il copia-incolla è disabilitato in questo editor.");
-    }
-});
 </script>
 </body>
 </html>
