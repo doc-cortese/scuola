@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editor Python - Prof. Antonio Adinolfi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script>
+    window.require = { paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+  <script src="./libs/pyodide.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #004080;
+      --secondary-color: #28a745;
+      --danger-color: #dc3545;
+      --bg-color: #f8f9fa;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg-color);
+    }
+
+    #main-layout { display: flex; flex-direction: column; height: 100vh; }
+    @media (min-width: 768px) {
+      #main-layout { flex-direction: row; }
+      #traccia { width: 45%; border-right: 2px solid #ddd; }
+      #editor-section { width: 55%; }
+    }
+
+    #traccia, #editor-section {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: white;
+    }
+
+    #viewerContainer {
+      flex-grow: 1;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: auto; 
+      background-color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .traccia-img { 
+      transition: width 0.2s ease-in-out;
+      width: 100%; 
+      height: auto;
+      display: block;
+    }
+
+    .controls { margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    input[type="text"] { flex-grow: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; }
+
+    button {
+      padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
+      font-weight: 600; transition: all 0.2s;
+    }
+    button:hover { opacity: 0.9; }
+
+    .btn-run { background-color: var(--primary-color); color: white; }
+    .btn-drive { background-color: var(--secondary-color); color: white; }
+    .btn-exit { background-color: var(--danger-color); color: white; }
+    .btn-zoom-ui { background-color: #f0f0f0; border: 1px solid #ccc; font-size: 18px; width: 40px; }
+
+    #monaco-container { flex-grow: 1; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
+    #output {
+      background: #1e1e1e; color: #00ff00; padding: 12px; font-family: 'Consolas', monospace;
+      border-radius: 8px; margin-top: 10px; height: 130px; overflow-y: auto; white-space: pre-wrap;
+      font-size: 13px;
+    }
+    #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div id="main-layout">
+  <div id="traccia">
+    <div class="controls">
+      <select id="tracciaSelect" onchange="updateTraccia(this.value)"></select>
+      <div id="imgZoomControls" style="display:none;">
+        <button class="btn-zoom-ui" onclick="zoomImage(1.2)">+</button>
+        <button class="btn-zoom-ui" onclick="zoomImage(0.8)">-</button>
+      </div>
+    </div>
+    <div id="viewerContainer">
+      <iframe id="pdfFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+  </div>
+
+  <div id="editor-section">
+    <div class="controls">
+      <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
+      <span id="timerDisplay">05:00</span>
+      <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
+    </div>
+
+    <div id="monaco-container"></div>
+
+    <div class="controls" style="margin-top: 10px;">
+      <button class="btn-run" id="eseguiBtn" onclick="runCode()" disabled>⌛ Caricamento...</button>
+      <button class="btn-drive" onclick="inviaConsegnaDrive()">☁️ Invia al Drive</button>
+    </div>
+    <pre id="output">Inizializzazione ambiente Python...</pre>
+  </div>
+</div>
+
+<iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+
+<script>
+  const EXERCISES_BY_CLASS = {
+    'Terze': [
+      { file: 'Esercizio_Terze_12122025.jpg', title: 'Esercizio Fisica (JPG)' },
+      { file: 'Esercizio_Terze_1.pdf', title: 'Esercizio Fisica (PDF)' }
+    ],
+    'Quarte': [{ file: 'Esercizio_Quarte_1.pdf', title: 'Database' }],
+    'default': [{ file: 'default.pdf', title: 'Traccia' }]
+  };
+
+  let editor, pyodide, timeLeft = 300, currentImgWidth = 100;
+  
+  // Registrazione tempo di inizio
+  const startTime = new Date();
+
+  function zoomImage(step) {
+    const img = document.querySelector('.traccia-img');
+    if (img) {
+      currentImgWidth *= step;
+      img.style.width = currentImgWidth + '%';
+    }
+  }
+
+  function updateTraccia(filePath) {
+    const container = document.getElementById('viewerContainer');
+    const zoomControls = document.getElementById('imgZoomControls');
+    const isImage = /\.(jpg|jpeg|png)$/i.test(filePath);
+    
+    if (isImage) {
+      container.innerHTML = `<img src="${filePath}" class="traccia-img">`;
+      zoomControls.style.display = 'block';
+      currentImgWidth = 100; 
+    } else {
+      container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
+      zoomControls.style.display = 'none';
+    }
+    resetActivityTimer();
+  }
+
+  window.inviaConsegnaDrive = function() {
+    const nome = document.getElementById("nomeStudente").value.trim();
+    if (!nome) return alert("Inserisci Nome e Cognome!");
+
+    const endTime = new Date();
+    const diffMs = endTime - startTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffSecs = Math.floor((diffMs % 60000) / 1000);
+    const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
+
+    const codice = editor.getValue();
+    const outputText = document.getElementById("output").textContent;
+    const urlParams = new URLSearchParams(window.location.search);
+    const classe = urlParams.get("classe") || "ND";
+
+    // Formattazione RTF con tempi di inizio, fine e totale
+    const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par\\par INIZIO PROVA: ${startTime.toLocaleString()}\\par FINE PROVA: ${endTime.toLocaleString()}\\par TEMPO TOTALE: ${tempoTotale}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
+
+    const blob = new Blob([rtfContent], { type: 'application/rtf' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
+    a.click();
+
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
+    const form = document.createElement('form');
+    form.method = 'POST'; form.action = GAS_URL; form.target = 'gasTarget';
+    
+    const add = (n, v) => {
+      const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v;
+      form.appendChild(i);
+    };
+
+    add('nomeStudente', nome);
+    add('classe', classe);
+    add('dataOra', endTime.toLocaleString()); // Usiamo l'orario di fine come riferimento temporale
+    add('rtfContent', rtfContent);
+    add('pyContent', codice);
+    
+    document.body.appendChild(form);
+    form.submit();
+    alert("✅ Consegna inviata al Drive!");
+  };
+
+  function resetActivityTimer() { timeLeft = 300; }
+
+  function tornaAllaPaginaPrincipale() { 
+    localStorage.removeItem("autoSaveCode");
+    localStorage.removeItem("nomeStudente");
+    window.location.href = '../index.html'; 
+  }
+
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(document.getElementById('monaco-container'), {
+      value: "# Scrivi qui il tuo codice Python\n",
+      language: 'python',
+      theme: 'vs-dark',
+      automaticLayout: true
+    });
+
+    editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
+    editor.onDidChangeModelContent(() => { resetActivityTimer(); });
+  });
+
+  async function runCode() {
+    const out = document.getElementById('output');
+    out.textContent = "Esecuzione...\n";
+    try {
+      if (!pyodide) pyodide = await loadPyodide();
+      document.getElementById('eseguiBtn').disabled = false;
+      document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
+      await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
+      await pyodide.runPythonAsync(editor.getValue());
+      out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
+    } catch (e) { out.textContent = "Errore:\n" + e; }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    runCode();
+    const urlParams = new URLSearchParams(window.location.search);
+    const cl = urlParams.get('classe') || 'default';
+    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+    const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
+    const select = document.getElementById('tracciaSelect');
+    exercises.forEach(ex => {
+      const opt = document.createElement('option');
+      opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
+      select.appendChild(opt);
+    });
+    if (exercises.length > 0) updateTraccia(`tracce/${exercises[0].file}`);
+
+    const ns = document.getElementById('nomeStudente');
+    ns.value = localStorage.getItem("nomeStudente") || "";
+    ns.oninput = () => localStorage.setItem("nomeStudente", ns.value);
+
+    setInterval(() => {
+      if (timeLeft <= 0) tornaAllaPaginaPrincipale();
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60);
+      const s = timeLeft % 60;
+      document.getElementById('timerDisplay').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
+  });
+</script>
+</body>
+</html>
