@@ -44,12 +44,12 @@
       background: white;
     }
 
-    /* Contenitore Traccia con Zoom Indipendente */
+    /* Contenitore Traccia con Scroll per lo Zoom */
     #viewerContainer {
       flex-grow: 1;
       border: 1px solid #ccc;
       border-radius: 8px;
-      overflow: auto; /* Permette lo scroll se l'immagine è grande */
+      overflow: auto; 
       background-color: #e0e0e0;
       display: flex;
       justify-content: center;
@@ -59,21 +59,12 @@
 
     #pdfFrame { width: 100%; height: 100%; border: none; }
     
-    /* Stile per l'immagine zoomabile */
+    /* Immagine zoomabile indipendente */
     .traccia-img { 
       transition: width 0.2s ease-in-out;
-      width: 100%; /* Default */
+      width: 100%; 
       height: auto;
       display: block;
-    }
-
-    .zoom-overlay {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      gap: 5px;
-      z-index: 10;
     }
 
     .controls { margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -106,11 +97,11 @@
     <div class="controls">
       <select id="tracciaSelect" onchange="updateTraccia(this.value)"></select>
       <div id="imgZoomControls" style="display:none;">
-        <button class="btn-zoom-ui" onclick="zoomImage(1.1)">+</button>
-        <button class="btn-zoom-ui" onclick="zoomImage(0.9)">-</button>
+        <button class="btn-zoom-ui" title="Zoom In Immagine" onclick="zoomImage(1.2)">+</button>
+        <button class="btn-zoom-ui" title="Zoom Out Immagine" onclick="zoomImage(0.8)">-</button>
       </div>
     </div>
-    <div id="viewerContainer" id="zoomTarget">
+    <div id="viewerContainer">
       <iframe id="pdfFrame" src=""></iframe>
     </div>
   </div>
@@ -146,7 +137,7 @@
 
   let editor, pyodide, timeLeft = 300, currentImgWidth = 100;
 
-  // ZOOM IMMAGINE (Solo per JPG)
+  // ZOOM IMMAGINE INDIPENDENTE
   function zoomImage(step) {
     const img = document.querySelector('.traccia-img');
     if (img) {
@@ -163,15 +154,15 @@
     if (isImage) {
       container.innerHTML = `<img src="${filePath}" class="traccia-img">`;
       zoomControls.style.display = 'block';
-      currentImgWidth = 100; // Reset zoom
+      currentImgWidth = 100; 
     } else {
-      container.innerHTML = `<iframe id="pdfFrame" src="${filePath}"></iframe>`;
+      container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
       zoomControls.style.display = 'none';
     }
     resetActivityTimer();
   }
 
-  // LOGICA INVIO DRIVE (RIPRISTINATA DA CLASSE 10)
+  // LOGICA INVIO DRIVE (RIPRISTINATA COMPLETA)
   window.inviaConsegnaDrive = function() {
     const nome = document.getElementById("nomeStudente").value.trim();
     if (!nome) return alert("Inserisci Nome e Cognome!");
@@ -180,19 +171,16 @@
     const outputText = document.getElementById("output").textContent;
     const urlParams = new URLSearchParams(window.location.search);
     const classe = urlParams.get("classe") || "ND";
-    const dataOra = new Date().toLocaleString();
+    const dataOra = new Date().toLocaleString("it-IT");
 
-    // Contenuto RTF per il Drive
     const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par Data: ${dataOra}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
 
-    // Download locale (Backup)
     const blob = new Blob([rtfContent], { type: 'application/rtf' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
     a.click();
 
-    // Invio al tuo Apps Script
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
     const form = document.createElement('form');
     form.method = 'POST'; form.action = GAS_URL; form.target = 'gasTarget';
@@ -210,16 +198,22 @@
     
     document.body.appendChild(form);
     form.submit();
-    alert("Inviato al Drive!");
+    alert("✅ Consegna inviata al Drive!");
   };
 
   function resetActivityTimer() { timeLeft = 300; }
-  function tornaAllaPaginaPrincipale() { window.location.href = '../index.html'; }
 
-  // MONACO EDITOR
+  // MODIFICA: Funzione Esci che pulisce la memoria
+  function tornaAllaPaginaPrincipale() { 
+    localStorage.removeItem("autoSaveCode");
+    localStorage.removeItem("nomeStudente");
+    window.location.href = '../index.html'; 
+  }
+
+  // MONACO EDITOR SENZA SALVATAGGIO AUTOMATICO
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monaco-container'), {
-      value: localStorage.getItem("autoSaveCode") || "# Scrivi qui il tuo codice\n",
+      value: "# Scrivi qui il tuo codice Python\n",
       language: 'python',
       theme: 'vs-dark',
       automaticLayout: true,
@@ -227,13 +221,13 @@
     });
 
     editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
+    
+    // Aggiornato: Resetta solo il timer, non salva il codice nel localStorage
     editor.onDidChangeModelContent(() => {
-      localStorage.setItem("autoSaveCode", editor.getValue());
       resetActivityTimer();
     });
   });
 
-  // PYODIDE (FIX INTERPRETE)
   async function runCode() {
     const out = document.getElementById('output');
     out.textContent = "Esecuzione...\n";
@@ -242,24 +236,14 @@
       document.getElementById('eseguiBtn').disabled = false;
       document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
       
-      // Isola l'output
-      await pyodide.runPythonAsync(`
-import sys, io
-sys.stdout = io.StringIO()
-sys.stderr = io.StringIO()
-      `);
-      
+      await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
       await pyodide.runPythonAsync(editor.getValue());
-      const stdout = pyodide.runPython("sys.stdout.getvalue()");
-      const stderr = pyodide.runPython("sys.stderr.getvalue()");
-      
-      out.textContent = stdout + (stderr ? "\nERRORI:\n" + stderr : "");
-      if (!stdout && !stderr) out.textContent = "Codice eseguito (nessun output).";
+      out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
     } catch (e) { out.textContent = "Errore di Sintassi/Esecuzione:\n" + e; }
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
-    runCode(); // Init pyodide
+    runCode(); // Inizializza pyodide
     const urlParams = new URLSearchParams(window.location.search);
     const cl = urlParams.get('classe') || 'default';
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
