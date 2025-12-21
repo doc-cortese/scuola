@@ -84,6 +84,31 @@
       font-size: 13px;
     }
     #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
+    /* Stile per i controlli dello zoom */
+    .zoom-toolbar {
+      background: #eee;
+      padding: 5px 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-bottom: none;
+    }
+    .btn-z {
+      padding: 2px 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    /* Identificativo per l'area di testo */
+    <div class="zoom-toolbar">
+    <span style="font-size: 12px; font-weight: bold;">ZOOM CODICE:</span>
+    <button class="btn-z" onclick="changeEditorZoom(2)">+</button>
+    <button class="btn-z" onclick="changeEditorZoom(-2)">-</button>
+    <button class="btn-z" onclick="resetEditorZoom()">Reset</button>
+    </div>
+    #python-editor {
+      transition: font-size 0.1s;
+    }
   </style>
 </head>
 <body oncopy="return false" oncut="return false" onpaste="return false" oncontextmenu="return false;">
@@ -263,6 +288,34 @@
       document.getElementById('timerDisplay').textContent = `${m}:${s.toString().padStart(2, '0')}`;
     }, 1000);
   });
+  // Gestione Zoom specifica per l'area di testo
+let currentFontSize = 16; 
+
+function changeEditorZoom(amount) {
+    currentFontSize += amount;
+    if (currentFontSize < 8) currentFontSize = 8;
+    if (currentFontSize > 50) currentFontSize = 50;
+    const editor = document.getElementById('python-editor');
+    if (editor) {
+        editor.style.fontSize = currentFontSize + 'px';
+    }
+}
+
+function resetEditorZoom() {
+    currentFontSize = 16;
+    const editor = document.getElementById('python-editor');
+    if (editor) {
+        editor.style.fontSize = '16px';
+    }
+}
+
+// Blocco delle scorciatoie da tastiera (Ctrl+C, Ctrl+V, ecc.)
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && ['c','v','x','s','u'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        alert("Il copia-incolla è disabilitato in questo editor.");
+    }
+});
 </script>
 </body>
 </html>
