@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Editor Python con Pyodide (Layout Bi-Dimensionale)</title>
+  <title>Editor Python con Pyodide - Prof. Adinolfi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script>
@@ -13,7 +13,6 @@
   <script src="./libs/pyodide.js"></script>
 
   <style>
-    /* RESET E LAYOUT BASE */
     body {
       margin: 0;
       font-family: sans-serif;
@@ -35,44 +34,32 @@
       min-height: 0; 
     }
 
-    /* AREA VISUALIZZAZIONE TRACCIA (PDF o IMG) */
+    /* Container per supportare sia PDF che Immagini */
     #viewerContainer {
       width: 100%;
-      height: 100%;
+      height: calc(100% - 40px);
       border: 1px solid #ccc;
       border-radius: 4px;
       overflow: auto;
       background-color: #fff;
-      display: flex;
-      justify-content: center;
     }
 
     #pdfFrame {
       width: 100%;
       height: 100%;
       border: none;
-      display: block;
     }
 
     .traccia-img {
-      max-width: 100%;
+      width: 100%;
       height: auto;
-      object-fit: contain;
       display: block;
     }
 
-    /* LAYOUT DESKTOP */
     @media (min-width: 768px) {
       body { flex-direction: row; }
-      #traccia {
-        width: 40%; 
-        border-right: 2px solid #ccc;
-        height: 100vh;
-      }
-      #editor {
-        width: 60%;
-        height: 100vh;
-      }
+      #traccia { width: 40%; border-right: 2px solid #ccc; height: 100vh; }
+      #editor { width: 60%; height: 100vh; }
     }
 
     .controls {
@@ -83,61 +70,36 @@
       flex-wrap: wrap;
     }
 
-    select, input {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    button {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: opacity 0.2s;
-    }
-
+    select, input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    
+    button { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .btn-run { background-color: #28a745; color: white; }
-    .btn-run:hover { opacity: 0.9; }
+    .btn-drive { background-color: #4285F4; color: white; }
+    .btn-exit { background-color: #dc3545; color: white; }
 
-    #monaco-container {
-      flex-grow: 1;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      min-height: 200px;
-    }
-
+    #monaco-container { flex-grow: 1; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; }
+    
     #output {
       background: #1e1e1e;
       color: #d4d4d4;
       padding: 10px;
       font-family: monospace;
       border-radius: 4px;
-      margin-top: 10px;
-      flex-grow: 0.3; 
+      height: 150px;
       overflow-y: auto;
       white-space: pre-wrap;
       font-size: 13px;
-      border: 1px solid #333;
     }
 
-    /* Timer Style */
-    #timerDisplay {
-        font-weight: bold;
-        color: #d9534f;
-        margin-left: auto;
-    }
+    #timerDisplay { font-weight: bold; color: #d9534f; margin-left: auto; }
   </style>
 </head>
 <body>
 
   <div id="traccia">
     <div class="controls">
-      <strong id="classeTitolo">Insegnamento</strong>
-      <select id="tracciaSelect" onchange="changeTraccia(this.value)">
-        </select>
+      <strong id="classeTitolo">Classe</strong>
+      <select id="tracciaSelect" onchange="updateTraccia(this.value)"></select>
     </div>
     <div id="viewerContainer">
       <iframe id="pdfFrame" src=""></iframe>
@@ -147,68 +109,74 @@
   <div id="editor">
     <div class="controls">
       <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente" style="flex-grow: 1;">
-      <button class="btn-run" onclick="runCode()">Esegui Codice (Ctrl+Enter)</button>
       <span id="timerDisplay"></span>
+      <button class="btn-exit" onclick="window.location.href='index.html'">Esci</button>
     </div>
+    
     <div id="monaco-container"></div>
-    <div id="output">Inizializzazione sistema in corso...</div>
+    
+    <div class="controls">
+      <button class="btn-run" onclick="runCode()">Esegui Codice (Ctrl+Enter)</button>
+      <button class="btn-drive" onclick="sendToDrive()">Invia al mio Drive</button>
+    </div>
+    
+    <div id="output">Inizializzazione sistema...</div>
   </div>
 
   <script>
-    // --- 1. CONFIGURAZIONE ESERCIZI ---
     const EXERCISES_BY_CLASS = {
         'Terze': [
             { file: 'Esercizio_Terze_12122025.jpg', title: 'Esercizio Analisi Fisica (JPG)' },
-            { file: 'Esercizio_Terze_Python_Base.pdf', title: 'Fondamenti di Python' }
+            { file: 'Esercizio_Terze_1.pdf', title: 'Esercizio Base PDF' }
         ],
         'Quarte': [
-            { file: 'Esercizio_Quarte_1.pdf', title: 'Database e SQL' }
+            { file: 'Esercizio_Quarte_1.pdf', title: 'Esercizio Database' }
         ],
         'default': [
             { file: 'default.pdf', title: 'Traccia Standard' }
         ]
     };
 
-    let editor;
-    let pyodide;
-    let activityTimer;
-    const INACTIVITY_LIMIT = 300000; // 5 minuti
+    let editor, pyodide, activityTimer;
+    const INACTIVITY_LIMIT = 300000; 
 
-    // --- 2. FUNZIONE CAMBIO VISUALIZZATORE (MODIFICATA) ---
-    function changeTraccia(filePath) {
+    function updateTraccia(filePath) {
         const container = document.getElementById('viewerContainer');
-        const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(filePath);
-
+        const isImage = /\.(jpg|jpeg|png)$/i.test(filePath);
         if (isImage) {
-            container.innerHTML = `<img src="${filePath}" class="traccia-img" alt="Traccia Esercizio">`;
+            container.innerHTML = `<img src="${filePath}" class="traccia-img">`;
         } else {
-            container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
+            container.innerHTML = `<iframe id="pdfFrame" src="${filePath}"></iframe>`;
         }
         resetActivityTimer();
     }
 
-    // --- 3. GESTIONE INATTIVITÀ ---
     function resetActivityTimer() {
         clearTimeout(activityTimer);
         activityTimer = setTimeout(() => {
-            alert("Sessione scaduta per inattività. Ricarica la pagina.");
-            location.reload();
+            alert("Sessione scaduta per inattività.");
+            window.location.href = 'index.html';
         }, INACTIVITY_LIMIT);
     }
 
-    // --- 4. INIZIALIZZAZIONE ---
+    function sendToDrive() {
+        const nome = document.getElementById('nomeStudente').value;
+        const code = editor.getValue();
+        if (!nome) return alert("Inserisci il tuo nome prima di inviare!");
+        
+        // Qui va la tua logica di integrazione Drive/Google Script
+        alert("Funzione di invio attivata per: " + nome + "\nIl codice è stato preparato per il caricamento.");
+        console.log("Dati invio:", {studente: nome, codice: code});
+    }
+
     document.addEventListener("DOMContentLoaded", async () => {
         const urlParams = new URLSearchParams(window.location.search);
-        const classeRaw = urlParams.get('classe');
-        const classKey = classeRaw || 'default';
-        
-        const tracciaSelect = document.getElementById('tracciaSelect');
+        const classKey = urlParams.get('classe') || 'default';
         const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
         
-        document.getElementById('classeTitolo').textContent = `– Classe ${classKey}`;
-
-        // Popolamento Select
-        tracciaSelect.innerHTML = '';
+        document.getElementById('classeTitolo').textContent = `Classe ${classKey}`;
+        
+        const tracciaSelect = document.getElementById('tracciaSelect');
         exercises.forEach(ex => {
             const opt = document.createElement('option');
             opt.value = `tracce/${ex.file}`;
@@ -216,76 +184,51 @@
             tracciaSelect.appendChild(opt);
         });
 
-        // Caricamento traccia iniziale
-        if (exercises.length > 0) {
-            changeTraccia(`tracce/${exercises[0].file}`);
-        }
+        if (exercises.length > 0) updateTraccia(`tracce/${exercises[0].file}`);
 
-        // Recupero Nome Studente
-        const nomeInput = document.getElementById("nomeStudente");
-        nomeInput.value = localStorage.getItem("nomeStudente") || "";
-        nomeInput.addEventListener('input', (e) => {
+        // Restore Nome
+        document.getElementById("nomeStudente").value = localStorage.getItem("nomeStudente") || "";
+        document.getElementById("nomeStudente").addEventListener('input', (e) => {
             localStorage.setItem("nomeStudente", e.target.value);
             resetActivityTimer();
         });
 
-        // Inizializzazione Monaco
+        // Load Monaco
         require(['vs/editor/editor.main'], function () {
             editor = monaco.editor.create(document.getElementById('monaco-container'), {
-                value: "# Scrivi qui il tuo codice Python\n\nprint('Benvenuto nell\\'editor')",
+                value: "# Scrivi il tuo codice qui\n",
                 language: 'python',
                 theme: 'vs-dark',
-                automaticLayout: true,
-                fontSize: 14
+                automaticLayout: true
             });
-
             editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, runCode);
             editor.onDidChangeModelContent(resetActivityTimer);
         });
 
-        // Inizializzazione Pyodide
-        const outputArea = document.getElementById('output');
+        // Load Pyodide
         try {
             pyodide = await loadPyodide();
-            outputArea.textContent = "Python 3.10 pronto. Scrivi il codice e premi Esegui.";
-        } catch (err) {
-            outputArea.textContent = "Errore critico: Impossibile caricare Pyodide.";
-            console.error(err);
+            document.getElementById('output').textContent = "Sistema pronto.";
+        } catch (e) {
+            document.getElementById('output').textContent = "Errore caricamento Python.";
         }
-
+        
         resetActivityTimer();
     });
 
-    // --- 5. ESECUZIONE CODICE ---
     async function runCode() {
-        const outputArea = document.getElementById('output');
+        const out = document.getElementById('output');
         const code = editor.getValue();
-        outputArea.textContent = "Esecuzione in corso...\n";
-        resetActivityTimer();
-
+        out.textContent = "In esecuzione...\n";
         try {
-            // Reindirizzamento stdout
             await pyodide.runPythonAsync(`
-                import sys
-                import io
+                import sys, io
                 sys.stdout = io.StringIO()
-                sys.stderr = io.StringIO()
             `);
-
             await pyodide.runPythonAsync(code);
-
-            const stdout = pyodide.runPython("sys.stdout.getvalue()");
-            const stderr = pyodide.runPython("sys.stderr.getvalue()");
-
-            outputArea.textContent = stdout;
-            if (stderr) {
-                outputArea.textContent += "\n--- ERRORI ---\n" + stderr;
-            }
-            if (!stdout && !stderr) {
-                outputArea.textContent = "Codice eseguito correttamente (nessun output).";
-            }
+            out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito (nessun output).";
         } catch (err) {
-            outputArea.textContent = "Errore di Runtime:\n" + err;
+            out.textContent = "Errore:\n" + err;
         }
     }
   </script>
