@@ -21,7 +21,7 @@
 
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -44,44 +44,59 @@
       background: white;
     }
 
+    /* Contenitore Traccia con Zoom Indipendente */
     #viewerContainer {
       flex-grow: 1;
       border: 1px solid #ccc;
       border-radius: 8px;
-      overflow: auto;
-      background-color: #ffffff;
+      overflow: auto; /* Permette lo scroll se l'immagine è grande */
+      background-color: #e0e0e0;
       display: flex;
       justify-content: center;
+      align-items: flex-start;
+      position: relative;
     }
 
     #pdfFrame { width: 100%; height: 100%; border: none; }
-    .traccia-img { max-width: 100%; height: auto; object-fit: contain; padding: 10px; }
+    
+    /* Stile per l'immagine zoomabile */
+    .traccia-img { 
+      transition: width 0.2s ease-in-out;
+      width: 100%; /* Default */
+      height: auto;
+      display: block;
+    }
+
+    .zoom-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+      z-index: 10;
+    }
 
     .controls { margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .label-bold { font-weight: bold; color: var(--primary-color); }
-
-    input, select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    input[type="text"] { flex-grow: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; }
 
     button {
       padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
-      font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+      font-weight: 600; transition: all 0.2s;
     }
-
-    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:hover { opacity: 0.9; }
 
     .btn-run { background-color: var(--primary-color); color: white; }
     .btn-drive { background-color: var(--secondary-color); color: white; }
     .btn-exit { background-color: var(--danger-color); color: white; }
-    .btn-zoom { background-color: #e9ecef; border: 1px solid #adb5bd; color: #495057; }
+    .btn-zoom-ui { background-color: #f0f0f0; border: 1px solid #ccc; font-size: 18px; width: 40px; }
 
     #monaco-container { flex-grow: 1; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
-
     #output {
       background: #1e1e1e; color: #00ff00; padding: 12px; font-family: 'Consolas', monospace;
-      border-radius: 8px; margin-top: 10px; height: 150px; overflow-y: auto; white-space: pre-wrap;
+      border-radius: 8px; margin-top: 10px; height: 130px; overflow-y: auto; white-space: pre-wrap;
+      font-size: 13px;
     }
-
-    #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; padding: 5px 12px; border: 1px solid #ffcccc; border-radius: 20px; }
+    #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
   </style>
 </head>
 <body>
@@ -89,30 +104,31 @@
 <div id="main-layout">
   <div id="traccia">
     <div class="controls">
-      <span class="label-bold" id="classeTitolo">Classe</span>
       <select id="tracciaSelect" onchange="updateTraccia(this.value)"></select>
+      <div id="imgZoomControls" style="display:none;">
+        <button class="btn-zoom-ui" onclick="zoomImage(1.1)">+</button>
+        <button class="btn-zoom-ui" onclick="zoomImage(0.9)">-</button>
+      </div>
     </div>
-    <div id="viewerContainer">
+    <div id="viewerContainer" id="zoomTarget">
       <iframe id="pdfFrame" src=""></iframe>
     </div>
   </div>
 
   <div id="editor-section">
     <div class="controls">
-      <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente" style="flex-grow: 1;">
-      <button class="btn-zoom" title="Zoom In" onclick="changeZoom(1.2)">A+</button>
-      <button class="btn-zoom" title="Zoom Out" onclick="changeZoom(0.8)">A-</button>
+      <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
       <span id="timerDisplay">05:00</span>
       <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
     </div>
 
     <div id="monaco-container"></div>
 
-    <div class="controls" style="margin-top: 12px;">
+    <div class="controls" style="margin-top: 10px;">
       <button class="btn-run" id="eseguiBtn" onclick="runCode()" disabled>⌛ Caricamento...</button>
       <button class="btn-drive" onclick="inviaConsegnaDrive()">☁️ Invia al Drive</button>
     </div>
-    <pre id="output">Inizializzazione Python...</pre>
+    <pre id="output">Inizializzazione ambiente Python...</pre>
   </div>
 </div>
 
@@ -121,32 +137,41 @@
 <script>
   const EXERCISES_BY_CLASS = {
     'Terze': [
-      { file: 'Esercizio_Terze_12122025.jpg', title: 'Analisi Fisica (JPG)' },
-      { file: 'Esercizio_Terze_1.pdf', title: 'Analisi Fisica (PDF)' }
+      { file: 'Esercizio_Terze_12122025.jpg', title: 'Esercizio Fisica (JPG)' },
+      { file: 'Esercizio_Terze_1.pdf', title: 'Esercizio Fisica (PDF)' }
     ],
-    'Quarte': [{ file: 'Esercizio_Quarte_1.pdf', title: 'Algoritmi e Database' }],
+    'Quarte': [{ file: 'Esercizio_Quarte_1.pdf', title: 'Database' }],
     'default': [{ file: 'default.pdf', title: 'Traccia' }]
   };
 
-  let editor, pyodide, timeLeft = 300, currentFontSize = 14;
+  let editor, pyodide, timeLeft = 300, currentImgWidth = 100;
+
+  // ZOOM IMMAGINE (Solo per JPG)
+  function zoomImage(step) {
+    const img = document.querySelector('.traccia-img');
+    if (img) {
+      currentImgWidth *= step;
+      img.style.width = currentImgWidth + '%';
+    }
+  }
 
   function updateTraccia(filePath) {
     const container = document.getElementById('viewerContainer');
-    if (/\.(jpg|jpeg|png|gif)$/i.test(filePath)) {
+    const zoomControls = document.getElementById('imgZoomControls');
+    const isImage = /\.(jpg|jpeg|png)$/i.test(filePath);
+    
+    if (isImage) {
       container.innerHTML = `<img src="${filePath}" class="traccia-img">`;
+      zoomControls.style.display = 'block';
+      currentImgWidth = 100; // Reset zoom
     } else {
-      container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
+      container.innerHTML = `<iframe id="pdfFrame" src="${filePath}"></iframe>`;
+      zoomControls.style.display = 'none';
     }
     resetActivityTimer();
   }
 
-  function changeZoom(multiplier) {
-    currentFontSize = Math.round(currentFontSize * multiplier);
-    currentFontSize = Math.max(8, Math.min(40, currentFontSize));
-    editor.updateOptions({ fontSize: currentFontSize });
-  }
-
-  // --- LOGICA DI INVIO RIPRISTINATA DAL FILE 10 CON IL TUO URL ---
+  // LOGICA INVIO DRIVE (RIPRISTINATA DA CLASSE 10)
   window.inviaConsegnaDrive = function() {
     const nome = document.getElementById("nomeStudente").value.trim();
     if (!nome) return alert("Inserisci Nome e Cognome!");
@@ -155,88 +180,95 @@
     const outputText = document.getElementById("output").textContent;
     const urlParams = new URLSearchParams(window.location.search);
     const classe = urlParams.get("classe") || "ND";
-    const dataOra = new Date().toLocaleString("it-IT");
+    const dataOra = new Date().toLocaleString();
 
-    // Generazione contenuto RTF per il Drive
+    // Contenuto RTF per il Drive
     const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par Data: ${dataOra}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
 
-    // Download locale di backup (come nel tuo file originale)
+    // Download locale (Backup)
     const blob = new Blob([rtfContent], { type: 'application/rtf' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
     a.click();
 
-    // Invio al tuo Apps Script (URL riga 168 del tuo file 11)
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
-    
+    // Invio al tuo Apps Script
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
     const form = document.createElement('form');
-    form.method = 'POST'; form.action = GAS_WEB_APP_URL; form.target = 'gasTarget';
+    form.method = 'POST'; form.action = GAS_URL; form.target = 'gasTarget';
     
-    const addField = (n, v) => {
+    const add = (n, v) => {
       const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v;
       form.appendChild(i);
     };
-    addField('nomeStudente', nome);
-    addField('classe', classe);
-    addField('dataOra', dataOra);
-    addField('rtfContent', rtfContent);
-    addField('pyContent', codice);
+
+    add('nomeStudente', nome);
+    add('classe', classe);
+    add('dataOra', dataOra);
+    add('rtfContent', rtfContent);
+    add('pyContent', codice);
     
     document.body.appendChild(form);
     form.submit();
-    alert("✅ Consegna inviata al Drive del Prof. Adinolfi e backup scaricato!");
+    alert("Inviato al Drive!");
   };
 
   function resetActivityTimer() { timeLeft = 300; }
   function tornaAllaPaginaPrincipale() { window.location.href = '../index.html'; }
 
+  // MONACO EDITOR
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monaco-container'), {
       value: localStorage.getItem("autoSaveCode") || "# Scrivi qui il tuo codice\n",
       language: 'python',
       theme: 'vs-dark',
-      fontSize: currentFontSize,
       automaticLayout: true,
       mouseWheelZoom: true
     });
 
-    // Blocco Incolla
     editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
-
     editor.onDidChangeModelContent(() => {
       localStorage.setItem("autoSaveCode", editor.getValue());
       resetActivityTimer();
     });
   });
 
+  // PYODIDE (FIX INTERPRETE)
   async function runCode() {
     const out = document.getElementById('output');
-    out.textContent = "Esecuzione...";
+    out.textContent = "Esecuzione...\n";
     try {
       if (!pyodide) pyodide = await loadPyodide();
       document.getElementById('eseguiBtn').disabled = false;
       document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
       
-      await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
+      // Isola l'output
+      await pyodide.runPythonAsync(`
+import sys, io
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+      `);
+      
       await pyodide.runPythonAsync(editor.getValue());
-      out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
-    } catch (e) { out.textContent = "Errore:\n" + e; }
+      const stdout = pyodide.runPython("sys.stdout.getvalue()");
+      const stderr = pyodide.runPython("sys.stderr.getvalue()");
+      
+      out.textContent = stdout + (stderr ? "\nERRORI:\n" + stderr : "");
+      if (!stdout && !stderr) out.textContent = "Codice eseguito (nessun output).";
+    } catch (e) { out.textContent = "Errore di Sintassi/Esecuzione:\n" + e; }
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
-    runCode(); // Inizializza pyodide
+    runCode(); // Init pyodide
     const urlParams = new URLSearchParams(window.location.search);
-    const classeRaw = urlParams.get('classe') || 'default';
-    const classKey = classeRaw.charAt(0).toUpperCase() + classeRaw.slice(1);
+    const cl = urlParams.get('classe') || 'default';
+    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
     const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
     
-    document.getElementById('classeTitolo').textContent = `– Classe ${classKey}`;
     const select = document.getElementById('tracciaSelect');
     exercises.forEach(ex => {
       const opt = document.createElement('option');
-      opt.value = `tracce/${ex.file}`;
-      opt.textContent = ex.title;
+      opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
       select.appendChild(opt);
     });
 
