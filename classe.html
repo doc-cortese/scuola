@@ -258,19 +258,7 @@
     }
   });
 
-  function zoomImage(step) {
-    const img = document.querySelector('.traccia-img'); [cite: 178]
-    if (img) {
-        currentImgWidth *= step; [cite: 180]
-        // Applica la nuova larghezza percentuale
-        img.style.width = currentImgWidth + '%'; [cite: 182]
-        
-        // Forza il contenitore a mostrare lo scroll se l'immagine è grande
-        const container = document.getElementById('viewerContainer');
-        container.style.overflow = 'auto';
-    }
-  }
-
+  
   function updateTraccia(filePath) {
     const container = document.getElementById('viewerContainer');
     const zoomControls = document.getElementById('imgZoomControls');
