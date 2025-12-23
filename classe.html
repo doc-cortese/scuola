@@ -275,32 +275,42 @@
   });
 
   
-  function updateTraccia(filePath) {
+ function updateTraccia(filePath) {
     const container = document.getElementById('viewerContainer');
     const zoomControls = document.getElementById('imgZoomControls');
-    const isImage = /\.(jpg|jpeg|png)$/i.test(filePath);
-    
+    // Verifica se il file è un'immagine [cite: 187]
+    const isImage = /\.(jpg|jpeg|png)$/i.test(filePath); 
+
     if (isImage) {
-      container.innerHTML = `<img src="${filePath}" class="traccia-img">`;
-      zoomControls.style.display = 'block';
-      currentImgWidth = 100; 
+        // Correzione: usa i backtick ` e assegna correttamente l'HTML [cite: 189]
+        container.innerHTML = `<img src="${filePath}" class="traccia-img" style="width:100%; height:auto; display:block;">`;
+        zoomControls.style.display = 'block'; // Mostra i tasti + e - [cite: 189]
+        currentImgWidth = 100; // Reset larghezza [cite: 190]
     } else {
-      container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
-      zoomControls.style.display = 'none';
+        // Se è un PDF [cite: 191]
+        container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
+        zoomControls.style.display = 'none'; // Nascondi zoom per PDF [cite: 194]
     }
-    resetActivityTimer();
+    resetActivityTimer(); // [cite: 195]
   }
 
   function zoomImage(step) {
-    const img = document.querySelector('.traccia-img'); [cite: 178]
-    if (img) {
-        currentImgWidth *= step; [cite: 180]
-        // Applica la nuova larghezza percentuale
-        img.style.width = currentImgWidth + '%'; [cite: 182]
+    const img = document.querySelector('.traccia-img');
+    const container = document.getElementById('viewerContainer');
+    
+    if (img && container) {
+        // 1. Calcola la nuova larghezza [cite: 180]
+        currentImgWidth = currentImgWidth * step;
         
-        // Forza il contenitore a mostrare lo scroll se l'immagine è grande
-        const container = document.getElementById('viewerContainer');
+        // 2. Applica la larghezza all'immagine [cite: 182]
+        img.style.width = currentImgWidth + '%';
+        
+        // 3. Rendi l'immagine "libera" di espandersi per attivare lo scroll
+        img.style.maxWidth = 'none'; 
+        
+        // 4. Assicura che il contenitore permetta lo scorrimento [cite: 51]
         container.style.overflow = 'auto';
+        container.style.display = 'block'; 
     }
   }
 
