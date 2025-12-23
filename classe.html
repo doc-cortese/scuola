@@ -71,11 +71,11 @@
 
     
    .controls { 
-    margin-bottom: 12px; 
-    display: flex; 
-    gap: 8px; 
-    align-items: center; 
-    flex-wrap: wrap; /* Fondamentale: i bottoni scendono se non c'è posto  */
+      margin-bottom: 12px; 
+      display: flex; 
+      gap: 8px; 
+      align-items: center; 
+      flex-wrap: wrap; /* Fondamentale: i bottoni scendono se non c'è posto  */
     }
 
     input[type="text"] { 
@@ -114,22 +114,22 @@
     }
 
     #monaco-container {
-    flex-grow: 1; /* Spinge l'editor a occupare tutto lo spazio disponibile [cite: 93] */
-    border: 1px solid #ccc;
-    border-radius: 0 0 8px 8px;
-    overflow: hidden;
-    background: #1e1e1e; /* Colore scuro di sfondo per evitare il flash bianco */
+      flex-grow: 1; /* Spinge l'editor a occupare tutto lo spazio disponibile [cite: 93] */
+      border: 1px solid #ccc;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+      background: #1e1e1e; /* Colore scuro di sfondo per evitare il flash bianco */
     }
 
    #output {
-    background: #1e1e1e; 
-    color: #00ff00; 
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-    height: 100px; /* Ridotto leggermente per mobile  */
-    overflow-y: auto;
-    font-size: 12px;
+      background: #1e1e1e; 
+      color: #00ff00; 
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      height: 100px; /* Ridotto leggermente per mobile  */
+      overflow-y: auto;
+      font-size: 12px;
   }
     #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
   </style>
@@ -303,7 +303,7 @@
       theme: 'vs-dark',
       automaticLayout: true,
       fontSize: 14,
-      contextmenu: false // Disabilita il menu contestuale interno di Monaco
+      contextmenu: false, // Disabilita il menu contestuale interno di Monaco
       minimap: { enabled: false } // Opzionale: guadagni spazio su mobile
     });
 
