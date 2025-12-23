@@ -32,19 +32,41 @@
       -webkit-user-select: none;
     }
 
-    #main-layout { display: flex; flex-direction: column; height: 100vh; }
-    @media (min-width: 768px) {
-      #main-layout { flex-direction: row; }
-      #traccia { width: 45%; border-right: 2px solid #ddd; }
-      #editor-section { width: 55%; }
+    /* Layout principale: Colonna su mobile, Riga su desktop */
+    #main-layout { 
+        display: flex; 
+        flex-direction: column; /* Gli elementi si impilano verticalmente [cite: 27] */
+        height: 100vh; 
+        overflow: hidden; 
     }
-
+    
+    /* Regole comuni per le due sezioni */
     #traccia, #editor-section {
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      background: white;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        background: white;
+        min-height: 0;
+        width: 100%; /* Su mobile occupano tutta la larghezza [cite: 60] */
+    }
+    
+    /* Su mobile, diamo un'altezza specifica per vedere entrambi */
+    #traccia { height: 40vh; border-bottom: 2px solid #ddd; }
+    #editor-section { height: 60vh; }
+    
+    /* Media Query per Desktop (schermi più larghi di 768px) */
+    @media (min-width: 768px) {
+        #main-layout { flex-direction: row; } /* Affiancati [cite: 36] */
+        #traccia { 
+            width: 45%; 
+            height: 100vh; 
+            border-right: 2px solid #ddd; 
+            border-bottom: none;
+        }
+        #editor-section { 
+            width: 55%; 
+            height: 100vh; 
+        }
     }
 
     #viewerContainer {
@@ -66,8 +88,19 @@
       display: block;
     }
 
-    .controls { margin-bottom: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    input[type="text"] { flex-grow: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; }
+   .controls { 
+    margin-bottom: 12px; 
+    display: flex; 
+    gap: 8px; 
+    align-items: center; 
+    flex-wrap: wrap; /* Fondamentale: i bottoni scendono se non c'è posto  */
+    }
+
+    input[type="text"] { 
+        flex: 1; 
+        min-width: 150px; /* Impedisce che l'input diventi troppo piccolo [cite: 64] */
+        padding: 8px; 
+    }
 
     button {
       padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
@@ -98,21 +131,28 @@
       font-size: 14px;
     }
 
-    #monaco-container { 
-        flex-grow: 1; 
-        border: 1px solid #ccc; 
-        border-radius: 0 0 8px 8px; 
-        overflow: hidden; 
+    #monaco-container {
+    flex-grow: 1; /* Spinge l'editor a occupare tutto lo spazio disponibile [cite: 93] */
+    border: 1px solid #ccc;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    background: #1e1e1e; /* Colore scuro di sfondo per evitare il flash bianco */
     }
 
-    #output {
-      background: #1e1e1e; color: #00ff00; padding: 12px; font-family: 'Consolas', monospace;
-      border-radius: 8px; margin-top: 10px; height: 130px; overflow-y: auto; white-space: pre-wrap;
-      font-size: 13px;
-    }
+   #output {
+    background: #1e1e1e; 
+    color: #00ff00; 
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    height: 100px; /* Ridotto leggermente per mobile  */
+    overflow-y: auto;
+    font-size: 12px;
+  }
     #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
   </style>
 </head>
+
 <body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
 
 <div id="main-layout">
@@ -282,6 +322,7 @@
       automaticLayout: true,
       fontSize: 14,
       contextmenu: false // Disabilita il menu contestuale interno di Monaco
+      minimap: { enabled: false } // Opzionale: guadagni spazio su mobile
     });
 
     // Blocco Paste specifico di Monaco
