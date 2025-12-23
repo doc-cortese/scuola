@@ -166,6 +166,7 @@
         <button class="btn-z" onclick="changeEditorZoom(2)">+</button>
         <button class="btn-z" onclick="changeEditorZoom(-2)">-</button>
         <button class="btn-z" onclick="resetEditorZoom()" style="background:#64748b;">Reset</button>
+        <button class="btn-z" id="focusBtn" onclick="toggleFocusMode()" style="background: #8b5cf6; margin-left: 5px;">Solo Editor</button>
     </div>
     <div id="monaco-container"></div>
 
@@ -210,6 +211,40 @@
     currentFontSize = 14;
     if (editor) {
       editor.updateOptions({ fontSize: 14 });
+    }
+  }
+
+  function toggleFocusMode() {
+    const traccia = document.getElementById('traccia');
+    const editorSection = document.getElementById('editor-section');
+    const focusBtn = document.getElementById('focusBtn');
+
+    if (traccia.style.display !== 'none') {
+        // Attiva Modalità Focus
+        traccia.style.display = 'none';
+        editorSection.style.width = '100%';
+        editorSection.style.height = '100vh';
+        focusBtn.textContent = 'Mostra Traccia';
+        focusBtn.style.background = '#64748b';
+    } else {
+        // Disattiva Modalità Focus (Ripristina layout)
+        traccia.style.display = 'flex';
+        focusBtn.textContent = 'Solo Editor';
+        focusBtn.style.background = '#8b5cf6';
+        
+        // Applica i ripristini in base alla larghezza dello schermo
+        if (window.innerWidth >= 768) {
+            editorSection.style.width = '55%';
+            editorSection.style.height = '100vh';
+        } else {
+            editorSection.style.width = '100%';
+            editorSection.style.height = '60vh';
+        }
+    }
+    
+    // Forza Monaco a ricalcolare le dimensioni dopo il cambio layout
+    if (editor) {
+        editor.layout();
     }
   }
 
