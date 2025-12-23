@@ -69,7 +69,23 @@
         }
     }
 
+    #viewerContainer {
+    flex-grow: 1; [cite: 48]
+    border: 1px solid #ccc; [cite: 49]
+    border-radius: 8px; [cite: 50]
+    /* Fondamentale per lo scorrimento */
+    overflow: auto !important; 
+    background-color: #e0e0e0; [cite: 52]
+    position: relative; [cite: 56]
+    display: block; /* Cambia da flex a block per favorire lo scroll */
+    }
     
+    .traccia-img {
+        transition: width 0.2s ease-in-out; [cite: 59]
+        /* Rimuovi height: auto se presente e usa questa configurazione */
+        max-width: none; 
+        display: block; [cite: 62]
+    }
    .controls { 
       margin-bottom: 12px; 
       display: flex; 
@@ -257,12 +273,17 @@
   });
 
   function zoomImage(step) {
-    const img = document.querySelector('.traccia-img');
+    const img = document.querySelector('.traccia-img'); [cite: 178]
     if (img) {
-      currentImgWidth *= step;
-      img.style.width = currentImgWidth + '%';
+        currentImgWidth *= step; [cite: 180]
+        // Applica la nuova larghezza percentuale
+        img.style.width = currentImgWidth + '%'; [cite: 182]
+        
+        // Forza il contenitore a mostrare lo scroll se l'immagine è grande
+        const container = document.getElementById('viewerContainer');
+        container.style.overflow = 'auto';
     }
-  }
+}
 
   function updateTraccia(filePath) {
     const container = document.getElementById('viewerContainer');
