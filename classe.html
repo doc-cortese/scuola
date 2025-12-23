@@ -70,21 +70,21 @@
     }
 
     #viewerContainer {
-        flex-grow: 1; [cite: 48]
-        border: 1px solid #ccc; [cite: 49]
-        border-radius: 8px; [cite: 50]
+        flex-grow: 1; 
+        border: 1px solid #ccc; 
+        border-radius: 8px; 
         /* Fondamentale per lo scorrimento */
         overflow: auto !important; 
-        background-color: #e0e0e0; [cite: 52]
-        position: relative; [cite: 56]
+        background-color: #e0e0e0; 
+        position: relative; 
         display: block; /* Cambia da flex a block per favorire lo scroll */
     }
     
     .traccia-img {
-        transition: width 0.2s ease-in-out; [cite: 59]
+        transition: width 0.2s ease-in-out; 
         /* Rimuovi height: auto se presente e usa questa configurazione */
         max-width: none; 
-        display: block; [cite: 62]
+        display: block; 
     }
    .controls { 
       margin-bottom: 12px; 
@@ -257,7 +257,7 @@
             editorSection.style.height = '60vh';
         }
     }
-    
+  }
     // Forza Monaco a ricalcolare le dimensioni dopo il cambio layout
     if (editor) {
         editor.layout();
