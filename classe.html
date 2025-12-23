@@ -132,7 +132,10 @@
   <div id="editor-section">
     <div class="controls">
       <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
-      <span id="timerDisplay">05:00</span>
+      <div style="display: inline-flex; flex-direction: column; align-items: flex-end; margin-left: auto; margin-right: 15px;">
+        <span style="font-size: 11px; color: #666;">Scadenza Inattività: <span id="timerDisplay">05:00</span></span>
+        <span style="font-weight: bold; color: #004080;">Fine Prova: <span id="maxTimerDisplay">45:00</span></span>
+      </div>
       <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
     </div>
 
@@ -167,7 +170,8 @@
 
   let editor, pyodide, timeLeft = 300, currentImgWidth = 100;
   let currentFontSize = 14; // Dimensione font iniziale dell'editor
-  
+  let maxTimeLeft = 2700; // 45 minuti in secondi
+  let warningSent = false; // Serve per mostrare l'alert una sola volta
   const startTime = new Date();
 
   // === FUNZIONI ZOOM EDITOR ===
@@ -319,14 +323,35 @@
     const ns = document.getElementById('nomeStudente');
     ns.value = localStorage.getItem("nomeStudente") || "";
     ns.oninput = () => localStorage.setItem("nomeStudente", ns.value);
-
     setInterval(() => {
-      if (timeLeft <= 0) tornaAllaPaginaPrincipale();
-      timeLeft--;
-      const m = Math.floor(timeLeft / 60);
-      const s = timeLeft % 60;
-      document.getElementById('timerDisplay').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    // 1. Controllo se uno dei due timer è scaduto
+    if (timeLeft <= 0 || maxTimeLeft <= 0) {
+        alert("Tempo scaduto! L'esercizio verrà chiuso.");
+        tornaAllaPaginaPrincipale(); // Funzione che riporta alla home [cite: 238, 241]
+    }
+
+    // 2. Decremento di entrambi i timer ogni secondo
+    timeLeft--;
+    maxTimeLeft--;
+
+    // 3. Gestione Avviso 5 minuti (300 secondi rimanenti nel timer massimo)
+    if (maxTimeLeft === 300 && !warningSent) {
+        alert("ATTENZIONE: Mancano solo 5 minuti al termine definitivo della prova!");
+        warningSent = true;
+    }
+
+    // 4. Aggiornamento grafico del Timer Inattività (esistente)
+    const m1 = Math.floor(timeLeft / 60);
+    const s1 = timeLeft % 60;
+    document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
+
+    // 5. Aggiornamento grafico del Timer Massimo (nuovo)
+    const m2 = Math.floor(maxTimeLeft / 60);
+    const s2 = maxTimeLeft % 60;
+    document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
+
     }, 1000);
+    
   });
 </script>
 </body>
