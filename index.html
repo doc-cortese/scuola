@@ -265,14 +265,48 @@
     .btn-action:hover { opacity: 0.9; }
 
     /* Login Google */
+    /* === MODIFICA QUESTO BLOCCO === */
     #login {
-      text-align: center;
       margin: 60px auto;
-      padding: 40px;
       background-color: #fff;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      max-width: 400px;
+      max-width: 850px; /* Aumentato per ospitare due colonne */
+      display: flex;    /* Attiva il layout orizzontale */
+      overflow: hidden; /* Taglia i bordi arrotondati se il contenuto esce */
+      padding: 0;       /* Reset padding: lo gestiremo internamente alle colonne */
+    }
+
+    /* NUOVE CLASSI DA AGGIUNGERE SOTTO */
+    .login-column {
+      flex: 1;          /* Divide lo spazio equamente (50% ciascuna) */
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .login-left {
+      background-color: #ffffff;
+    }
+
+    .login-right {
+      background-color: #f8fafc; /* Grigio chiarissimo per distinguere l'area */
+      border-left: 1px solid #e2e8f0;
+    }
+
+    /* Rende il box di nuovo verticale sui telefoni */
+    @media (max-width: 768px) {
+      #login {
+        flex-direction: column;
+        max-width: 400px;
+      }
+      .login-right {
+        border-left: none;
+        border-top: 1px solid #e2e8f0;
+      }
     }
     /* STILE PER IL BOTTONE OSPITI */
     .guest-section {
@@ -457,19 +491,29 @@
 </main>
 
 <div id="login">
-  <p style="font-weight: 800; color: var(--primary); margin-bottom: 10px;">Area Protetta</p>
-  <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">Accedi con il tuo account istituzionale @lscortese.com per consultare i materiali.</p>
-  <div id="g_id_onload"
-       data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com"
-       data-callback="handleCredentialResponse"
-       data-auto_prompt="false">
+  
+  <div class="login-column login-left">
+      <p style="font-weight: 800; color: var(--primary); margin-bottom: 10px; font-size: 18px;">Area Protetta</p>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">
+          Accedi con il tuo account istituzionale<br><strong>@lscortese.com</strong>
+      </p>
+      
+      <div id="g_id_onload"
+           data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-size="large"></div>
   </div>
-  <div class="g_id_signin" data-type="standard"></div>
 
-  <div class="guest-section">
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Non sei uno studente del liceo?</p>
-      <a href="ospiti.html" class="btn-guest">Entra nell'Area Ospiti &rarr;</a>
+  <div class="login-column login-right">
+      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 18px;">Area Ospiti</p>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">
+          Se non sei uno studente del liceo,<br>puoi consultare le risorse pubbliche.
+      </p>
+      <a href="ospiti.html" class="btn-guest">Entra come Ospite &rarr;</a>
   </div>
+
 </div>
 
   
@@ -540,6 +584,7 @@ function performSearch() {
 
 </body>
 </html>
+
 
 
 
