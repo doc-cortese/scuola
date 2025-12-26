@@ -266,47 +266,57 @@
 
     /* Login Google */
     /* === MODIFICA QUESTO BLOCCO === */
-    #login {
+   /* === CONTENITORE GENERALE DELLE CARD === */
+    .login-container-3d {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
       margin: 60px auto;
-      background-color: #fff;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      max-width: 850px; /* Aumentato per ospitare due colonne */
-      display: flex;    /* Attiva il layout orizzontale */
-      overflow: hidden; /* Taglia i bordi arrotondati se il contenuto esce */
-      padding: 0;       /* Reset padding: lo gestiremo internamente alle colonne */
+      max-width: 1000px;
+      perspective: 1000px; /* Necessario per l'effetto 3D */
     }
 
-    /* NUOVE CLASSI DA AGGIUNGERE SOTTO */
-    .login-column {
-      flex: 1;          /* Divide lo spazio equamente (50% ciascuna) */
+    /* === SINGOLA CARD 3D === */
+    .card-3d {
+      flex: 1;
+      background: white;
+      border-radius: var(--radius);
       padding: 40px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      transform-style: preserve-3d;
+      border: 1px solid rgba(255,255,255,0.2);
+      max-width: 400px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
     }
 
-    .login-left {
-      background-color: #ffffff;
+    /* Effetto Hover: Rotazione e Sollevamento */
+    .card-3d:hover {
+      transform: translateY(-10px) rotateX(5deg) rotateY(-5deg);
+      box-shadow: 20px 20px 60px rgba(0,0,0,0.15);
     }
 
-    .login-right {
-      background-color: #f8fafc; /* Grigio chiarissimo per distinguere l'area */
-      border-left: 1px solid #e2e8f0;
+    /* Effetto profondità sugli elementi interni */
+    .card-3d p, .card-3d div, .card-3d a {
+      transform: translateZ(30px); /* Fa "uscire" il testo dalla card */
     }
 
-    /* Rende il box di nuovo verticale sui telefoni */
+    .card-ospiti-3d {
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+    }
+
+    /* Adattabilità Mobile */
     @media (max-width: 768px) {
-      #login {
+      .login-container-3d {
         flex-direction: column;
-        max-width: 400px;
+        align-items: center;
       }
-      .login-right {
-        border-left: none;
-        border-top: 1px solid #e2e8f0;
-      }
+      .card-3d { width: 100%; }
     }
     /* STILE PER IL BOTTONE OSPITI */
     .guest-section {
@@ -490,12 +500,12 @@
   </div>
 </main>
 
-<div id="login">
+<div id="login" class="login-container-3d">
   
-  <div class="login-column login-left">
-      <p style="font-weight: 800; color: var(--primary); margin-bottom: 10px; font-size: 18px;">Area Protetta</p>
+  <div class="card-3d">
+      <p style="font-weight: 800; color: var(--primary); margin-bottom: 10px; font-size: 20px;">Area Protetta</p>
       <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">
-          Accedi con il tuo account istituzionale<br><strong>@lscortese.com</strong>
+          Accedi con l'account istituzionale<br><strong>@lscortese.com</strong>
       </p>
       
       <div id="g_id_onload"
@@ -506,10 +516,10 @@
       <div class="g_id_signin" data-type="standard" data-size="large"></div>
   </div>
 
-  <div class="login-column login-right">
-      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 18px;">Area Ospiti</p>
+  <div class="card-3d card-ospiti-3d">
+      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 20px;">Area Ospiti</p>
       <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">
-          Se non sei uno studente del liceo,<br>puoi consultare le risorse pubbliche.
+          Sei un visitatore esterno?<br>Esplora le risorse pubbliche.
       </p>
       <a href="ospiti.html" class="btn-guest">Entra come Ospite &rarr;</a>
   </div>
@@ -584,6 +594,7 @@ function performSearch() {
 
 </body>
 </html>
+
 
 
 
