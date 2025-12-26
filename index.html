@@ -621,7 +621,7 @@ function performSearch() {
 
 // Funzione per caricare il Feed RSS dal blog ascuolaoggi.com
 async function loadRSS() {
-    const feedUrl = 'https://ascuolaoggi.com/feed/'; 
+    const feedUrl = 'https://www.tomshw.it/feed/'; 
     const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
 
     try {
@@ -655,6 +655,7 @@ document.addEventListener('DOMContentLoaded', loadRSS);
 
 </body>
 </html>
+
 
 
 
