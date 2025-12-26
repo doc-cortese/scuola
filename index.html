@@ -274,7 +274,32 @@
       box-shadow: var(--shadow);
       max-width: 400px;
     }
-    
+    /* STILE PER IL BOTTONE OSPITI */
+    .guest-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-guest {
+        display: inline-block;
+        background-color: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 10px 24px;
+        border-radius: 50px; /* Arrotondato */
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-guest:hover {
+        background-color: var(--primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 64, 128, 0.2);
+        transform: translateY(-2px);
+    }
     /* Footer */
     footer {
       text-align: center;
@@ -440,7 +465,14 @@
        data-auto_prompt="false">
   </div>
   <div class="g_id_signin" data-type="standard"></div>
+
+  <div class="guest-section">
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Non sei uno studente del liceo?</p>
+      <a href="ospiti.html" class="btn-guest">Entra nell'Area Ospiti &rarr;</a>
+  </div>
 </div>
+
+  
 
 <footer>
   &copy; 2025 Prof. Antonio Adinolfi – Liceo Scientifico "N. Cortese"<br>
@@ -508,6 +540,7 @@ function performSearch() {
 
 </body>
 </html>
+
 
 
 
