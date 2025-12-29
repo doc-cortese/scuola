@@ -619,35 +619,55 @@ function performSearch() {
     document.getElementById('resultsCount').textContent = `Mostrando ${visibleCount} classi su ${items.length}`;
 }
 
-// Funzione per caricare il Feed RSS dal blog ascuolaoggi.com
-async function loadRSS() {
-    const feedUrl = 'https://www.tomshw.it/feed/'; 
-    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
-
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        const container = document.getElementById('rss-feed');
-        
-        if (data.status === 'ok') {
-            container.innerHTML = '';
-            // Mostriamo gli ultimi 3 articoli
-            data.items.slice(0, 3).forEach(item => {
-                const date = new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
-                container.innerHTML += `
-                    <a href="${item.link}" class="news-item" target="_blank">
-                        <span class="news-date">${date}</span>
-                        <span class="news-title">${item.title}</span>
-                    </a>
-                `;
-            });
-        } else {
-            container.innerHTML = '<p style="font-size:12px; color:red;">News momentaneamente non disponibili.</p>';
+// Funzione per caricare il Feed RSS dal blog liceoscientificocortese.edu.it
+async function loadFeeds() {
+    // Definizione dei feed
+    const feeds = [
+        {
+            url: 'https://liceoscientificocortese.edu.it/feed/',
+            containerId: 'school-feed',
+            itemClass: 'school-news-item',
+            dateClass: 'school-news-date',
+            titleClass: 'school-news-title',
+            limit: 2 // Mostriamo solo 2 per non allungare troppo la card login
+        },
+        {
+            url: 'https://ascuolaoggi.com/feed/', // Ho ripristinato il tuo blog (nel file 16 c'era tomshw)
+            containerId: 'rss-feed',
+            itemClass: 'news-item',
+            dateClass: 'news-date',
+            titleClass: 'news-title',
+            limit: 3
         }
-    } catch (error) {
-        console.error('Errore RSS:', error);
+    ];
+
+    for (const feed of feeds) {
+        try {
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            const container = document.getElementById(feed.containerId);
+            
+            if (data.status === 'ok' && container) {
+                container.innerHTML = '';
+                data.items.slice(0, feed.limit).forEach(item => {
+                    const date = new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+                    container.innerHTML += `
+                        <a href="${item.link}" class="${feed.itemClass}" target="_blank">
+                            <span class="${feed.dateClass}">${date}</span>
+                            <span class="${feed.titleClass}">${item.title}</span>
+                        </a>
+                    `;
+                });
+            }
+        } catch (error) {
+            console.error('Errore caricamento feed:', feed.url, error);
+        }
     }
 }
+
+// Avvia i feed
+document.addEventListener('DOMContentLoaded', loadFeeds);
 
 // Avviamo la funzione dopo il caricamento della pagina
 document.addEventListener('DOMContentLoaded', loadRSS);
@@ -655,6 +675,7 @@ document.addEventListener('DOMContentLoaded', loadRSS);
 
 </body>
 </html>
+
 
 
 
