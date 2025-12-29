@@ -571,7 +571,7 @@
 
 <div id="login" class="login-container-3d">
   
-  <div class="card-3d">
+  <div class="card-3d" style="border-top: 4px solid #bb4500>
       <p style="font-weight: 800; color: var(--primary); margin-bottom: 5px; font-size: 17px;">Area Protetta</p>
       
       <div id="school-feed">
@@ -583,15 +583,12 @@
       <div class="g_id_signin" data-type="standard" data-size="medium"></div>
   </div>
 
-  <div class="card-3d" style="border-top: 4px solid #ff4500;">
-      <p style="font-weight: 800; color: #ff4500; margin-bottom: 5px; font-size: 17px;">ascuolaoggi.com</p>
-      <div id="rss-feed">Caricamento notizie...</div>
-      <a href="https://ascuolaoggi.com" target="_blank" class="btn-guest" style="border-color: #ff4500; color: #ff4500; margin-top: auto; font-size: 11px; padding: 6px 12px;">Vai al Blog &nearrow;</a>
-  </div>
-
+  
   <div class="card-3d">
       <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 17px;">Area Ospiti</p>
       <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 25px;">Risorse pubbliche per visitatori ed esterni.</p>
+      <div id="rss-feed">Caricamento notizie...</div>
+      <a href="https://www.tomshw.it/feed/" target="_blank" class="btn-guest" style="border-color: #ff4500; color: #ff4500; margin-top: auto; font-size: 11px; padding: 6px 12px;">Vai al Blog &nearrow;</a>
       <a href="ospiti.html" class="btn-guest" style="margin-top: auto; font-size: 11px; padding: 6px 12px;">Entra come Ospite &rarr;</a>
   </div>
 
@@ -674,7 +671,7 @@ async function loadAllFeeds() {
             limit: 2 // Solo le ultime 2 circolari per non allungare la card
         },
         {
-            url: 'https://ascuolaoggi.com/feed/',
+            url: 'https://www.tomshw.it/feed/',
             containerId: 'rss-feed',
             itemClass: 'news-item',
             dateClass: 'news-date',
@@ -715,6 +712,7 @@ document.addEventListener('DOMContentLoaded', loadAllFeeds);
 
 </body>
 </html>
+
 
 
 
