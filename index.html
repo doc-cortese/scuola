@@ -399,7 +399,7 @@
     #school-feed {
       text-align: left;
       width: 100%;
-      margin-bottom: 15px;
+      margin-bottom: 15px 0;
     }
 
     .school-news-item {
@@ -667,7 +667,7 @@ async function loadAllFeeds() {
             itemClass: 'school-news-item',
             dateClass: 'school-news-date',
             titleClass: 'school-news-title',
-            limit: 2 // Solo le ultime 2 circolari per non allungare la card
+            limit: 3 // Solo le ultime 2 circolari per non allungare la card
         },
         {
             url: 'https://www.tomshw.it/feed/',
@@ -711,6 +711,7 @@ document.addEventListener('DOMContentLoaded', loadAllFeeds);
 
 </body>
 </html>
+
 
 
 
