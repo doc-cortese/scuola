@@ -394,6 +394,44 @@
         .profile-card { flex-direction: column; text-align: center; }
         header { text-align: center; }
     }
+
+    /* Stile specifico per il feed del Liceo (Card Area Protetta) */
+    #school-feed {
+      text-align: left;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .school-news-item {
+      display: block;
+      text-decoration: none;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(0, 64, 128, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .school-news-item:hover { transform: translateX(5px); }
+
+    .school-news-date { 
+      font-size: 9px; 
+      color: var(--primary); 
+      font-weight: 700; 
+      text-transform: uppercase; 
+    }
+
+    .school-news-title { 
+      font-size: 11px; 
+      color: var(--text-main); 
+      font-weight: 600; 
+      line-height: 1.2; 
+      display: block; 
+    }
+
+    /* Riduciamo leggermente l'altezza delle card */
+    .card-3d {
+      padding: 20px 20px !important;
+      min-height: 320px !important;
+    }
   </style>
 </head>
 <body>
@@ -533,25 +571,30 @@
 
 <div id="login" class="login-container-3d">
   
-  <div class="card-3d" style="border-top: 4px solid #ffb100;">
-      <p style="font-weight: 800; color: var(--primary); margin-bottom: 10px; font-size: 18px;">Area Protetta</p>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 25px;">Accedi con l'account istituzionale<br><strong>@lscortese.com</strong></p>
+  <div class="card-3d">
+      <p style="font-weight: 800; color: var(--primary); margin-bottom: 5px; font-size: 17px;">Area Protetta</p>
+      
+      <div id="school-feed">
+          <p style="font-size: 10px; color: var(--text-muted); text-align: center;">Caricamento circolari...</p>
+      </div>
+
+      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">Login istituzionale @lscortese.com</p>
       <div id="g_id_onload" data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-      <div class="g_id_signin" data-type="standard"></div>
+      <div class="g_id_signin" data-type="standard" data-size="medium"></div>
   </div>
 
-
-  
   <div class="card-3d" style="border-top: 4px solid #ff4500;">
-      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 18px;">Area Ospiti</p>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 25px;">Risorse pubbliche per visitatori e studenti esterni.</p>
-      <a href="ospiti.html" class="btn-guest" style="margin-top: auto;">Entra come Ospite &rarr;</a>
-      
-      <div id="rss-feed">Caricamento ultime notizie...</div>
-      
+      <p style="font-weight: 800; color: #ff4500; margin-bottom: 5px; font-size: 17px;">ascuolaoggi.com</p>
+      <div id="rss-feed">Caricamento notizie...</div>
+      <a href="https://ascuolaoggi.com" target="_blank" class="btn-guest" style="border-color: #ff4500; color: #ff4500; margin-top: auto; font-size: 11px; padding: 6px 12px;">Vai al Blog &nearrow;</a>
   </div>
-    
-  
+
+  <div class="card-3d">
+      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 17px;">Area Ospiti</p>
+      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 25px;">Risorse pubbliche per visitatori ed esterni.</p>
+      <a href="ospiti.html" class="btn-guest" style="margin-top: auto; font-size: 11px; padding: 6px 12px;">Entra come Ospite &rarr;</a>
+  </div>
+
 </div>
 
   
@@ -620,8 +663,7 @@ function performSearch() {
 }
 
 // Funzione per caricare il Feed RSS dal blog liceoscientificocortese.edu.it
-async function loadFeeds() {
-    // Definizione dei feed
+async function loadAllFeeds() {
     const feeds = [
         {
             url: 'https://liceoscientificocortese.edu.it/feed/',
@@ -629,15 +671,15 @@ async function loadFeeds() {
             itemClass: 'school-news-item',
             dateClass: 'school-news-date',
             titleClass: 'school-news-title',
-            limit: 2 // Mostriamo solo 2 per non allungare troppo la card login
+            limit: 2 // Solo le ultime 2 circolari per non allungare la card
         },
         {
-            url: 'https://ascuolaoggi.com/feed/', // Ho ripristinato il tuo blog (nel file 16 c'era tomshw)
+            url: 'https://ascuolaoggi.com/feed/',
             containerId: 'rss-feed',
             itemClass: 'news-item',
             dateClass: 'news-date',
             titleClass: 'news-title',
-            limit: 3
+            limit: 3 // Le ultime 3 del blog
         }
     ];
 
@@ -662,19 +704,18 @@ async function loadFeeds() {
             }
         } catch (error) {
             console.error('Errore caricamento feed:', feed.url, error);
+            document.getElementById(feed.containerId).innerHTML = '<p style="font-size:10px;">News non disponibili.</p>';
         }
     }
 }
 
-// Avvia i feed
-document.addEventListener('DOMContentLoaded', loadFeeds);
-
-// Avviamo la funzione dopo il caricamento della pagina
-document.addEventListener('DOMContentLoaded', loadRSS);
+// Avviamo il caricamento
+document.addEventListener('DOMContentLoaded', loadAllFeeds);
 </script>
 
 </body>
 </html>
+
 
 
 
