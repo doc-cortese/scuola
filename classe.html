@@ -364,10 +364,9 @@
     const cl = urlParams.get('classe') || 'default';
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
     
-    // Pulizia totale dei dati di sessione
     localStorage.removeItem(`tracciaAssegnata_${classKey}`);
     localStorage.removeItem(`fineProva_${classKey}`);
-    localStorage.removeItem("autoSaveCode");
+    localStorage.removeItem(`codiceSalvato_${classKey}`);
     localStorage.removeItem("nomeStudente");
     window.location.href = '../index.html'; 
   }
@@ -379,17 +378,17 @@
       theme: 'vs-dark',
       automaticLayout: true,
       fontSize: 14,
-      contextmenu: false, // Disabilita il menu contestuale interno di Monaco
-      minimap: { enabled: false } // Opzionale: guadagni spazio su mobile
+      contextmenu: false,
+      minimap: { enabled: false }
     });
-
-    // Blocco Paste specifico di Monaco
-    editor.onDidPaste((e) => { 
-        e.stopImmediatePropagation(); 
-        alert('🚫 Incolla disabilitato nell\'editor.'); 
-    });
-
+    editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
     editor.onDidChangeModelContent(() => { resetActivityTimer(); });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const cl = urlParams.get('classe') || 'default';
+    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+    const lastCode = localStorage.getItem(`codiceSalvato_${classKey}`);
+    if (lastCode) editor.setValue(lastCode);
   });
 
   async function runCode() {
@@ -397,6 +396,7 @@
     out.textContent = "Esecuzione...\n";
     try {
       if (!pyodide) pyodide = await loadPyodide();
+      document.getElementById('eseguiBtn').style.display = "inline-block";
       document.getElementById('eseguiBtn').disabled = false;
       document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
       await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
@@ -413,10 +413,8 @@
     const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
     const select = document.getElementById('tracciaSelect');
 
-    // --- 1. GESTIONE TRACCIA PERSISTENTE ---
     const tracciaKey = `tracciaAssegnata_${classKey}`;
     let assignedIndex = localStorage.getItem(tracciaKey);
-
     if (assignedIndex === null) {
         assignedIndex = Math.floor(Math.random() * exercises.length);
         localStorage.setItem(tracciaKey, assignedIndex);
@@ -427,61 +425,48 @@
     const selectedExercise = exercises[assignedIndex];
 
     exercises.forEach((ex, index) => {
-        const opt = document.createElement('option');
-        opt.value = `tracce/${ex.file}`;
-        opt.textContent = ex.title;
-        if (index === assignedIndex) opt.selected = true;
-        select.appendChild(opt);
+      const opt = document.createElement('option');
+      opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
+      if (index === assignedIndex) opt.selected = true;
+      select.appendChild(opt);
     });
-    select.disabled = true; 
+    select.disabled = true;
     if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
 
-    // --- 2. GESTIONE TIMER FINE PROVA PERSISTENTE ---
     const timerKey = `fineProva_${classKey}`;
-    let savedMaxTime = localStorage.getItem(timerKey);
+    let savedTime = localStorage.getItem(timerKey);
+    if (savedTime !== null) maxTimeLeft = parseInt(savedTime);
 
-    if (savedMaxTime !== null) {
-        maxTimeLeft = parseInt(savedMaxTime);
-    } else {
-        // Se è la prima volta, usa il valore di default (2700s / 45min)
-        localStorage.setItem(timerKey, maxTimeLeft);
-    }
-
-    // --- 3. GESTIONE NOME STUDENTE ---
     const ns = document.getElementById('nomeStudente');
     ns.value = localStorage.getItem("nomeStudente") || "";
     ns.oninput = () => localStorage.setItem("nomeStudente", ns.value);
 
-    // --- 4. CICLO UNICO DEI TIMER ---
     setInterval(() => {
         if (timeLeft <= 0 || maxTimeLeft <= 0) {
             alert("Tempo scaduto! L'esercizio verrà chiuso.");
             tornaAllaPaginaPrincipale();
-            return;
         }
-
-        timeLeft--; 
+        timeLeft--;
         maxTimeLeft--;
-
-        // Salva il tempo rimanente ogni secondo nel localStorage
         localStorage.setItem(timerKey, maxTimeLeft);
 
         if (maxTimeLeft === 300 && !warningSent) {
-            alert("ATTENZIONE: Mancano solo 5 minuti al termine definitivo della prova!");
+            alert("ATTENZIONE: Mancano solo 5 minuti al termine!");
             warningSent = true;
         }
-
-        // Aggiornamento grafici
-        const m1 = Math.floor(timeLeft / 60);
-        const s1 = timeLeft % 60;
-        document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
-
-        const m2 = Math.floor(maxTimeLeft / 60);
-        const s2 = maxTimeLeft % 60;
-        document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
-
+        document.getElementById('timerDisplay').textContent = 
+            `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`;
+        document.getElementById('maxTimerDisplay').textContent = 
+            `${Math.floor(maxTimeLeft / 60)}:${(maxTimeLeft % 60).toString().padStart(2, '0')}`;
     }, 1000);
-});
+
+    setInterval(() => {
+        if (editor) {
+            localStorage.setItem(`codiceSalvato_${classKey}`, editor.getValue());
+            console.log("Backup eseguito");
+        }
+    }, 120000);
+  });
 </script>
 </body>
 </html>
