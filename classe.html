@@ -209,10 +209,11 @@
     'default': [{ file: 'default.pdf', title: 'Traccia' }]
   };
 
-  let editor, pyodide, timeLeft = 300, currentImgWidth = 100;
-  let currentFontSize = 14; // Dimensione font iniziale dell'editor
-  let maxTimeLeft = 2700; // 45 minuti in secondi
-  let warningSent = false; // Serve per mostrare l'alert una sola volta
+  let editor, pyodide, timeLeft = 300;
+  let maxTimeLeft = 2700; // Valore di default (45 min)
+  let currentImgWidth = 100;
+  let currentFontSize = 14;
+  let warningSent = false;
   const startTime = new Date();
 
   // === FUNZIONI ZOOM EDITOR ===
@@ -433,31 +434,37 @@
     select.disabled = true;
     if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
 
+    // --- GESTIONE TIMER FINE PROVA PERSISTENTE ---
     const timerKey = `fineProva_${classKey}`;
     let savedTime = localStorage.getItem(timerKey);
-    if (savedTime !== null) maxTimeLeft = parseInt(savedTime);
 
-    const ns = document.getElementById('nomeStudente');
-    ns.value = localStorage.getItem("nomeStudente") || "";
-    ns.oninput = () => localStorage.setItem("nomeStudente", ns.value);
+    if (savedTime !== null) {
+    // IMPORTANTE: Sovrascriviamo la variabile globale con il tempo salvato
+        maxTimeLeft = parseInt(savedTime); 
+    } else {
+    // Se è la prima volta, inizializziamo il salvataggio
+        localStorage.setItem(timerKey, maxTimeLeft);
+    }
 
     setInterval(() => {
-        if (timeLeft <= 0 || maxTimeLeft <= 0) {
-            alert("Tempo scaduto! L'esercizio verrà chiuso.");
-            tornaAllaPaginaPrincipale();
-        }
-        timeLeft--;
-        maxTimeLeft--;
-        localStorage.setItem(timerKey, maxTimeLeft);
+    if (timeLeft <= 0 || maxTimeLeft <= 0) {
+        // Se il tempo è scaduto, puliamo i dati e usciamo
+        alert("Tempo scaduto! L'esercizio verrà chiuso.");
+        tornaAllaPaginaPrincipale();
+        return;
+    }
 
-        if (maxTimeLeft === 300 && !warningSent) {
-            alert("ATTENZIONE: Mancano solo 5 minuti al termine!");
-            warningSent = true;
-        }
-        document.getElementById('timerDisplay').textContent = 
-            `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`;
-        document.getElementById('maxTimerDisplay').textContent = 
-            `${Math.floor(maxTimeLeft / 60)}:${(maxTimeLeft % 60).toString().padStart(2, '0')}`;
+    timeLeft--;
+    maxTimeLeft--;
+    
+    // Aggiorna il salvataggio ogni secondo
+    localStorage.setItem(timerKey, maxTimeLeft);
+
+    // Aggiornamento interfaccia (codice invariato)
+    document.getElementById('timerDisplay').textContent = 
+        `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`;
+    document.getElementById('maxTimerDisplay').textContent = 
+        `${Math.floor(maxTimeLeft / 60)}:${(maxTimeLeft % 60).toString().padStart(2, '0')}`;
     }, 1000);
 
     setInterval(() => {
