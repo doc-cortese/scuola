@@ -360,6 +360,13 @@
   function resetActivityTimer() { timeLeft = 300; }
 
   function tornaAllaPaginaPrincipale() { 
+    const urlParams = new URLSearchParams(window.location.search);
+    const cl = urlParams.get('classe') || 'default';
+    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+    
+    // Pulizia totale dei dati di sessione
+    localStorage.removeItem(`tracciaAssegnata_${classKey}`);
+    localStorage.removeItem(`fineProva_${classKey}`);
     localStorage.removeItem("autoSaveCode");
     localStorage.removeItem("nomeStudente");
     window.location.href = '../index.html'; 
@@ -405,46 +412,76 @@
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
     const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
     const select = document.getElementById('tracciaSelect');
-    exercises.forEach(ex => {
-      const opt = document.createElement('option');
-      opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
-      select.appendChild(opt);
-    });
-    if (exercises.length > 0) updateTraccia(`tracce/${exercises[0].file}`);
 
+    // --- 1. GESTIONE TRACCIA PERSISTENTE ---
+    const tracciaKey = `tracciaAssegnata_${classKey}`;
+    let assignedIndex = localStorage.getItem(tracciaKey);
+
+    if (assignedIndex === null) {
+        assignedIndex = Math.floor(Math.random() * exercises.length);
+        localStorage.setItem(tracciaKey, assignedIndex);
+    } else {
+        assignedIndex = parseInt(assignedIndex);
+        if (assignedIndex >= exercises.length) assignedIndex = 0;
+    }
+    const selectedExercise = exercises[assignedIndex];
+
+    exercises.forEach((ex, index) => {
+        const opt = document.createElement('option');
+        opt.value = `tracce/${ex.file}`;
+        opt.textContent = ex.title;
+        if (index === assignedIndex) opt.selected = true;
+        select.appendChild(opt);
+    });
+    select.disabled = true; 
+    if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
+
+    // --- 2. GESTIONE TIMER FINE PROVA PERSISTENTE ---
+    const timerKey = `fineProva_${classKey}`;
+    let savedMaxTime = localStorage.getItem(timerKey);
+
+    if (savedMaxTime !== null) {
+        maxTimeLeft = parseInt(savedMaxTime);
+    } else {
+        // Se è la prima volta, usa il valore di default (2700s / 45min)
+        localStorage.setItem(timerKey, maxTimeLeft);
+    }
+
+    // --- 3. GESTIONE NOME STUDENTE ---
     const ns = document.getElementById('nomeStudente');
     ns.value = localStorage.getItem("nomeStudente") || "";
     ns.oninput = () => localStorage.setItem("nomeStudente", ns.value);
+
+    // --- 4. CICLO UNICO DEI TIMER ---
     setInterval(() => {
-    // 1. Controllo se uno dei due timer è scaduto
-    if (timeLeft <= 0 || maxTimeLeft <= 0) {
-        alert("Tempo scaduto! L'esercizio verrà chiuso.");
-        tornaAllaPaginaPrincipale(); // Funzione che riporta alla home [cite: 238, 241]
-    }
+        if (timeLeft <= 0 || maxTimeLeft <= 0) {
+            alert("Tempo scaduto! L'esercizio verrà chiuso.");
+            tornaAllaPaginaPrincipale();
+            return;
+        }
 
-    // 2. Decremento di entrambi i timer ogni secondo
-    timeLeft--;
-    maxTimeLeft--;
+        timeLeft--; 
+        maxTimeLeft--;
 
-    // 3. Gestione Avviso 5 minuti (300 secondi rimanenti nel timer massimo)
-    if (maxTimeLeft === 300 && !warningSent) {
-        alert("ATTENZIONE: Mancano solo 5 minuti al termine definitivo della prova!");
-        warningSent = true;
-    }
+        // Salva il tempo rimanente ogni secondo nel localStorage
+        localStorage.setItem(timerKey, maxTimeLeft);
 
-    // 4. Aggiornamento grafico del Timer Inattività (esistente)
-    const m1 = Math.floor(timeLeft / 60);
-    const s1 = timeLeft % 60;
-    document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
+        if (maxTimeLeft === 300 && !warningSent) {
+            alert("ATTENZIONE: Mancano solo 5 minuti al termine definitivo della prova!");
+            warningSent = true;
+        }
 
-    // 5. Aggiornamento grafico del Timer Massimo (nuovo)
-    const m2 = Math.floor(maxTimeLeft / 60);
-    const s2 = maxTimeLeft % 60;
-    document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
+        // Aggiornamento grafici
+        const m1 = Math.floor(timeLeft / 60);
+        const s1 = timeLeft % 60;
+        document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
+
+        const m2 = Math.floor(maxTimeLeft / 60);
+        const s2 = maxTimeLeft % 60;
+        document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
 
     }, 1000);
-    
-  });
+});
 </script>
 </body>
 </html>
