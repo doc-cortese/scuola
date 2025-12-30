@@ -333,17 +333,37 @@
         border-top: 1px solid #e2e8f0;
     }
 
+    /* Stile pulsante Ospite identico a Google Sign-In */
     .btn-guest {
-        display: inline-block;
-        background-color: transparent;
-        border: 2px solid var(--primary);
-        color: var(--primary);
-        padding: 10px 24px;
-        border-radius: 50px; /* Arrotondato */
-        font-weight: 700;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      color: #3c4043; /* Grigio scuro tipico di Google */
+      border: 1px solid #dadce0;
+      border-radius: 4px; /* Angoli meno arrotondati, come Google */
+      padding: 0 15px;
+      height: 40px; /* Altezza standard dei pulsanti Google */
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background-color .2s, box-shadow .2s;
+      font-family: 'Roboto', arial, sans-serif;
+      width: 100%;
+      max-width: 240px; /* Larghezza simile al tasto Google */
+    }
+
+    .btn-guest:hover {
+      background-color: #f8f9fa;
+      border-color: #d2d4d7;
+      box-shadow: 0 1px 2px 0 rgba(60,64,67,0.30), 0 1px 3px 1px rgba(60,64,67,0.15);
+    }
+
+    /* Icona interna simile al logo */
+    .btn-guest::before {
+      content: '👤'; /* Icona utente semplice */
+      margin-right: 10px;
+      font-size: 16px;
     }
 
     .btn-guest:hover {
@@ -573,8 +593,9 @@
 <div id="login" class="login-container-3d">
   
   <div class="card-3d" style="border-top: 4px solid #bb4500">
-      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 0px; font-size: 17px;"><b>Area Protetta</b></p>
-      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 0px;">Login istituzionale @lscortese.com</p>
+      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 17px;"><b>Area Protetta</b></p>
+      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 25px;">Login istituzionale @lscortese.com</p>
+    
       <div id="g_id_onload" data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
       <div class="g_id_signin" data-type="standard" data-size="medium"></div>
       <div id="school-feed">
@@ -583,15 +604,17 @@
       
   </div>
 
-  
   <div class="card-3d" style="border-top: 4px solid #ff4500">
-      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 0px; font-size: 17px;"><b>Area Ospiti</b></p>
-      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 0px;">Risorse pubbliche per visitatori ed esterni.</p>
-      <div><a href="ospiti.html" class="btn-guest" style="margin-top: auto; font-size: 11px; padding: 6px 12px;">Entra come Ospite &rarr;</a></div>
+      <p style="font-weight: 800; color: var(--text-main); margin-bottom: 10px; font-size: 17px;">Area Ospiti</p>
+      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 25px;">Risorse pubbliche per visitatori ed esterni.</p>
+      
+      <a href="ospiti.html" class="btn-guest">Entra come Ospite</a>
       <div></div>
       <div id="rss-feed">
           <p style="font-size: 10px; color: var(--text-muted); text-align: center;">Caricamento notizie...</p>
       </div>
+  </div>
+  
       
   </div>
 
@@ -715,6 +738,7 @@ document.addEventListener('DOMContentLoaded', loadAllFeeds);
 
 </body>
 </html>
+
 
 
 
