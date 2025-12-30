@@ -173,8 +173,8 @@
     <div class="controls">
       <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
       <div style="display: inline-flex; flex-direction: column; align-items: flex-end; margin-left: auto; margin-right: 15px;">
-        <span style="font-size: 11px; color: #666;">Scadenza Inattività: <span id="timerDisplay">05:00</span></span>
-        <span style="font-weight: bold; color: #004080;">Fine Prova: <span id="maxTimerDisplay">45:00</span></span>
+        <div style="font-size: 11px; color: #666;">Inattività: <span id="timerDisplay">--:--</span></div>
+        <div style="font-weight: bold; color: var(--primary-color);">Fine Prova: <span id="maxTimerDisplay">--:--</span></div>
       </div>
       <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
     </div>
@@ -216,6 +216,15 @@
   let warningSent = false;
   const startTime = new Date();
 
+  function aggiornaDisplayTimer() {
+    const m1 = Math.floor(timeLeft / 60);
+    const s1 = timeLeft % 60;
+    document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
+
+    const m2 = Math.floor(maxTimeLeft / 60);
+    const s2 = maxTimeLeft % 60;
+    document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
+  }
   // === FUNZIONI ZOOM EDITOR ===
   function changeEditorZoom(delta) {
     currentFontSize += delta;
@@ -435,36 +444,28 @@
     if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
 
     // --- GESTIONE TIMER FINE PROVA PERSISTENTE ---
-    const timerKey = `fineProva_${classKey}`;
-    let savedTime = localStorage.getItem(timerKey);
-
+    // RECUPERO TIMER PERSISTENTE
+    const timerKey = `timer_${classKey}`;
+    const savedTime = localStorage.getItem(timerKey);
     if (savedTime !== null) {
-    // IMPORTANTE: Sovrascriviamo la variabile globale con il tempo salvato
-        maxTimeLeft = parseInt(savedTime); 
-    } else {
-    // Se è la prima volta, inizializziamo il salvataggio
-        localStorage.setItem(timerKey, maxTimeLeft);
+        maxTimeLeft = parseInt(savedTime);
     }
 
+    // AGGIORNAMENTO IMMEDIATO DELLO SCHERMO (Prima che parta il setInterval)
+    aggiornaDisplayTimer(); 
+
+    // AVVIO DEL CICLO
     setInterval(() => {
-    if (timeLeft <= 0 || maxTimeLeft <= 0) {
-        // Se il tempo è scaduto, puliamo i dati e usciamo
-        alert("Tempo scaduto! L'esercizio verrà chiuso.");
-        tornaAllaPaginaPrincipale();
-        return;
-    }
-
-    timeLeft--;
-    maxTimeLeft--;
-    
-    // Aggiorna il salvataggio ogni secondo
-    localStorage.setItem(timerKey, maxTimeLeft);
-
-    // Aggiornamento interfaccia (codice invariato)
-    document.getElementById('timerDisplay').textContent = 
-        `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`;
-    document.getElementById('maxTimerDisplay').textContent = 
-        `${Math.floor(maxTimeLeft / 60)}:${(maxTimeLeft % 60).toString().padStart(2, '0')}`;
+        if (timeLeft <= 0 || maxTimeLeft <= 0) {
+            alert("Tempo scaduto!");
+            tornaAllaPaginaPrincipale();
+            return;
+        }
+        timeLeft--;
+        maxTimeLeft--;
+        localStorage.setItem(timerKey, maxTimeLeft);
+        
+        aggiornaDisplayTimer(); // Continua ad aggiornare ogni secondo
     }, 1000);
 
     setInterval(() => {
