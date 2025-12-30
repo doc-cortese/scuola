@@ -199,14 +199,21 @@
 <iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
 
 <script>
+  // CONFIGURAZIONE CARTELLE PER CLASSE
   const EXERCISES_BY_CLASS = {
-    'Seconde': [{ file: 'Esercizio_II_22122025.jpg', title: 'Scontrino' }],
-    'Terze': [
-      { file: 'Esercizio_Terze_12122025.jpg', title: 'Esercizio Fisica (JPG)' },
-      { file: 'Esercizio_Terze_1.pdf', title: 'Esercizio Fisica (PDF)' }
+    'Seconde': [
+      { file: 'Seconde/Esercizio_II_1.jpg', title: 'Scontrino Spesa' }
+      
     ],
-    'Quarte': [{ file: 'Esercizio_Quarte_1.pdf', title: 'Database' }],
-    'default': [{ file: 'default.pdf', title: 'Traccia' }]
+    'Terze': [
+      { file: 'Terze/Esercizio_III_1.pdf', title: 'Moto Rettilineo' },
+      { file: 'Terze/Esercizio_III_2.jpg', title: 'Forze e Vettori' }
+    ],
+    'Quarte': [
+      { file: 'Quarte/Esercizio_IV_1.pdf', title: 'Modello ER' },
+      { file: 'Quarte/Esercizio_IV_2.pdf', title: 'Query SQL' }
+    ],
+    'default': [{ file: 'default.pdf', title: 'Traccia Standard' }]
   };
 
   let editor, pyodide, timeLeft = 300;
