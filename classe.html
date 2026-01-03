@@ -148,8 +148,22 @@
       height: 100px; /* Ridotto leggermente per mobile  */
       overflow-y: auto;
       font-size: 12px;
-  }
+    }
     #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
+
+    @keyframes rotateHourglass {
+      0% { transform: rotate(0deg); }
+      45% { transform: rotate(180deg); }
+      50% { transform: rotate(180deg); }
+      95% { transform: rotate(360deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .clessidra-icon {
+        display: inline-block;
+        font-size: 18px;
+        animation: rotateHourglass 3s infinite ease-in-out;
+    }
   </style>
 </head>
 
@@ -173,7 +187,7 @@
     <div class="controls">
       <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
       <div style="display: inline-flex; flex-direction: column; align-items: flex-end; margin-left: auto; margin-right: 15px;">
-        <div style="font-size: 11px; color: #666;">⌛<span id="timerDisplay">--:--</span></div>
+        <div style="font-size: 11px; color: #666;">Inattività:⌛<span id="timerDisplay">--:--</span></div>
         <div style="font-weight: bold; color: var(--primary-color);">Fine Prova: <span id="maxTimerDisplay">--:--</span></div>
       </div>
       <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
