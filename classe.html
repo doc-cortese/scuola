@@ -500,25 +500,31 @@
     aggiornaDisplayTimer(); 
 
     // AVVIO DEL CICLO
-    setInterval(() => {
+    const timerInterval = setInterval(() => {
         if (timeLeft <= 0 || maxTimeLeft <= 0) {
-            alert("Tempo scaduto!");
+            clearInterval(timerInterval);
+            
+            // Messaggio e Invio automatico al Drive
+            alert("Tempo scaduto o sessione inattiva! Il file è stato inviato al docente.");
+            
+            if (typeof window.inviaConsegnaDrive === 'function') {
+                window.inviaConsegnaDrive(true); // true salta l'alert di conferma manuale
+            }
+
+            // Pulizia
+            localStorage.removeItem(`codiceSalvato_${classKey}`);
+            localStorage.removeItem(timerKey);
+            
             tornaAllaPaginaPrincipale();
             return;
         }
-        timeLeft--;
-        maxTimeLeft--;
-        localStorage.setItem(timerKey, maxTimeLeft);
-        
-        aggiornaDisplayTimer(); // Continua ad aggiornare ogni secondo
-    }, 1000);
 
-    setInterval(() => {
-        if (editor) {
-            localStorage.setItem(`codiceSalvato_${classKey}`, editor.getValue());
-            console.log("Backup eseguito");
-        }
-    }, 120000);
+        timeLeft--;      // Scala inattività
+        maxTimeLeft--;   // Scala fine prova
+        localStorage.setItem(timerKey, maxTimeLeft); // Salva il tempo prova
+        
+        aggiornaDisplayTimer(); 
+    }, 1000);
   });
 </script>
 </body>
