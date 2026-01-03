@@ -226,19 +226,21 @@
   function aggiornaDisplayTimer() {
     const m1 = Math.floor(timeLeft / 60);
     const s1 = timeLeft % 60;
-    document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
+    
+    const timerDisplay = document.getElementById('timerDisplay');
+    
+    if (timerDisplay) {
+        // Commentiamo la riga qui sotto per non mostrare il tempo a video
+        // document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
+        
+        // Opzionale: puoi scrivere un testo fisso o lasciarlo vuoto
+        timerDisplay.textContent = "Tempo di inattività:5 min"; 
+    }
 
     const m2 = Math.floor(maxTimeLeft / 60);
     const s2 = maxTimeLeft % 60;
-    const maxTimerDisplay = document.getElementById('maxTimerDisplay');
+    document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
     
-    if (maxTimerDisplay) {
-        // Commentiamo la riga qui sotto per non mostrare il tempo a video
-        // maxTimerDisplay.textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
-        
-        // Opzionale: puoi scrivere un testo fisso o lasciarlo vuoto
-        maxTimerDisplay.textContent = "Tempo di inattività:5 min"; 
-    }
     
   }
   // === FUNZIONI ZOOM EDITOR ===
