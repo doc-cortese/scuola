@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editor Python - Prof. Antonio Adinolfi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script>
+    window.require = { paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+  <script src="./libs/pyodide.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #004080;
+      --secondary-color: #28a745;
+      --danger-color: #dc3545;
+      --bg-color: #f8f9fa;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      /* Protezione: impedisce la selezione del testo nell'interfaccia */
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Layout principale: Colonna su mobile, Riga su desktop */
+    #main-layout { 
+        display: flex; 
+        flex-direction: column; /* Gli elementi si impilano verticalmente [cite: 27] */
+        height: 100vh; 
+        overflow: hidden; 
+    }
+    
+    /* Regole comuni per le due sezioni */
+    #traccia, #editor-section {
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        background: white;
+        min-height: 0;
+        width: 100%; /* Su mobile occupano tutta la larghezza [cite: 60] */
+    }
+    
+    /* Su mobile, diamo un'altezza specifica per vedere entrambi */
+    #traccia { height: 40vh; border-bottom: 2px solid #ddd; }
+    #editor-section { height: 60vh; }
+    
+    /* Media Query per Desktop (schermi più larghi di 768px) */
+    @media (min-width: 768px) {
+        #main-layout { flex-direction: row; } /* Affiancati [cite: 36] */
+        #traccia { 
+            width: 45%; 
+            height: 100vh; 
+            border-right: 2px solid #ddd; 
+            border-bottom: none;
+        }
+        #editor-section { 
+            width: 55%; 
+            height: 100vh; 
+        }
+    }
+
+   #viewerContainer {
+        flex-grow: 1; [cite: 48]
+        border: 1px solid #ccc; [cite: 49]
+        border-radius: 8px; [cite: 50]
+        /* Fondamentale per lo scorrimento */
+        overflow: auto !important; 
+        background-color: #e0e0e0; [cite: 52]
+        position: relative; [cite: 56]
+        display: block; /* Cambia da flex a block per favorire lo scroll */
+    }
+
+    .traccia-img {
+        transition: width 0.2s ease-in-out; [cite: 59]
+        /* Rimuovi height: auto se presente e usa questa configurazione */
+        max-width: none; 
+        display: block; [cite: 62]
+    }
+
+    
+   .controls { 
+      margin-bottom: 12px; 
+      display: flex; 
+      gap: 8px; 
+      align-items: center; 
+      flex-wrap: wrap; /* Fondamentale: i bottoni scendono se non c'è posto  */
+    }
+
+    input[type="text"] { 
+        flex: 1; 
+        min-width: 150px; /* Impedisce che l'input diventi troppo piccolo [cite: 64] */
+        padding: 8px; 
+    }
+
+    button {
+      padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;
+      font-weight: 600; transition: all 0.2s;
+    }
+    button:hover { opacity: 0.9; }
+
+    .btn-run { background-color: var(--primary-color); color: white; }
+    .btn-drive { background-color: var(--secondary-color); color: white; }
+    .btn-exit { background-color: var(--danger-color); color: white; }
+    .btn-zoom-ui { background-color: #f0f0f0; border: 1px solid #ccc; font-size: 18px; width: 40px; }
+
+    /* Stili per la nuova Toolbar dello Zoom Codice */
+    .zoom-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .btn-z {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 4px 12px;
+      font-size: 14px;
+    }
+
+    #monaco-container {
+      flex-grow: 1; /* Spinge l'editor a occupare tutto lo spazio disponibile [cite: 93] */
+      border: 1px solid #ccc;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+      background: #1e1e1e; /* Colore scuro di sfondo per evitare il flash bianco */
+    }
+
+   #output {
+      background: #1e1e1e; 
+      color: #00ff00; 
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      height: 100px; /* Ridotto leggermente per mobile  */
+      overflow-y: auto;
+      font-size: 12px;
+  }
+    #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
+  </style>
+</head>
+
+<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+
+<div id="main-layout">
+  <div id="traccia">
+    <div class="controls">
+      <select id="tracciaSelect" onchange="updateTraccia(this.value)"></select>
+      <div id="imgZoomControls" style="display:none;">
+        <button class="btn-zoom-ui" onclick="zoomImage(1.2)">+</button>
+        <button class="btn-zoom-ui" onclick="zoomImage(0.8)">-</button>
+      </div>
+    </div>
+    <div id="viewerContainer">
+      <iframe id="pdfFrame" src="" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+  </div>
+
+  <div id="editor-section">
+    <div class="controls">
+      <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
+      <div style="display: inline-flex; flex-direction: column; align-items: flex-end; margin-left: auto; margin-right: 15px;">
+        <div style="font-size: 11px; color: #666;">Inattività: <span id="timerDisplay">--:--</span></div>
+        <div style="font-weight: bold; color: var(--primary-color);">Fine Prova: <span id="maxTimerDisplay">--:--</span></div>
+      </div>
+      <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
+    </div>
+
+    <div class="zoom-toolbar">
+        <span style="font-size: 12px; font-weight: bold; color: var(--primary-color);">ZOOM CODICE:</span>
+        <button class="btn-z" onclick="changeEditorZoom(2)">+</button>
+        <button class="btn-z" onclick="changeEditorZoom(-2)">-</button>
+        <button class="btn-z" onclick="resetEditorZoom()" style="background:#64748b;">Reset</button>
+        <button class="btn-z" id="focusBtn" onclick="toggleFocusMode()" style="background: #8b5cf6; margin-left: 5px;">Solo Editor</button>
+    </div>
+    <div id="monaco-container"></div>
+
+    <div class="controls" style="margin-top: 10px;">
+      <button class="btn-run" id="eseguiBtn" onclick="runCode()" style="display:none;" disabled>⌛ Caricamento...</button>
+      <button class="btn-drive" onclick="inviaConsegnaDrive()">☁️ Invia al Drive</button>
+    </div>
+    <pre id="output">Inizializzazione ambiente Python...</pre>
+  </div>
+</div>
+
+<iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+
+<script>
+  // CONFIGURAZIONE CARTELLE PER CLASSE
+  const EXERCISES_BY_CLASS = {
+    'Seconde': [
+      { file: 'Seconde/Esercizio_II_1.jpg', title: 'Scontrino Spesa' }
+      
+    ],
+    'Terze': [
+      { file: 'Terze/Esercizio_III_1.pdf', title: 'Moto Rettilineo' },
+      { file: 'Terze/Esercizio_III_2.jpg', title: 'Forze e Vettori' }
+    ],
+    'Quarte': [
+      { file: 'Quarte/Esercizio_IV_1.pdf', title: 'Modello ER' },
+      { file: 'Quarte/Esercizio_IV_2.pdf', title: 'Query SQL' }
+    ],
+    'default': [{ file: 'default.pdf', title: 'Traccia Standard' }]
+  };
+
+  let editor, pyodide, timeLeft = 300;
+  let maxTimeLeft = 2700; // Valore di default (45 min)
+  let currentImgWidth = 100;
+  let currentFontSize = 14;
+  let warningSent = false;
+  const startTime = new Date();
+
+  function aggiornaDisplayTimer() {
+    const m1 = Math.floor(timeLeft / 60);
+    const s1 = timeLeft % 60;
+    
+    const timerDisplay = document.getElementById('timerDisplay');
+    
+    if (timerDisplay) {
+        // Commentiamo la riga qui sotto per non mostrare il tempo a video
+        // document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
+        
+        // Opzionale: puoi scrivere un testo fisso o lasciarlo vuoto
+        timerDisplay.textContent = ""; 
+    }
+
+    const m2 = Math.floor(maxTimeLeft / 60);
+    const s2 = maxTimeLeft % 60;
+    document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
+    
+    
+  }
+  // === FUNZIONI ZOOM EDITOR ===
+  function changeEditorZoom(delta) {
+    currentFontSize += delta;
+    if (currentFontSize < 8) currentFontSize = 8;
+    if (currentFontSize > 40) currentFontSize = 40;
+    if (editor) {
+      editor.updateOptions({ fontSize: currentFontSize });
+    }
+  }
+
+  function resetEditorZoom() {
+    currentFontSize = 14;
+    if (editor) {
+      editor.updateOptions({ fontSize: 14 });
+    }
+  }
+
+  function toggleFocusMode() {
+    const traccia = document.getElementById('traccia');
+    const editorSection = document.getElementById('editor-section');
+    const focusBtn = document.getElementById('focusBtn');
+
+    if (traccia.style.display !== 'none') {
+        // Attiva Modalità Focus
+        traccia.style.display = 'none';
+        editorSection.style.width = '100%';
+        editorSection.style.height = '100vh';
+        focusBtn.textContent = 'Mostra Traccia';
+        focusBtn.style.background = '#64748b';
+    } else {
+        // Disattiva Modalità Focus (Ripristina layout)
+        traccia.style.display = 'flex';
+        focusBtn.textContent = 'Solo Editor';
+        focusBtn.style.background = '#8b5cf6';
+        
+        // Applica i ripristini in base alla larghezza dello schermo
+        if (window.innerWidth >= 768) {
+            editorSection.style.width = '55%';
+            editorSection.style.height = '100vh';
+        } else {
+            editorSection.style.width = '100%';
+            editorSection.style.height = '60vh';
+        }
+    }
+  
+    // Forza Monaco a ricalcolare le dimensioni dopo il cambio layout
+    if (editor) {
+        editor.layout();
+    }
+  }
+
+  // === BLOCCO TASTIERA ANTI-COPIA ===
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && ['c','v','x','s','u'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        alert("Attenzione: Funzioni di copia/incolla disabilitate.");
+    }
+  });
+
+  
+ function updateTraccia(filePath) {
+    const container = document.getElementById('viewerContainer');
+    const zoomControls = document.getElementById('imgZoomControls');
+    // Verifica se il file è un'immagine [cite: 187]
+    const isImage = /\.(jpg|jpeg|png)$/i.test(filePath); 
+
+    if (isImage) {
+        // Correzione: usa i backtick ` e assegna correttamente l'HTML [cite: 189]
+        container.innerHTML = `<img src="${filePath}" class="traccia-img" style="width:100%; height:auto; display:block;">`;
+        zoomControls.style.display = 'block'; // Mostra i tasti + e - [cite: 189]
+        currentImgWidth = 100; // Reset larghezza [cite: 190]
+    } else {
+        // Se è un PDF [cite: 191]
+        container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
+        zoomControls.style.display = 'none'; // Nascondi zoom per PDF [cite: 194]
+    }
+    resetActivityTimer(); // [cite: 195]
+  }
+
+  function zoomImage(step) {
+    const img = document.querySelector('.traccia-img');
+    const container = document.getElementById('viewerContainer');
+    
+    if (img && container) {
+        // 1. Calcola la nuova larghezza [cite: 180]
+        currentImgWidth = currentImgWidth * step;
+        
+        // 2. Applica la larghezza all'immagine [cite: 182]
+        img.style.width = currentImgWidth + '%';
+        
+        // 3. Rendi l'immagine "libera" di espandersi per attivare lo scroll
+        img.style.maxWidth = 'none'; 
+        
+        // 4. Assicura che il contenitore permetta lo scorrimento [cite: 51]
+        container.style.overflow = 'auto';
+        container.style.display = 'block'; 
+    }
+  }
+
+  window.inviaConsegnaDrive = function() {
+    const nome = document.getElementById("nomeStudente").value.trim();
+    if (!nome) return alert("Inserisci Nome e Cognome!");
+
+    const endTime = new Date();
+    const diffMs = endTime - startTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffSecs = Math.floor((diffMs % 60000) / 1000);
+    const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
+
+    const codice = editor.getValue();
+    const outputText = document.getElementById("output").textContent;
+    const urlParams = new URLSearchParams(window.location.search);
+    const classe = urlParams.get("classe") || "ND";
+
+    const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par\\par INIZIO PROVA: ${startTime.toLocaleString()}\\par FINE PROVA: ${endTime.toLocaleString()}\\par TEMPO TOTALE: ${tempoTotale}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
+
+    const blob = new Blob([rtfContent], { type: 'application/rtf' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
+    a.click();
+
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
+    const form = document.createElement('form');
+    form.method = 'POST'; form.action = GAS_URL; form.target = 'gasTarget';
+    
+    const add = (n, v) => {
+      const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v;
+      form.appendChild(i);
+    };
+
+    add('nomeStudente', nome);
+    add('classe', classe);
+    add('dataOra', endTime.toLocaleString());
+    add('rtfContent', rtfContent);
+    add('pyContent', codice);
+    
+    document.body.appendChild(form);
+    form.submit();
+    alert("✅ Consegna inviata al Drive!");
+  };
+
+  function resetActivityTimer() { timeLeft = 300; }
+
+  function tornaAllaPaginaPrincipale() { 
+    const urlParams = new URLSearchParams(window.location.search);
+    const cl = urlParams.get('classe') || 'default';
+    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+    
+    localStorage.removeItem(`tracciaAssegnata_${classKey}`);
+    localStorage.removeItem(`fineProva_${classKey}`);
+    localStorage.removeItem(`codiceSalvato_${classKey}`);
+    localStorage.removeItem("nomeStudente");
+    window.location.href = '../index.html'; 
+  }
+
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(document.getElementById('monaco-container'), {
+      value: "# Scrivi qui il tuo codice Python\n",
+      language: 'python',
+      theme: 'vs-dark',
+      automaticLayout: true,
+      fontSize: 14,
+      contextmenu: false,
+      minimap: { enabled: false }
+    });
+    editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
+    editor.onDidChangeModelContent(() => { resetActivityTimer(); });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const cl = urlParams.get('classe') || 'default';
+    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+    const lastCode = localStorage.getItem(`codiceSalvato_${classKey}`);
+    if (lastCode) editor.setValue(lastCode);
+  });
+
+  async function runCode() {
+    const out = document.getElementById('output');
+    out.textContent = "Esecuzione...\n";
+    try {
+      if (!pyodide) pyodide = await loadPyodide();
+      document.getElementById('eseguiBtn').style.display = "inline-block";
+      document.getElementById('eseguiBtn').disabled = false;
+      document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
+      await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
+      await pyodide.runPythonAsync(editor.getValue());
+      out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
+    } catch (e) { out.textContent = "Errore:\n" + e; }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    runCode();
+    const urlParams = new URLSearchParams(window.location.search);
+    const cl = urlParams.get('classe') || 'default';
+    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+    const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
+    const select = document.getElementById('tracciaSelect');
+
+    const tracciaKey = `tracciaAssegnata_${classKey}`;
+    let assignedIndex = localStorage.getItem(tracciaKey);
+    if (assignedIndex === null) {
+        assignedIndex = Math.floor(Math.random() * exercises.length);
+        localStorage.setItem(tracciaKey, assignedIndex);
+    } else {
+        assignedIndex = parseInt(assignedIndex);
+        if (assignedIndex >= exercises.length) assignedIndex = 0;
+    }
+    const selectedExercise = exercises[assignedIndex];
+
+    exercises.forEach((ex, index) => {
+      const opt = document.createElement('option');
+      opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
+      if (index === assignedIndex) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.disabled = true;
+    if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
+
+    // --- GESTIONE TIMER FINE PROVA PERSISTENTE ---
+    // RECUPERO TIMER PERSISTENTE
+    const timerKey = `timer_${classKey}`;
+    const savedTime = localStorage.getItem(timerKey);
+    if (savedTime !== null) {
+        maxTimeLeft = parseInt(savedTime);
+    }
+
+    // AGGIORNAMENTO IMMEDIATO DELLO SCHERMO (Prima che parta il setInterval)
+    aggiornaDisplayTimer(); 
+
+    // AVVIO DEL CICLO
+    setInterval(() => {
+        if (timeLeft <= 0 || maxTimeLeft <= 0) {
+            alert("Tempo scaduto!");
+            tornaAllaPaginaPrincipale();
+            return;
+        }
+        timeLeft--;
+        maxTimeLeft--;
+        localStorage.setItem(timerKey, maxTimeLeft);
+        
+        aggiornaDisplayTimer(); // Continua ad aggiornare ogni secondo
+    }, 1000);
+
+    setInterval(() => {
+        if (editor) {
+            localStorage.setItem(`codiceSalvato_${classKey}`, editor.getValue());
+            console.log("Backup eseguito");
+        }
+    }, 120000);
+  });
+</script>
+</body>
+</html>
