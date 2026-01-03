@@ -150,6 +150,19 @@
       font-size: 12px;
   }
     #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
+    @keyframes rotateHourglass {
+    0% { transform: rotate(0deg); }
+    45% { transform: rotate(180deg); }
+    50% { transform: rotate(180deg); }
+    95% { transform: rotate(360deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .clessidra-icon {
+    display: inline-block;
+    animation: rotateHourglass 3s infinite ease-in-out;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.1));
+  }
   </style>
 </head>
 
@@ -170,14 +183,18 @@
   </div>
 
   <div id="editor-section">
-    <div class="controls">
-      <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
-      <div style="display: inline-flex; flex-direction: column; align-items: flex-end; margin-left: auto; margin-right: 15px;">
-        <div style="font-size: 11px; color: #666;">Inattività: <span id="timerDisplay">--:--</span></div>
-        <div style="font-weight: bold; color: var(--primary-color);">Fine Prova: <span id="maxTimerDisplay">--:--</span></div>
+  <div class="controls">
+    <input type="text" id="nomeStudente" placeholder="Nome e Cognome Studente">
+    <div style="display: inline-flex; flex-direction: column; align-items: flex-end; margin-left: auto; margin-right: 15px;">
+      <div style="display: flex; align-items: center; font-size: 14px; margin-bottom: 2px;">
+        <span class="clessidra-icon">⌛</span>
+        <span id="timerDisplay" style="display: none;">--:--</span> </div>
+      <div style="font-weight: bold; color: var(--primary-color); font-size: 13px;">
+        Fine Prova: <span id="maxTimerDisplay">--:--</span>
       </div>
-      <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
     </div>
+    <button class="btn-exit" onclick="tornaAllaPaginaPrincipale()">Esci</button>
+  </div>
 
     <div class="zoom-toolbar">
         <span style="font-size: 12px; font-weight: bold; color: var(--primary-color);">ZOOM CODICE:</span>
@@ -224,25 +241,23 @@
   const startTime = new Date();
 
   function aggiornaDisplayTimer() {
+    // Gestione Fine Prova (timeLeft)
     const m1 = Math.floor(timeLeft / 60);
     const s1 = timeLeft % 60;
-    
-    const timerDisplay = document.getElementById('timerDisplay');
-    
-    if (timerDisplay) {
-        // Commentiamo la riga qui sotto per non mostrare il tempo a video
-        // document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
-        
-        // Opzionale: puoi scrivere un testo fisso o lasciarlo vuoto
-        timerDisplay.textContent = ""; 
+    const fineProvaDisplay = document.getElementById('maxTimerDisplay');
+    if (fineProvaDisplay) {
+        fineProvaDisplay.textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
     }
 
+    // Gestione Inattività (maxTimeLeft) - Ora nascosta dietro la clessidra
     const m2 = Math.floor(maxTimeLeft / 60);
     const s2 = maxTimeLeft % 60;
-    document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
-    
-    
-  }
+    const inattivitaDisplay = document.getElementById('timerDisplay');
+    if (inattivitaDisplay) {
+        // Aggiorniamo il numero (anche se nascosto via CSS) per sicurezza
+        inattivitaDisplay.textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
+    }
+}
   // === FUNZIONI ZOOM EDITOR ===
   function changeEditorZoom(delta) {
     currentFontSize += delta;
