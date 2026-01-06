@@ -378,7 +378,8 @@
       width: 100%;
       margin: 15px 0;
     }
-
+    
+     
     .news-item {
       display: block;
       text-decoration: none;
@@ -395,6 +396,16 @@
       .login-container-3d { flex-direction: column; align-items: center; }
       .card-3d { width: 100%; max-width: 400px; }
     }
+
+    /* Stile per il Feed del Blog */
+       
+    #tecnica-feed {
+      text-align: left;
+      width: 100%;
+      margin: 15px 0;
+    }
+    
+   
     /* Footer */
     footer {
       text-align: center;
@@ -609,7 +620,7 @@
       <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 25px;">Risorse pubbliche per visitatori ed esterni.</p>
       
       <a href="https://unica.istruzione.gov.it/portale/it/home" class="btn-guest">UNICA</a>
-      <div id="rss-feed">
+      <div id="tecnica-feed">
           <p style="font-size: 10px; color: var(--text-muted); text-align: center;">Caricamento notizie...</p>
       </div>
   </div>
@@ -718,6 +729,14 @@ async function loadAllFeeds() {
             titleClass: 'news-title',
             limit: 3 // Le ultime 3 del blog
         }
+        {
+            url: 'https://www.edscuola.it/rss/',
+            containerId: 'tecnica-feed',
+            itemClass: 'news-item',
+            dateClass: 'news-date',
+            titleClass: 'news-title',
+            limit: 3 // Le ultime 3 del blog
+        }
     ];
 
     for (const feed of feeds) {
@@ -752,6 +771,7 @@ document.addEventListener('DOMContentLoaded', loadAllFeeds);
 
 </body>
 </html>
+
 
 
 
