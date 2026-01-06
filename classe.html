@@ -563,7 +563,34 @@ ${outputText
 document.addEventListener("DOMContentLoaded", async () => {
   await initMonacoEditor();
   attachPasteBlockers();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const cl = urlParams.get("classe") || "default";
+  const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+
+  const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS["default"];
+  const tracciaKey = `tracciaAssegnata_${classKey}`;
+  let assignedIndex = localStorage.getItem(tracciaKey);
+
+  if (assignedIndex === null) {
+    assignedIndex = Math.floor(Math.random() * exercises.length);
+    localStorage.setItem(tracciaKey, String(assignedIndex));
+  } else {
+    assignedIndex = parseInt(assignedIndex, 10);
+    if (isNaN(assignedIndex) || assignedIndex >= exercises.length) assignedIndex = 0;
+  }
+
+  const selectedExercise = exercises[assignedIndex];
+  if (selectedExercise) {
+    updateTraccia(`tracce/${selectedExercise.file}`);
+  }
+
+  const lastCode = localStorage.getItem(`codiceSalvato_${classKey}`);
+  if (lastCode && editor) editor.setValue(lastCode);
+
+  startTimers(classKey);
 });
+
 </script>
 
 </body>
