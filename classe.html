@@ -231,25 +231,81 @@ const EXERCISES_BY_CLASS = {
 
 let editor = null;
 let pyodide = null;
-let timeLeft = 300;           // inattività (se usata)
-let maxTimeLeft = 2700;      // durata prova (es. 45 min)
+let timeLeft = 300;
+let maxTimeLeft = 2700;
 let startTime = new Date();
 let currentImgWidth = 100;
 let currentFontSize = 14;
 let mainTimerId = null;
 let backupSaveId = null;
 
+/* ======= UTILITY UI ======= */
+function showNotice(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position: 'fixed', right: '16px', bottom: '16px',
+    background: '#111', color: '#fff', padding: '8px 12px',
+    borderRadius: '6px', zIndex: 99999, opacity: 0.95, fontSize: '13px'
+  });
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+/* ======= BLOCCO INCOLLA (da registrare dopo che editor è pronto) ======= */
+function attachPasteBlockers() {
+  const blockPasteHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showNotice('Incollare è disabilitato.');
+    return false;
+  };
+
+  // Cattura paste globale (fase capturing)
+  document.addEventListener('paste', blockPasteHandler, true);
+
+  // Blocca scorciatoia tastiera globale (Ctrl/Cmd+V)
+  document.addEventListener('keydown', (e) => {
+    const key = (e.key || '').toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && key === 'v') {
+      e.preventDefault();
+      e.stopPropagation();
+      showNotice('Incollare è disabilitato.');
+      return false;
+    }
+  }, true);
+
+  // Blocca middle-click paste su alcune piattaforme
+  document.addEventListener('mouseup', (e) => {
+    if (e.button === 1) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  // Se Monaco è disponibile, aggiungi handler sul DOM dell'editor e comando Ctrl+V
+  if (typeof editor !== 'undefined' && editor && editor.getDomNode) {
+    const dom = editor.getDomNode();
+    if (dom) dom.addEventListener('paste', blockPasteHandler, true);
+
+    try {
+      // Prova a registrare il comando Monaco per Ctrl/Cmd+V
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_V, () => {
+        showNotice('Incollare è disabilitato.');
+        return null;
+      });
+    } catch (err) {
+      console.warn('Impossibile registrare comando Monaco per Ctrl+V', err);
+    }
+  }
+}
+
 /* ======= FUNZIONI UI / TIMER ======= */
 function aggiornaDisplayTimer() {
   const timerDisplay = document.getElementById('timerDisplay');
   const maxTimerDisplay = document.getElementById('maxTimerDisplay');
 
-  // Inattività (opzionale: lasciamo vuoto per non mostrare)
-  if (timerDisplay) {
-    timerDisplay.textContent = ''; // non mostrare il tempo di inattività
-  }
-
-  // Fine prova (mostriamo sempre)
+  if (timerDisplay) timerDisplay.textContent = ''; // non mostrare inattività
   if (maxTimerDisplay) {
     const m2 = Math.floor(maxTimeLeft / 60);
     const s2 = maxTimeLeft % 60;
@@ -258,59 +314,40 @@ function aggiornaDisplayTimer() {
 }
 
 function onTimeExpired(classKey) {
-  // Ferma gli intervalli
-  if (mainTimerId !== null) {
-    clearInterval(mainTimerId);
-    mainTimerId = null;
-  }
-  if (backupSaveId !== null) {
-    clearInterval(backupSaveId);
-    backupSaveId = null;
-  }
+  if (mainTimerId !== null) { clearInterval(mainTimerId); mainTimerId = null; }
+  if (backupSaveId !== null) { clearInterval(backupSaveId); backupSaveId = null; }
 
-  // Azzera i valori e aggiorna UI
   timeLeft = 0;
   maxTimeLeft = 0;
   aggiornaDisplayTimer();
 
-  // Disabilita editor e pulsanti
   if (editor) {
     try { editor.updateOptions({ readOnly: true }); } catch (e) { /* ignore */ }
   }
   const eseguiBtn = document.getElementById('eseguiBtn');
-  if (eseguiBtn) {
-    eseguiBtn.disabled = true;
-    eseguiBtn.textContent = 'Tempo scaduto';
-  }
+  if (eseguiBtn) { eseguiBtn.disabled = true; eseguiBtn.textContent = 'Tempo scaduto'; }
 
-  // Rimuovi timer persistente
   const timerKey = `timer_${classKey}`;
   localStorage.removeItem(timerKey);
 
-  // Mostra messaggio non bloccante
   setTimeout(() => { alert('Tempo scaduto!'); }, 50);
 }
 
 function startTimers(classKey) {
-  // Pulisce eventuali intervalli precedenti
   if (mainTimerId !== null) clearInterval(mainTimerId);
   if (backupSaveId !== null) clearInterval(backupSaveId);
 
-  // Recupera valore persistente
   const timerKey = `timer_${classKey}`;
   const saved = localStorage.getItem(timerKey);
   if (saved !== null && !isNaN(parseInt(saved, 10))) {
     maxTimeLeft = parseInt(saved, 10);
   }
 
-  // Aggiorna subito il display
   aggiornaDisplayTimer();
 
-  // Intervallo principale
   mainTimerId = setInterval(() => {
     if (timeLeft <= 0 || maxTimeLeft <= 0) {
       onTimeExpired(classKey);
-      // opzionale: tornaAllaPaginaPrincipale();
       return;
     }
     timeLeft--;
@@ -319,25 +356,18 @@ function startTimers(classKey) {
     aggiornaDisplayTimer();
   }, 1000);
 
-  // Backup automatico del codice ogni 2 minuti
   backupSaveId = setInterval(() => {
     if (editor) {
       const key = `codiceSalvato_${classKey}`;
-      try {
-        localStorage.setItem(key, editor.getValue());
-        console.log('Backup eseguito');
-      } catch (e) {
-        console.warn('Backup fallito', e);
-      }
+      try { localStorage.setItem(key, editor.getValue()); console.log('Backup eseguito'); }
+      catch (e) { console.warn('Backup fallito', e); }
     }
   }, 120000);
 }
 
-function resetActivityTimer() {
-  timeLeft = 300;
-}
+function resetActivityTimer() { timeLeft = 300; }
 
-/* ======= FUNZIONI PER TRACCIA / VISUALIZZAZIONE ======= */
+/* ======= TRACCIA / VISUALIZZAZIONE ======= */
 function updateTraccia(filePath) {
   const container = document.getElementById('viewerContainer');
   const zoomControls = document.getElementById('imgZoomControls');
@@ -349,7 +379,6 @@ function updateTraccia(filePath) {
     if (zoomControls) zoomControls.style.display = 'block';
     currentImgWidth = 100;
   } else {
-    // PDF o altro
     container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
     if (zoomControls) zoomControls.style.display = 'none';
   }
@@ -368,7 +397,7 @@ function zoomImage(step) {
   container.style.display = 'block';
 }
 
-/* ======= FUNZIONI EDITOR / ZOOM / FOCUS ======= */
+/* ======= EDITOR / ZOOM / FOCUS ======= */
 function changeEditorZoom(delta) {
   currentFontSize += delta;
   if (currentFontSize < 8) currentFontSize = 8;
@@ -386,14 +415,12 @@ function toggleFocusMode() {
   if (!traccia || !editorSection || !focusBtn) return;
 
   if (traccia.style.display !== 'none') {
-    // Attiva focus
     traccia.style.display = 'none';
     editorSection.style.width = '100%';
     editorSection.style.height = '100vh';
     focusBtn.textContent = 'Mostra Traccia';
     focusBtn.style.background = '#64748b';
   } else {
-    // Disattiva focus
     traccia.style.display = 'flex';
     focusBtn.textContent = 'Solo Editor';
     focusBtn.style.background = '#8b5cf6';
@@ -408,7 +435,7 @@ function toggleFocusMode() {
   if (editor && typeof editor.layout === 'function') editor.layout();
 }
 
-/* ======= FUNZIONI DI INVIO / SALVATAGGIO ======= */
+/* ======= INVIO / SALVATAGGIO ======= */
 window.inviaConsegnaDrive = function() {
   const nome = (document.getElementById("nomeStudente") || {}).value || '';
   if (!nome.trim()) return alert("Inserisci Nome e Cognome!");
@@ -423,10 +450,8 @@ window.inviaConsegnaDrive = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const classe = urlParams.get("classe") || "ND";
 
-  // Creazione RTF semplice
   const rtfContent = `{\n\\rtf1\\ansi\nStudente: ${nome}\\par\nClasse: ${classe}\\par\nINIZIO PROVA: ${startTime.toLocaleString()}\\par\nFINE PROVA: ${endTime.toLocaleString()}\\par\nTEMPO TOTALE: ${tempoTotale}\\par\n\\par\nCODICE:\\par\n${codice.replace(/\n/g, '\\par ')}\\par\n\\par\nOUTPUT:\\par\n${outputText.replace(/\n/g, '\\par ')}\n}`;
 
-  // Scarica file localmente
   try {
     const blob = new Blob([rtfContent], { type: 'application/rtf' });
     const a = document.createElement('a');
@@ -439,7 +464,6 @@ window.inviaConsegnaDrive = function() {
     console.warn('Download fallito', e);
   }
 
-  // Invio a Google Apps Script (se necessario)
   try {
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
     const form = document.createElement('form');
@@ -462,7 +486,7 @@ window.inviaConsegnaDrive = function() {
     form.submit();
     form.remove();
     alert('Consegna inviata al Drive!');
-    maxTimeLeft = 2700; // reset opzionale
+    maxTimeLeft = 2700;
   } catch (e) {
     console.warn('Invio Drive fallito', e);
   }
@@ -476,41 +500,36 @@ function tornaAllaPaginaPrincipale() {
   localStorage.removeItem(`fineProva_${classKey}`);
   localStorage.removeItem(`codiceSalvato_${classKey}`);
   localStorage.removeItem("nomeStudente");
-  // Ferma intervalli
   if (mainTimerId !== null) clearInterval(mainTimerId);
   if (backupSaveId !== null) clearInterval(backupSaveId);
   window.location.href = '../index.html';
 }
 
-/* ======= INIZIALIZZAZIONE MONACO EDITOR ======= */
-/* Nota: questo blocco assume che il loader di Monaco sia già caricato correttamente */
+/* ======= INIZIALIZZAZIONE MONACO EDITOR (Promise) ======= */
 function initMonacoEditor(initialCode = "# Scrivi qui il tuo codice Python\n") {
-  try {
-    require(['vs/editor/editor.main'], function () {
-      editor = monaco.editor.create(document.getElementById('monaco-container'), {
-        value: initialCode,
-        language: 'python',
-        theme: 'vs-dark',
-        automaticLayout: true,
-        fontSize: currentFontSize,
-        contextmenu: false,
-        minimap: { enabled: false }
-      });
-
-      // Disabilita incolla tramite evento (se necessario)
-      editor.onDidPaste && editor.onDidPaste((e) => {
-        // Alcune versioni di Monaco non espongono onDidPaste; proteggiamo la chiamata
+  return new Promise((resolve, reject) => {
+    try {
+      require(['vs/editor/editor.main'], function () {
         try {
-          // blocco incolla: impediamo l'azione e mostriamo avviso
-          alert('Incollare è disabilitato.');
-        } catch (err) { /* ignore */ }
+          editor = monaco.editor.create(document.getElementById('monaco-container'), {
+            value: initialCode,
+            language: 'python',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: currentFontSize,
+            contextmenu: false,
+            minimap: { enabled: false }
+          });
+          editor.onDidChangeModelContent(() => { resetActivityTimer(); });
+          resolve(editor);
+        } catch (err) {
+          reject(err);
+        }
       });
-
-      editor.onDidChangeModelContent(() => { resetActivityTimer(); });
-    });
-  } catch (e) {
-    console.error('Errore inizializzazione Monaco:', e);
-  }
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
 /* ======= ESECUZIONE PYODIDE ======= */
@@ -519,11 +538,9 @@ async function runCode() {
   if (out) out.textContent = "Esecuzione...\n";
   try {
     if (!pyodide) {
-      // loadPyodide deve essere disponibile globalmente (incluso tramite <script src="...pyodide.js">)
       pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/" });
     }
     const code = editor ? editor.getValue() : '';
-    // Reindirizziamo stdout
     await pyodide.runPythonAsync(`
 import sys, io
 sys.stdout = io.StringIO()
@@ -540,13 +557,16 @@ sys.stdout = io.StringIO()
 /* ======= CARICAMENTO INIZIALE E POPOLAMENTO TRACCE ======= */
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    // Inizializza editor (Monaco loader deve essere caricato prima)
-    initMonacoEditor();
+    // Inizializza editor e aspetta che sia pronto
+    await initMonacoEditor();
 
     // Recupera classe e costruisci classKey
     const urlParams = new URLSearchParams(window.location.search);
     const cl = urlParams.get('classe') || 'default';
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+
+    // Registra i blocchi per incolla SOLO dopo che editor è pronto
+    attachPasteBlockers();
 
     // Popola select tracce
     const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
@@ -583,7 +603,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Avvia timers
     startTimers(classKey);
 
-    // Avvia esecuzione iniziale (opzionale)
+    // Opzionale: esegui codice iniziale
     // runCode();
 
   } catch (e) {
