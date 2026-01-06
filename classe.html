@@ -450,47 +450,45 @@ window.inviaConsegnaDrive = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const classe = urlParams.get("classe") || "ND";
 
-  const rtfContent = `{\n\\rtf1\\ansi\nStudente: ${nome}\\par\nClasse: ${classe}\\par\nINIZIO PROVA: ${startTime.toLocaleString()}\\par\nFINE PROVA: ${endTime.toLocaleString()}\\par\nTEMPO TOTALE: ${tempoTotale}\\par\n\\par\nCODICE:\\par\n${codice.replace(/\n/g, '\\par ')}\\par\n\\par\nOUTPUT:\\par\n${outputText.replace(/\n/g, '\\par ')}\n}`;
-
-  try {
-    const blob = new Blob([rtfContent], { type: 'application/rtf' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } catch (e) {
-    console.warn('Download fallito', e);
+  const rtfContent = `{\\rtf1\\ansi
+  {\\colortbl;
+   \\red0\\green0\\blue0;        /* 0: nero */
+   \\red0\\green0\\blue255;      /* 1: blu */
+   \\red200\\green0\\blue0;      /* 2: rosso */
+   \\red0\\green128\\blue0;      /* 3: verde */
   }
-
-  try {
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = GAS_URL;
-    form.target = 'gasTarget';
-    const add = (n, v) => {
-      const i = document.createElement('input');
-      i.type = 'hidden';
-      i.name = n;
-      i.value = v;
-      form.appendChild(i);
-    };
-    add('nomeStudente', nome);
-    add('classe', classe);
-    add('dataOra', endTime.toLocaleString());
-    add('rtfContent', rtfContent);
-    add('pyContent', codice);
-    document.body.appendChild(form);
-    form.submit();
-    form.remove();
-    alert('Consegna inviata al Drive!');
-    maxTimeLeft = 2700;
-  } catch (e) {
-    console.warn('Invio Drive fallito', e);
+  
+  \\fs28 \\b Dati Studente \\b0 \\fs20 \\par
+  \\cf1 Nome: \\cf0 ${nome}\\par
+  \\cf1 Classe: \\cf0 ${classe}\\par
+  \\cf1 Inizio Prova: \\cf0 ${startTime.toLocaleString()}\\par
+  \\cf1 Fine Prova: \\cf0 ${endTime.toLocaleString()}\\par
+  \\cf1 Tempo Totale: \\cf0 ${tempoTotale}\\par
+  \\par
+  \\pard\\qr ------------------------------ \\pard\\ql \\par
+  
+  \\fs28 \\b Codice Python \\b0 \\fs20 \\par
+  {\\f1\\fs18
+  ${codice
+    .replace(/\\/g, '\\\\')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/\n/g, '\\par \\tab ')
   }
-};
+  }\\par
+  \\pard\\qr ------------------------------ \\pard\\ql \\par
+  
+  \\fs28 \\b Output \\b0 \\fs20 \\par
+  {\\cf3\\f1\\fs18
+  ${outputText
+    .replace(/\\/g, '\\\\')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/\n/g, '\\par \\tab ')
+  }
+  }\\par
+  }`;
+
 
 function tornaAllaPaginaPrincipale() {
   const urlParams = new URLSearchParams(window.location.search);
