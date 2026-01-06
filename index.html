@@ -665,7 +665,6 @@ function handleCredentialResponse(response) {
   const data = jwt_decode_external(response.credential);
   
   if (data.email.endsWith("@lscortese.com")) {
-    document.title = 'Area Riservata';
     document.getElementById("contenutoProtetto").style.display = "block";
     document.getElementById("welcomeMessage").style.display = "block";
     document.getElementById("login").style.display = "none";
@@ -777,6 +776,7 @@ document.addEventListener('DOMContentLoaded', loadAllFeeds);
 
 </body>
 </html>
+
 
 
 
