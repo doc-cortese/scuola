@@ -712,58 +712,61 @@ function performSearch() {
 
 // Funzione per caricare il Feed RSS dal blog liceoscientificocortese.edu.it
 async function loadAllFeeds() {
-    const feeds = [
-        {
-            url: 'https://liceoscientificocortese.edu.it/feed/',
-            containerId: 'school-feed',
-            itemClass: 'school-news-item',
-            dateClass: 'school-news-date',
-            titleClass: 'school-news-title',
-            limit: 3 // Solo le ultime 2 circolari per non allungare la card
-        },
-        {
-            url: 'https://www.tecnicadellascuola.it/feed/',
-            containerId: 'rss-feed',
-            itemClass: 'news-item',
-            dateClass: 'news-date',
-            titleClass: 'news-title',
-            limit: 3 // Le ultime 3 del blog
-        }
-        {
-            url: 'https://www.edscuola.it/rss/',
-            containerId: 'tecnica-feed',
-            itemClass: 'news-item',
-            dateClass: 'news-date',
-            titleClass: 'news-title',
-            limit: 3 // Le ultime 3 del blog
-        }
-    ];
-
-    for (const feed of feeds) {
-        try {
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-            const container = document.getElementById(feed.containerId);
-            
-            if (data.status === 'ok' && container) {
-                container.innerHTML = '';
-                data.items.slice(0, feed.limit).forEach(item => {
-                    const date = new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
-                    container.innerHTML += `
-                        <a href="${item.link}" class="${feed.itemClass}" target="_blank">
-                            <span class="${feed.dateClass}">${date}</span>
-                            <span class="${feed.titleClass}">${item.title}</span>
-                        </a>
-                    `;
-                });
-            }
-        } catch (error) {
-            console.error('Errore caricamento feed:', feed.url, error);
-            document.getElementById(feed.containerId).innerHTML = '<p style="font-size:10px;">News non disponibili.</p>';
-        }
+  const feeds = [
+    {
+      url: 'https://liceoscientificocortese.edu.it/feed/',
+      containerId: 'school-feed',
+      itemClass: 'school-news-item',
+      dateClass: 'school-news-date',
+      titleClass: 'school-news-title',
+      limit: 3
+    },
+    {
+      url: 'https://www.tecnicadellascuola.it/feed/',
+      containerId: 'rss-feed',
+      itemClass: 'news-item',
+      dateClass: 'news-date',
+      titleClass: 'news-title',
+      limit: 3
+    },
+    {
+      url: 'https://www.edscuola.it/rss/',
+      containerId: 'tecnica-feed',
+      itemClass: 'news-item',
+      dateClass: 'news-date',
+      titleClass: 'news-title',
+      limit: 3
     }
+  ];
+
+  for (const feed of feeds) {
+    const container = document.getElementById(feed.containerId);
+    if (!container) continue;
+    try {
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      if (data.status === 'ok' && Array.isArray(data.items)) {
+        container.innerHTML = '';
+        data.items.slice(0, feed.limit).forEach(item => {
+          const date = new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+          container.innerHTML += `
+            <a href="${item.link}" class="${feed.itemClass}" target="_blank">
+              <span class="${feed.dateClass}">${date}</span>
+              <span class="${feed.titleClass}">${item.title}</span>
+            </a>
+          `;
+        });
+      } else {
+        container.innerHTML = '<p style="font-size:10px;">News non disponibili.</p>';
+      }
+    } catch (error) {
+      console.error('Errore caricamento feed:', feed.url, error);
+      container.innerHTML = '<p style="font-size:10px;">News non disponibili.</p>';
+    }
+  }
 }
+
 
 // Avviamo il caricamento
 document.addEventListener('DOMContentLoaded', loadAllFeeds);
@@ -771,6 +774,7 @@ document.addEventListener('DOMContentLoaded', loadAllFeeds);
 
 </body>
 </html>
+
 
 
 
