@@ -215,300 +215,382 @@
 <iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
 
 <script>
-  // CONFIGURAZIONE CARTELLE PER CLASSE
-  const EXERCISES_BY_CLASS = {
-    'Seconde': [
-      { file: 'Seconde/Esercizio_II_1.jpg', title: 'Scontrino Spesa' }            
-    ],
-    'Terze': [
-      { file: 'Terze/Esercizio_III_1.pdf', title: 'Moto Rettilineo' },
-      { file: 'Terze/Esercizio_III_2.jpg', title: 'Forze e Vettori' }
-    ],
-    'Quarte': [
-      { file: 'Quarte/Esercizio_IV_1.pdf', title: 'Modello ER' },
-      { file: 'Quarte/Esercizio_IV_2.pdf', title: 'Query SQL' }
-    ],
-    'default': [{ file: 'default.pdf', title: 'Traccia Standard' }]
-  };
+/* ======= CONFIGURAZIONE E VARIABILI GLOBALI ======= */
+const EXERCISES_BY_CLASS = {
+  'Seconde': [{ file: 'Seconde/Esercizio_II_1.jpg', title: 'Scontrino Spesa' }],
+  'Terze': [
+    { file: 'Terze/Esercizio_III_1.pdf', title: 'Moto Rettilineo' },
+    { file: 'Terze/Esercizio_III_2.jpg', title: 'Forze e Vettori' }
+  ],
+  'Quarte': [
+    { file: 'Quarte/Esercizio_IV_1.pdf', title: 'Modello ER' },
+    { file: 'Quarte/Esercizio_IV_2.pdf', title: 'Query SQL' }
+  ],
+  'default': [{ file: 'default.pdf', title: 'Traccia Standard' }]
+};
 
-  let editor, pyodide, timeLeft = 300;
-  let maxTimeLeft = 2700; // Valore di default (45 min)
-  let currentImgWidth = 100;
-  let currentFontSize = 14;
-  let warningSent = false;
-  const startTime = new Date();
+let editor = null;
+let pyodide = null;
+let timeLeft = 300;           // inattività (se usata)
+let maxTimeLeft = 2700;      // durata prova (es. 45 min)
+let startTime = new Date();
+let currentImgWidth = 100;
+let currentFontSize = 14;
+let mainTimerId = null;
+let backupSaveId = null;
 
-  function aggiornaDisplayTimer() {
-    const m1 = Math.floor(timeLeft / 60);
-    const s1 = timeLeft % 60;
-    
-    const timerDisplay = document.getElementById('timerDisplay');
-    
-    if (timerDisplay) {
-        // Commentiamo la riga qui sotto per non mostrare il tempo a video
-        // document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
-        
-        // Opzionale: puoi scrivere un testo fisso o lasciarlo vuoto
-        timerDisplay.textContent = ""; 
-    }
+/* ======= FUNZIONI UI / TIMER ======= */
+function aggiornaDisplayTimer() {
+  const timerDisplay = document.getElementById('timerDisplay');
+  const maxTimerDisplay = document.getElementById('maxTimerDisplay');
 
+  // Inattività (opzionale: lasciamo vuoto per non mostrare)
+  if (timerDisplay) {
+    timerDisplay.textContent = ''; // non mostrare il tempo di inattività
+  }
+
+  // Fine prova (mostriamo sempre)
+  if (maxTimerDisplay) {
     const m2 = Math.floor(maxTimeLeft / 60);
     const s2 = maxTimeLeft % 60;
-    document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
-    
-    
+    maxTimerDisplay.textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
   }
-  // === FUNZIONI ZOOM EDITOR ===
-  function changeEditorZoom(delta) {
-    currentFontSize += delta;
-    if (currentFontSize < 8) currentFontSize = 8;
-    if (currentFontSize > 40) currentFontSize = 40;
-    if (editor) {
-      editor.updateOptions({ fontSize: currentFontSize });
+}
+
+function onTimeExpired(classKey) {
+  // Ferma gli intervalli
+  if (mainTimerId !== null) {
+    clearInterval(mainTimerId);
+    mainTimerId = null;
+  }
+  if (backupSaveId !== null) {
+    clearInterval(backupSaveId);
+    backupSaveId = null;
+  }
+
+  // Azzera i valori e aggiorna UI
+  timeLeft = 0;
+  maxTimeLeft = 0;
+  aggiornaDisplayTimer();
+
+  // Disabilita editor e pulsanti
+  if (editor) {
+    try { editor.updateOptions({ readOnly: true }); } catch (e) { /* ignore */ }
+  }
+  const eseguiBtn = document.getElementById('eseguiBtn');
+  if (eseguiBtn) {
+    eseguiBtn.disabled = true;
+    eseguiBtn.textContent = 'Tempo scaduto';
+  }
+
+  // Rimuovi timer persistente
+  const timerKey = `timer_${classKey}`;
+  localStorage.removeItem(timerKey);
+
+  // Mostra messaggio non bloccante
+  setTimeout(() => { alert('Tempo scaduto!'); }, 50);
+}
+
+function startTimers(classKey) {
+  // Pulisce eventuali intervalli precedenti
+  if (mainTimerId !== null) clearInterval(mainTimerId);
+  if (backupSaveId !== null) clearInterval(backupSaveId);
+
+  // Recupera valore persistente
+  const timerKey = `timer_${classKey}`;
+  const saved = localStorage.getItem(timerKey);
+  if (saved !== null && !isNaN(parseInt(saved, 10))) {
+    maxTimeLeft = parseInt(saved, 10);
+  }
+
+  // Aggiorna subito il display
+  aggiornaDisplayTimer();
+
+  // Intervallo principale
+  mainTimerId = setInterval(() => {
+    if (timeLeft <= 0 || maxTimeLeft <= 0) {
+      onTimeExpired(classKey);
+      // opzionale: tornaAllaPaginaPrincipale();
+      return;
     }
-  }
+    timeLeft--;
+    maxTimeLeft--;
+    localStorage.setItem(timerKey, String(maxTimeLeft));
+    aggiornaDisplayTimer();
+  }, 1000);
 
-  function resetEditorZoom() {
-    currentFontSize = 14;
+  // Backup automatico del codice ogni 2 minuti
+  backupSaveId = setInterval(() => {
     if (editor) {
-      editor.updateOptions({ fontSize: 14 });
+      const key = `codiceSalvato_${classKey}`;
+      try {
+        localStorage.setItem(key, editor.getValue());
+        console.log('Backup eseguito');
+      } catch (e) {
+        console.warn('Backup fallito', e);
+      }
     }
+  }, 120000);
+}
+
+function resetActivityTimer() {
+  timeLeft = 300;
+}
+
+/* ======= FUNZIONI PER TRACCIA / VISUALIZZAZIONE ======= */
+function updateTraccia(filePath) {
+  const container = document.getElementById('viewerContainer');
+  const zoomControls = document.getElementById('imgZoomControls');
+  if (!container) return;
+
+  const isImage = /\.(jpg|jpeg|png|gif)$/i.test(filePath);
+  if (isImage) {
+    container.innerHTML = `<img src="${filePath}" class="traccia-img" style="width:100%; height:auto; display:block;">`;
+    if (zoomControls) zoomControls.style.display = 'block';
+    currentImgWidth = 100;
+  } else {
+    // PDF o altro
+    container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
+    if (zoomControls) zoomControls.style.display = 'none';
   }
+  resetActivityTimer();
+}
 
-  function toggleFocusMode() {
-    const traccia = document.getElementById('traccia');
-    const editorSection = document.getElementById('editor-section');
-    const focusBtn = document.getElementById('focusBtn');
+function zoomImage(step) {
+  const img = document.querySelector('.traccia-img');
+  const container = document.getElementById('viewerContainer');
+  if (!img || !container) return;
+  currentImgWidth = currentImgWidth * step;
+  if (currentImgWidth < 10) currentImgWidth = 10;
+  img.style.width = currentImgWidth + '%';
+  img.style.maxWidth = 'none';
+  container.style.overflow = 'auto';
+  container.style.display = 'block';
+}
 
-    if (traccia.style.display !== 'none') {
-        // Attiva Modalità Focus
-        traccia.style.display = 'none';
-        editorSection.style.width = '100%';
-        editorSection.style.height = '100vh';
-        focusBtn.textContent = 'Mostra Traccia';
-        focusBtn.style.background = '#64748b';
+/* ======= FUNZIONI EDITOR / ZOOM / FOCUS ======= */
+function changeEditorZoom(delta) {
+  currentFontSize += delta;
+  if (currentFontSize < 8) currentFontSize = 8;
+  if (currentFontSize > 40) currentFontSize = 40;
+  if (editor) editor.updateOptions({ fontSize: currentFontSize });
+}
+function resetEditorZoom() {
+  currentFontSize = 14;
+  if (editor) editor.updateOptions({ fontSize: 14 });
+}
+function toggleFocusMode() {
+  const traccia = document.getElementById('traccia');
+  const editorSection = document.getElementById('editor-section');
+  const focusBtn = document.getElementById('focusBtn');
+  if (!traccia || !editorSection || !focusBtn) return;
+
+  if (traccia.style.display !== 'none') {
+    // Attiva focus
+    traccia.style.display = 'none';
+    editorSection.style.width = '100%';
+    editorSection.style.height = '100vh';
+    focusBtn.textContent = 'Mostra Traccia';
+    focusBtn.style.background = '#64748b';
+  } else {
+    // Disattiva focus
+    traccia.style.display = 'flex';
+    focusBtn.textContent = 'Solo Editor';
+    focusBtn.style.background = '#8b5cf6';
+    if (window.innerWidth >= 768) {
+      editorSection.style.width = '55%';
+      editorSection.style.height = '100vh';
     } else {
-        // Disattiva Modalità Focus (Ripristina layout)
-        traccia.style.display = 'flex';
-        focusBtn.textContent = 'Solo Editor';
-        focusBtn.style.background = '#8b5cf6';
-        
-        // Applica i ripristini in base alla larghezza dello schermo
-        if (window.innerWidth >= 768) {
-            editorSection.style.width = '55%';
-            editorSection.style.height = '100vh';
-        } else {
-            editorSection.style.width = '100%';
-            editorSection.style.height = '60vh';
-        }
-    }
-  
-    // Forza Monaco a ricalcolare le dimensioni dopo il cambio layout
-    if (editor) {
-        editor.layout();
+      editorSection.style.width = '100%';
+      editorSection.style.height = '60vh';
     }
   }
+  if (editor && typeof editor.layout === 'function') editor.layout();
+}
 
-  // === BLOCCO TASTIERA ANTI-COPIA ===
-  document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && ['c','v','x','s','u'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-        alert("Attenzione: Funzioni di copia/incolla disabilitate.");
-    }
-  });
+/* ======= FUNZIONI DI INVIO / SALVATAGGIO ======= */
+window.inviaConsegnaDrive = function() {
+  const nome = (document.getElementById("nomeStudente") || {}).value || '';
+  if (!nome.trim()) return alert("Inserisci Nome e Cognome!");
 
-  
- function updateTraccia(filePath) {
-    const container = document.getElementById('viewerContainer');
-    const zoomControls = document.getElementById('imgZoomControls');
-    // Verifica se il file è un'immagine [cite: 187]
-    const isImage = /\.(jpg|jpeg|png)$/i.test(filePath); 
+  const endTime = new Date();
+  const diffMs = endTime - startTime;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffSecs = Math.floor((diffMs % 60000) / 1000);
+  const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
+  const codice = editor ? editor.getValue() : '';
+  const outputText = (document.getElementById("output") || {}).textContent || '';
+  const urlParams = new URLSearchParams(window.location.search);
+  const classe = urlParams.get("classe") || "ND";
 
-    if (isImage) {
-        // Correzione: usa i backtick ` e assegna correttamente l'HTML [cite: 189]
-        container.innerHTML = `<img src="${filePath}" class="traccia-img" style="width:100%; height:auto; display:block;">`;
-        zoomControls.style.display = 'block'; // Mostra i tasti + e - [cite: 189]
-        currentImgWidth = 100; // Reset larghezza [cite: 190]
-    } else {
-        // Se è un PDF [cite: 191]
-        container.innerHTML = `<iframe id="pdfFrame" src="${filePath}" style="width:100%; height:100%; border:none;"></iframe>`;
-        zoomControls.style.display = 'none'; // Nascondi zoom per PDF [cite: 194]
-    }
-    resetActivityTimer(); // [cite: 195]
-  }
+  // Creazione RTF semplice
+  const rtfContent = `{\n\\rtf1\\ansi\nStudente: ${nome}\\par\nClasse: ${classe}\\par\nINIZIO PROVA: ${startTime.toLocaleString()}\\par\nFINE PROVA: ${endTime.toLocaleString()}\\par\nTEMPO TOTALE: ${tempoTotale}\\par\n\\par\nCODICE:\\par\n${codice.replace(/\n/g, '\\par ')}\\par\n\\par\nOUTPUT:\\par\n${outputText.replace(/\n/g, '\\par ')}\n}`;
 
-  function zoomImage(step) {
-    const img = document.querySelector('.traccia-img');
-    const container = document.getElementById('viewerContainer');
-    
-    if (img && container) {
-        // 1. Calcola la nuova larghezza [cite: 180]
-        currentImgWidth = currentImgWidth * step;
-        
-        // 2. Applica la larghezza all'immagine [cite: 182]
-        img.style.width = currentImgWidth + '%';
-        
-        // 3. Rendi l'immagine "libera" di espandersi per attivare lo scroll
-        img.style.maxWidth = 'none'; 
-        
-        // 4. Assicura che il contenitore permetta lo scorrimento [cite: 51]
-        container.style.overflow = 'auto';
-        container.style.display = 'block'; 
-    }
-  }
-
-  window.inviaConsegnaDrive = function() {
-    const nome = document.getElementById("nomeStudente").value.trim();
-    if (!nome) return alert("Inserisci Nome e Cognome!");
-
-    const endTime = new Date();
-    const diffMs = endTime - startTime;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffSecs = Math.floor((diffMs % 60000) / 1000);
-    const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
-
-    const codice = editor.getValue();
-    const outputText = document.getElementById("output").textContent;
-    const urlParams = new URLSearchParams(window.location.search);
-    const classe = urlParams.get("classe") || "ND";
-
-    const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par\\par INIZIO PROVA: ${startTime.toLocaleString()}\\par FINE PROVA: ${endTime.toLocaleString()}\\par TEMPO TOTALE: ${tempoTotale}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
-
+  // Scarica file localmente
+  try {
     const blob = new Blob([rtfContent], { type: 'application/rtf' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
+  } catch (e) {
+    console.warn('Download fallito', e);
+  }
 
+  // Invio a Google Apps Script (se necessario)
+  try {
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
     const form = document.createElement('form');
-    form.method = 'POST'; form.action = GAS_URL; form.target = 'gasTarget';
-    
+    form.method = 'POST';
+    form.action = GAS_URL;
+    form.target = 'gasTarget';
     const add = (n, v) => {
-      const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v;
+      const i = document.createElement('input');
+      i.type = 'hidden';
+      i.name = n;
+      i.value = v;
       form.appendChild(i);
     };
-
     add('nomeStudente', nome);
     add('classe', classe);
     add('dataOra', endTime.toLocaleString());
     add('rtfContent', rtfContent);
     add('pyContent', codice);
-    
     document.body.appendChild(form);
     form.submit();
-    alert("✅ Consegna inviata al Drive!");
-    maxTimeLeft=2700;
-  };
-
-  function resetActivityTimer() { timeLeft = 300; }
-
-  function tornaAllaPaginaPrincipale() { 
-    const urlParams = new URLSearchParams(window.location.search);
-    const cl = urlParams.get('classe') || 'default';
-    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
-    
-    localStorage.removeItem(`tracciaAssegnata_${classKey}`);
-    localStorage.removeItem(`fineProva_${classKey}`);
-    localStorage.removeItem(`codiceSalvato_${classKey}`);
-    localStorage.removeItem("nomeStudente");
-    window.location.href = '../index.html'; 
+    form.remove();
+    alert('Consegna inviata al Drive!');
+    maxTimeLeft = 2700; // reset opzionale
+  } catch (e) {
+    console.warn('Invio Drive fallito', e);
   }
+};
 
-  require(['vs/editor/editor.main'], function () {
-    editor = monaco.editor.create(document.getElementById('monaco-container'), {
-      value: "# Scrivi qui il tuo codice Python\n",
-      language: 'python',
-      theme: 'vs-dark',
-      automaticLayout: true,
-      fontSize: 14,
-      contextmenu: false,
-      minimap: { enabled: false }
+function tornaAllaPaginaPrincipale() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const cl = urlParams.get('classe') || 'default';
+  const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+  localStorage.removeItem(`tracciaAssegnata_${classKey}`);
+  localStorage.removeItem(`fineProva_${classKey}`);
+  localStorage.removeItem(`codiceSalvato_${classKey}`);
+  localStorage.removeItem("nomeStudente");
+  // Ferma intervalli
+  if (mainTimerId !== null) clearInterval(mainTimerId);
+  if (backupSaveId !== null) clearInterval(backupSaveId);
+  window.location.href = '../index.html';
+}
+
+/* ======= INIZIALIZZAZIONE MONACO EDITOR ======= */
+/* Nota: questo blocco assume che il loader di Monaco sia già caricato correttamente */
+function initMonacoEditor(initialCode = "# Scrivi qui il tuo codice Python\n") {
+  try {
+    require(['vs/editor/editor.main'], function () {
+      editor = monaco.editor.create(document.getElementById('monaco-container'), {
+        value: initialCode,
+        language: 'python',
+        theme: 'vs-dark',
+        automaticLayout: true,
+        fontSize: currentFontSize,
+        contextmenu: false,
+        minimap: { enabled: false }
+      });
+
+      // Disabilita incolla tramite evento (se necessario)
+      editor.onDidPaste && editor.onDidPaste((e) => {
+        // Alcune versioni di Monaco non espongono onDidPaste; proteggiamo la chiamata
+        try {
+          // blocco incolla: impediamo l'azione e mostriamo avviso
+          alert('Incollare è disabilitato.');
+        } catch (err) { /* ignore */ }
+      });
+
+      editor.onDidChangeModelContent(() => { resetActivityTimer(); });
     });
-    editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
-    editor.onDidChangeModelContent(() => { resetActivityTimer(); });
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const cl = urlParams.get('classe') || 'default';
-    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
-    const lastCode = localStorage.getItem(`codiceSalvato_${classKey}`);
-    if (lastCode) editor.setValue(lastCode);
-  });
-
-  async function runCode() {
-    const out = document.getElementById('output');
-    out.textContent = "Esecuzione...\n";
-    try {
-      if (!pyodide) pyodide = await loadPyodide();
-      document.getElementById('eseguiBtn').style.display = "inline-block";
-      document.getElementById('eseguiBtn').disabled = false;
-      document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
-      await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
-      await pyodide.runPythonAsync(editor.getValue());
-      out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
-    } catch (e) { out.textContent = "Errore:\n" + e; }
+  } catch (e) {
+    console.error('Errore inizializzazione Monaco:', e);
   }
+}
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    runCode();
+/* ======= ESECUZIONE PYODIDE ======= */
+async function runCode() {
+  const out = document.getElementById('output');
+  if (out) out.textContent = "Esecuzione...\n";
+  try {
+    if (!pyodide) {
+      // loadPyodide deve essere disponibile globalmente (incluso tramite <script src="...pyodide.js">)
+      pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/" });
+    }
+    const code = editor ? editor.getValue() : '';
+    // Reindirizziamo stdout
+    await pyodide.runPythonAsync(`
+import sys, io
+sys.stdout = io.StringIO()
+`);
+    await pyodide.runPythonAsync(code);
+    const result = pyodide.runPython("sys.stdout.getvalue()");
+    out.textContent = result || "Eseguito.";
+  } catch (e) {
+    if (out) out.textContent = "Errore:\n" + e;
+    console.error(e);
+  }
+}
+
+/* ======= CARICAMENTO INIZIALE E POPOLAMENTO TRACCE ======= */
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // Inizializza editor (Monaco loader deve essere caricato prima)
+    initMonacoEditor();
+
+    // Recupera classe e costruisci classKey
     const urlParams = new URLSearchParams(window.location.search);
     const cl = urlParams.get('classe') || 'default';
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+
+    // Popola select tracce
     const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
     const select = document.getElementById('tracciaSelect');
-
     const tracciaKey = `tracciaAssegnata_${classKey}`;
     let assignedIndex = localStorage.getItem(tracciaKey);
-    if (assignedIndex === null) {
-        assignedIndex = Math.floor(Math.random() * exercises.length);
-        localStorage.setItem(tracciaKey, assignedIndex);
-    } else {
-        assignedIndex = parseInt(assignedIndex);
-        if (assignedIndex >= exercises.length) assignedIndex = 0;
-    }
-    const selectedExercise = exercises[assignedIndex];
 
-    exercises.forEach((ex, index) => {
-      const opt = document.createElement('option');
-      opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
-      if (index === assignedIndex) opt.selected = true;
-      select.appendChild(opt);
-    });
-    select.disabled = true;
+    if (assignedIndex === null) {
+      assignedIndex = Math.floor(Math.random() * exercises.length);
+      localStorage.setItem(tracciaKey, String(assignedIndex));
+    } else {
+      assignedIndex = parseInt(assignedIndex, 10);
+      if (isNaN(assignedIndex) || assignedIndex >= exercises.length) assignedIndex = 0;
+    }
+
+    const selectedExercise = exercises[assignedIndex];
+    if (select) {
+      exercises.forEach((ex, index) => {
+        const opt = document.createElement('option');
+        opt.value = `tracce/${ex.file}`;
+        opt.textContent = ex.title;
+        if (index === assignedIndex) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.disabled = true;
+    }
+
     if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
 
-    // --- GESTIONE TIMER FINE PROVA PERSISTENTE ---
-    // RECUPERO TIMER PERSISTENTE
-    const timerKey = `timer_${classKey}`;
-    const savedTime = localStorage.getItem(timerKey);
-    if (savedTime !== null) {
-        maxTimeLeft = parseInt(savedTime);
-    }
+    // Recupera codice salvato
+    const lastCode = localStorage.getItem(`codiceSalvato_${classKey}`);
+    if (lastCode && editor) editor.setValue(lastCode);
 
-    // AGGIORNAMENTO IMMEDIATO DELLO SCHERMO (Prima che parta il setInterval)
-    aggiornaDisplayTimer(); 
+    // Avvia timers
+    startTimers(classKey);
 
-    // AVVIO DEL CICLO
-    setInterval(() => {
-        if (timeLeft <= 0 || maxTimeLeft <= 0) {
-            alert("Tempo scaduto!");
-            tornaAllaPaginaPrincipale();
-            return;
-        }
-        timeLeft--;
-        maxTimeLeft--;
-        localStorage.setItem(timerKey, maxTimeLeft);
-        
-        aggiornaDisplayTimer(); // Continua ad aggiornare ogni secondo
-    }, 1000);
+    // Avvia esecuzione iniziale (opzionale)
+    // runCode();
 
-    setInterval(() => {
-        if (editor) {
-            localStorage.setItem(`codiceSalvato_${classKey}`, editor.getValue());
-            console.log("Backup eseguito");
-        }
-    }, 120000);
-  });
+  } catch (e) {
+    console.error('Errore inizializzazione pagina:', e);
+  }
+});
 </script>
+
 </body>
 </html>
