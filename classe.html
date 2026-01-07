@@ -441,25 +441,45 @@
     if (lastCode) editor.setValue(lastCode);
   });
 
-    async function runCode() {
-      const out = document.getElementById('output');
-      const btn = document.getElementById('eseguiBtn');
-      out.textContent = "⏳ Esecuzione in corso...\n";
-      try {
-        if (!pyodide) pyodide = await loadPyodide();
-        btn.disabled = true;
+  async function runCode() {
+    const out = document.getElementById('output');
+    const btn = document.getElementById('eseguiBtn');
+    
+    out.textContent = "⏳ Esecuzione in corso...";
+    
+    try {
+        // Verifica se pyodide è stato caricato correttamente
+        if (typeof loadPyodide === 'undefined') {
+            out.textContent = "Errore: Libreria Pyodide non trovata. Controlla la connessione internet.";
+            return;
+        }
+
+        if (!pyodide) {
+            pyodide = await loadPyodide();
+        }
+
+        // Setup per catturare il print() di Python
+        await pyodide.runPythonAsync(`
+import sys
+import io
+sys.stdout = io.StringIO()
+        `);
+
+        // Prendi il codice dall'editor Monaco
+        const code = editor.getValue();
         
-        // Cattura l'output di Python
-        await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
-        await pyodide.runPythonAsync(editor.getValue());
+        // Esegui il codice
+        await pyodide.runPythonAsync(code);
+
+        // Estrai l'output catturato
+        const stdout = pyodide.runPython("sys.stdout.getvalue()");
         
-        const res = pyodide.runPython("sys.stdout.getvalue()");
-        out.textContent = res || "✅ Codice eseguito correttamente.";
-      } catch (e) { 
-        out.textContent = "❌ ERRORE:\n" + e; 
-      } finally {
-        btn.disabled = false;
-      }
+        out.textContent = stdout || "✅ Codice eseguito (nessun output da visualizzare).";
+
+    } catch (err) {
+        // Mostra l'errore Python nella console verde
+        out.textContent = "❌ ERRORE PYTHON:\n" + err;
+    }
   }
   function scaricaFileLocale() {
       const codice = editor.getValue();
