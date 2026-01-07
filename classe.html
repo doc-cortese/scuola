@@ -139,15 +139,18 @@
       background: #1e1e1e; /* Colore scuro di sfondo per evitare il flash bianco */
     }
 
-   #output {
-      background: #1e1e1e; 
-      color: #00ff00; 
-      padding: 10px;
+     #output {
+      background: #0d0d0d !important; 
+      color: #00ff41 !important; 
+      padding: 15px;
       border-radius: 8px;
       margin-top: 10px;
-      height: 100px; /* Ridotto leggermente per mobile  */
+      height: 150px; 
       overflow-y: auto;
-      font-size: 12px;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      border-left: 5px solid var(--primary-color);
+      box-shadow: inset 0 0 10px rgba(0,0,0,1);
     }
     #timerDisplay { margin-left: auto; color: var(--danger-color); font-weight: bold; }
 
@@ -205,8 +208,9 @@
     <div id="monaco-container"></div>
 
     <div class="controls" style="margin-top: 10px;">
-      <button class="btn-run" id="eseguiBtn" onclick="runCode()">⌛ Caricamento Python...</button>
+      <button class="btn-run" id="eseguiBtn" onclick="runCode()">▶ Esegui Codice</button>
       <button class="btn-drive" onclick="inviaConsegnaDrive()">☁️ Invia al Drive</button>
+      <button class="btn-z" onclick="scaricaFileLocale()" style="background:#64748b; padding: 8px 16px;">💾 Salva .py</button>
     </div>
     <pre id="output">Inizializzazione ambiente Python...</pre>
   </div>
@@ -437,20 +441,35 @@
     if (lastCode) editor.setValue(lastCode);
   });
 
-  async function runCode() {
-    const out = document.getElementById('output');
-    out.textContent = "Esecuzione...\n";
-    try {
-      if (!pyodide) pyodide = await loadPyodide();
-      document.getElementById('eseguiBtn').style.display = "inline-block";
-      document.getElementById('eseguiBtn').disabled = false;
-      document.getElementById('eseguiBtn').textContent = "▶ Esegui Codice";
-      await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
-      await pyodide.runPythonAsync(editor.getValue());
-      out.textContent = pyodide.runPython("sys.stdout.getvalue()") || "Eseguito.";
-    } catch (e) { out.textContent = "Errore:\n" + e; }
+    async function runCode() {
+      const out = document.getElementById('output');
+      const btn = document.getElementById('eseguiBtn');
+      out.textContent = "⏳ Esecuzione in corso...\n";
+      try {
+        if (!pyodide) pyodide = await loadPyodide();
+        btn.disabled = true;
+        
+        // Cattura l'output di Python
+        await pyodide.runPythonAsync(`import sys, io\nsys.stdout = io.StringIO()`);
+        await pyodide.runPythonAsync(editor.getValue());
+        
+        const res = pyodide.runPython("sys.stdout.getvalue()");
+        out.textContent = res || "✅ Codice eseguito correttamente.";
+      } catch (e) { 
+        out.textContent = "❌ ERRORE:\n" + e; 
+      } finally {
+        btn.disabled = false;
+      }
   }
-
+  function scaricaFileLocale() {
+      const codice = editor.getValue();
+      const nome = document.getElementById("nomeStudente").value.trim() || "esercizio_python";
+      const blob = new Blob([codice], { type: 'text/plain' });
+      const lnk = document.createElement('a');
+      lnk.href = URL.createObjectURL(blob);
+      lnk.download = `${nome.replace(/\s+/g, '_')}.py`;
+      lnk.click();
+  }
   document.addEventListener("DOMContentLoaded", async () => {
     runCode();
     const urlParams = new URLSearchParams(window.location.search);
