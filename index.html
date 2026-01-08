@@ -548,6 +548,8 @@
     transform: translateY(-10px);
     transition: opacity 0.3s ease, transform 0.3s ease;
     pointer-events: none;
+    top: 100%;
+    left: 0;
 }
 
 .dropdown-content a {
@@ -698,7 +700,10 @@ nav a.active::after {
     <ul id="nav-menu">
         <li><a href="index.html#home">Home</a></li>
         <!-- MENU A TENDINA "CLASSI" -->
-        <li class="dropdown">Classi </a>
+        <li class="dropdown">
+            <a href="#" class="dropbtn">
+                Classi <i class="fas fa-chevron-down"></i>
+            </a>
             <div class="dropdown-content">
                 <a href="https://antonioadinolfi.it/classe.html?classe=Prime">Prime</a>
                 <a href="https://antonioadinolfi.it/classe.html?classe=Seconde">Seconde</a>
@@ -707,6 +712,7 @@ nav a.active::after {
                 <a href="https://antonioadinolfi.it/classe.html?classe=Quinte">Quinte</a>
             </div>
         </li>
+
         
         <li><a href="https://antonioadinolfi.it/materiali.html">Materiali</a></li>
         <li><a href="index.html#contact">Contatti</a></li>
@@ -1083,24 +1089,25 @@ function setActiveMenu() {
 function handleMobileDropdown() {
     const dropdowns = document.querySelectorAll('.dropdown');
     const isMobile = window.innerWidth <= 768;
-    
+
     dropdowns.forEach(dropdown => {
-        const dropbtn = dropdown.querySelector('.dropbtn');
-        
+        const btn = dropdown.querySelector('.dropbtn');
+        const content = dropdown.querySelector('.dropdown-content');
+
         if (isMobile) {
-            // Su mobile, toggle al click
-            dropbtn.addEventListener('click', function(e) {
+            btn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                const content = this.nextElementSibling;
-                content.style.display = content.style.display === 'block' ? 'none' : 'block';
-            });
+                content.style.display =
+                    content.style.display === 'block' ? 'none' : 'block';
+            };
         } else {
-            // Su desktop, rimuovi event listener mobile
-            dropbtn.removeEventListener('click', handleClick);
+            content.style.display = '';
+            btn.onclick = null;
         }
     });
 }
+
 
 // Chiudi tendine quando si clicca fuori
 document.addEventListener('click', function(e) {
@@ -1148,6 +1155,7 @@ highlightCurrentPage();
     </script>
 </body>
 </html>
+
 
 
 
