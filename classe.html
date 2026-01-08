@@ -379,7 +379,9 @@
     const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
 
     const codice = editor.getValue();
-    const outputText = document.getElementById("output").textContent;
+    // Cerca l'elemento 'output' (se esiste ancora) oppure usa un testo di default
+    const outputElement = document.getElementById("output");
+    const outputText = outputElement ? outputElement.textContent : "Output non disponibile (compilatore disattivato)";
     const urlParams = new URLSearchParams(window.location.search);
     const classe = urlParams.get("classe") || "ND";
 
