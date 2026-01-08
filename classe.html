@@ -421,12 +421,15 @@
     const cl = urlParams.get('classe') || 'default';
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
     
-    localStorage.removeItem(`tracciaAssegnata_${classKey}`);
-    localStorage.removeItem(`fineProva_${classKey}`);
+    // RIMUOVI queste righe se vuoi che la traccia rimanga la stessa al rientro:
+    // localStorage.removeItem(`tracciaAssegnata_${classKey}`); 
+    
+    // Mantieni invece la pulizia dei dati sensibili se necessario
     localStorage.removeItem(`codiceSalvato_${classKey}`);
     localStorage.removeItem("nomeStudente");
+    
     window.location.href = '../index.html'; 
-  }
+}
 
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monaco-container'), {
