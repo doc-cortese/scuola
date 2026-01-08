@@ -167,6 +167,18 @@
         font-size: 18px;
         animation: rotateHourglass 3s infinite ease-in-out;
     }
+    /* Animazione per il lampeggio */
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
+    
+    /* Classe che attiva il lampeggio e colora la clessidra di rosso */
+    .urgent-blink {
+      animation: rotateHourglass 3s infinite ease-in-out, blink 0.8s infinite !important;
+      color: var(--danger-color) !important;
+    }
   </style>
 </head>
 
@@ -254,20 +266,24 @@
     const s1 = timeLeft % 60;
     
     const timerDisplay = document.getElementById('timerDisplay');
+    const clessidra = document.querySelector('.clessidra-icon'); // Seleziona l'icona della clessidra
     
     if (timerDisplay) {
-        // Commentiamo la riga qui sotto per non mostrare il tempo a video
-        // document.getElementById('timerDisplay').textContent = `${m1}:${s1.toString().padStart(2, '0')}`;
-        
-        // Opzionale: puoi scrivere un testo fisso o lasciarlo vuoto
         timerDisplay.textContent = ""; 
+    }
+
+    // GESTIONE LAMPEGGIO CLESSIDRA (Inattività < 60 secondi)
+    if (clessidra) {
+        if (timeLeft <= 60) {
+            clessidra.classList.add('urgent-blink');
+        } else {
+            clessidra.classList.remove('urgent-blink');
+        }
     }
 
     const m2 = Math.floor(maxTimeLeft / 60);
     const s2 = maxTimeLeft % 60;
     document.getElementById('maxTimerDisplay').textContent = `${m2}:${s2.toString().padStart(2, '0')}`;
-    
-    
   }
   // === FUNZIONI ZOOM EDITOR ===
   function changeEditorZoom(delta) {
