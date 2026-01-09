@@ -20,126 +20,84 @@
       --unina-blue: #002d4d;
       --bg-gray: #f2f2f2;
       --text-dark: #333;
-      --accent: #f7a81b;
     }
 
-    body { margin: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); }
+    /* FIX: Sticky Footer Layout */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
 
-    /* NAVBAR */
-    .top-nav { background-color: var(--unina-blue); color: white; padding: 12px 10%; display: flex; justify-content: space-between; align-items: center; }
-    .logo-area { display: flex; align-items: center; gap: 15px; }
+    body {
+      display: flex;
+      flex-direction: column;
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-gray);
+      color: var(--text-dark);
+    }
 
-    /* BANNER UNINA STYLE */
-    .hero-banner { background-color: var(--unina-blue); color: white; padding: 50px 10%; display: flex; align-items: center; gap: 40px; }
+    /* NAVBAR & HERO */
+    .top-nav { background-color: var(--unina-blue); color: white; padding: 12px 10%; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    .hero-banner { background-color: var(--unina-blue); color: white; padding: 50px 10%; display: flex; align-items: center; gap: 40px; flex-shrink: 0; }
     .profile-img { width: 160px; height: 160px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); background: white; }
     .hero-content h1 { font-size: 42px; margin: 0; text-transform: uppercase; font-weight: 500; }
 
     /* TABS */
-    .tabs-nav { background: white; padding: 0 10%; display: flex; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 100; }
+    .tabs-nav { background: white; padding: 0 10%; display: flex; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
     .tab-btn { padding: 20px 30px; cursor: pointer; font-weight: 500; color: #666; text-transform: uppercase; font-size: 15px; border-bottom: 4px solid transparent; }
     .tab-btn.active { border-bottom-color: var(--unina-blue); color: var(--unina-blue); background: #f9f9f9; }
 
-    /* GRID & CARDS */
-    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; min-height: auto; }
+    /* CONTAINER PRINCIPALE (Si espande per spingere il footer) */
+    main.container {
+      flex: 1 0 auto;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
     .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
-    .info-card { background: white; padding: 30px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .info-card { background: white; padding: 30px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); height: auto; }
     .info-card h3 { color: var(--text-dark); margin: 0 0 20px 0; font-size: 22px; font-weight: 400; border-bottom: 1px solid #eee; padding-bottom: 10px; }
 
     /* DIDATTICA */
     .course-row { background: white; padding: 20px; border-left: 5px solid var(--unina-blue); display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .course-info h4 { margin: 0; font-size: 18px; color: var(--unina-blue); }
     .btn-group { display: flex; gap: 10px; }
     .btn-action { padding: 8px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase; transition: 0.2s; }
     .btn-blue { background: var(--unina-blue); color: white; }
     .btn-border { border: 1px solid var(--unina-blue); color: var(--unina-blue); }
-    .btn-blue:hover { opacity: 0.9; }
 
     /* FEED RSS */
     .news-item { display: block; padding: 10px 0; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: var(--unina-blue); }
     .news-date { font-size: 11px; color: #888; display: block; margin-bottom: 3px; font-weight: bold; }
-    .news-title { font-size: 14px; font-weight: 500; }
 
-    /* FOOTER ISTITUZIONALE */
+    /* FOOTER DEFINITIVO (Sticky) */
     footer {
-      background: #fff;
+      flex-shrink: 0;
+      background: white;
       border-top: 1px solid #d1d5db;
       padding: 20px 10%;
-      margin-top: 60px;
-      display: flex;
-      flex-direction: column; /* Cambiato per ospitare due righe */
-      gap: 15px;
-      font-size: 13px;
       color: #4b5563;
     }
-    
-    .footer-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
-    
-    .footer-bottom-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid #f3f4f6;
-      padding-top: 15px;
-      width: 100%;
-    }
-    
-    .footer-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .footer-right {
-      display: flex;
-      gap: 20px;
-    }
-    
-    .footer-right a {
-      color: #002d4d;
-      text-decoration: none;
-    }
-    
-    .footer-right a:hover {
-      text-decoration: underline;
-    }
-    
-    .social-icons {
-      display: flex;
-      gap: 15px;
-    }
-    
-    .social-icons a {
-      color: #002d4d;
-      font-size: 18px;
-      transition: opacity 0.2s;
-    }
-    
-    .social-icons a:hover {
-      opacity: 0.7;
-    }
-    
+    .footer-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; font-size: 12px; }
+    .social-icons { display: flex; gap: 15px; }
+    .social-icons a { color: var(--unina-blue); font-size: 18px; }
+
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-      .footer-top-row, .footer-bottom-row {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-      }
-      .footer-right {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
+        .hero-banner { flex-direction: column; text-align: center; gap: 20px; }
+        .info-grid { grid-template-columns: 1fr; }
+        .course-row { flex-direction: column; text-align: center; gap: 15px; }
+        .footer-top, .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
     }
   </style>
 </head>
 <body>
 
 <nav class="top-nav">
-    <div class="logo-area">
+    <div style="display: flex; align-items: center; gap: 15px;">
         <div style="font-weight: 900; font-size: 22px;">LSC</div>
         <div style="font-size: 11px; font-weight: bold; text-transform: uppercase;">Liceo Scientifico<br>Nino Cortese</div>
     </div>
@@ -171,7 +129,7 @@
             <div class="info-card">
                 <h3>Ruolo</h3>
                 <p>Docente di Informatica e Tecnologie Digitali</p>
-                <p>Classe di concorso A-41</p>
+                <p>Classe di concorso A-41 (Ex B016)</p>
             </div>
             <div class="info-card">
                 <h3>Contatti</h3>
@@ -190,79 +148,55 @@
     </div>
 
     <div id="tab-didattica" class="tab-content" style="display:none;">
-        <div id="login-wall" style="background:white; padding:50px; text-align:center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div id="login-wall" style="background:white; padding:50px; text-align:center;">
             <i class="fas fa-lock" style="font-size: 40px; color: var(--unina-blue); margin-bottom: 20px;"></i>
             <h3>Area Riservata Didattica</h3>
-            <p>Esegui il login con l'account istituzionale <strong>@lscortese.com</strong></p>
             <div id="g_id_onload" data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-            <div class="g_id_signin" data-type="standard" data-size="large" style="display: inline-block; margin-top: 20px;"></div>
+            <div class="g_id_signin" data-type="standard" data-size="large"></div>
         </div>
 
         <div id="protected-content" style="display:none;">
-            <h3 style="margin-bottom:30px; border-bottom: 2px solid var(--unina-blue); padding-bottom: 10px;">I Miei Insegnamenti - A.S. 2025/26</h3>
-            
-            <div class="course-row">
-                <div class="course-info"><h4>Classe Prima</h4><p>Coding e Problem Solving</p></div>
-                <div class="btn-group">
-                    <a href="materiali.html?classe=Prime" class="btn-action btn-blue">Materiali</a>
-                    <a href="classe.html?classe=Prime" class="btn-action btn-border">Lezioni</a>
-                </div>
-            </div>
-            <div class="course-row">
-                <div class="course-info"><h4>Classe Seconda</h4><p>Algoritmi e Flowchart</p></div>
-                <div class="btn-group">
-                    <a href="materiali.html?classe=Seconde" class="btn-action btn-blue">Materiali</a>
-                    <a href="classe.html?classe=Seconde" class="btn-action btn-border">Lezioni</a>
-                </div>
-            </div>
-            <div class="course-row">
-                <div class="course-info"><h4>Classe Terza</h4><p>Sviluppo Web (HTML/CSS)</p></div>
-                <div class="btn-group">
-                    <a href="materiali.html?classe=Terze" class="btn-action btn-blue">Materiali</a>
-                    <a href="classe.html?classe=Terze" class="btn-action btn-border">Lezioni</a>
-                </div>
-            </div>
-            <div class="course-row">
-                <div class="course-info"><h4>Classe Quarta</h4><p>Database e SQL</p></div>
-                <div class="btn-group">
-                    <a href="materiali.html?classe=Quarte" class="btn-action btn-blue">Materiali</a>
-                    <a href="classe.html?classe=Quarte" class="btn-action btn-border">Lezioni</a>
-                </div>
-            </div>
-            <div class="course-row">
-                <div class="course-info"><h4>Classe Quinta</h4><p>Sistemi, Reti e Maturità</p></div>
-                <div class="btn-group">
-                    <a href="materiali.html?classe=Quinte" class="btn-action btn-blue">Materiali</a>
-                    <a href="classe.html?classe=Quinte" class="btn-action btn-border">Lezioni</a>
-                </div>
-            </div>
+            <h3 style="margin-bottom:30px;">I Miei Insegnamenti</h3>
+            <script>
+                const classi = ["Prime", "Seconde", "Terze", "Quarte", "Quinte"];
+                classi.forEach(c => {
+                    document.write(`
+                        <div class="course-row">
+                            <div><h4>Classe ${c}</h4></div>
+                            <div class="btn-group">
+                                <a href="materiali.html?classe=${c}" class="btn-action btn-blue">Materiali</a>
+                                <a href="classe.html?classe=${c}" class="btn-action btn-border">Lezioni</a>
+                            </div>
+                        </div>
+                    `);
+                });
+            </script>
         </div>
     </div>
 </main>
 
 <footer>
-    <div class="footer-top-row">
+    <div class="footer-top">
         <div class="social-icons">
-            <a href="https://github.com/tuo-profilo" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-            <a href="https://linkedin.com/in/tuo-profilo" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
-            <a href="https://youtube.com/tuo-canale" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
-            <a href="mailto:antonioadinolfi@lscortese.com" title="Email"><i class="fas fa-envelope"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="mailto:antonioadinolfi@lscortese.com"><i class="fas fa-envelope"></i></a>
         </div>
-        <div class="footer-right">
-            <a href="https://www.liceoscientificocortese.edu.it/" target="_blank">Sito del Liceo</a>
-            <a href="#">Cookies e Privacy</a>
-            <a href="#">Accessibilità</a>
+        <div style="display: flex; gap: 20px; font-size: 13px;">
+            <a href="https://www.liceoscientificocortese.edu.it/" target="_blank" style="color: var(--unina-blue); text-decoration: none;">Sito del Liceo</a>
+            <a href="#" style="color: var(--unina-blue); text-decoration: none;">Cookies e Privacy</a>
+            <a href="#" style="color: var(--unina-blue); text-decoration: none;">Accessibilità</a>
         </div>
     </div>
-
-    <div class="footer-bottom-row">
-        <div class="footer-left">
-            <span>© 2026 Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"</span>
-            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visite&color=%23002d4d" alt="Contatore Visite" style="height: 20px;">
+    <div class="footer-bottom">
+        <div>
+            © 2026 Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"
+            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visite&color=%23002d4d" style="height: 18px; vertical-align: middle; margin-left: 10px;">
         </div>
-        <div class="footer-right">
-            <a href="#">Contatti</a>
-            <a href="#">Mappa del Sito</a>
+        <div style="display: flex; gap: 20px;">
+            <a href="#" style="color: #4b5563; text-decoration: none;">Contatti</a>
+            <a href="#" style="color: #4b5563; text-decoration: none;">Mappa del Sito</a>
         </div>
     </div>
 </footer>
@@ -281,9 +215,7 @@ function handleCredentialResponse(response) {
     if (data.email.endsWith("@lscortese.com")) {
         document.getElementById("login-wall").style.display = "none";
         document.getElementById("protected-content").style.display = "block";
-        document.getElementById("auth-info").innerHTML = `<i class="fas fa-user-circle"></i> ${data.given_name} ${data.family_name}`;
-    } else {
-        alert("Accesso negato. Utilizza l'email @lscortese.com");
+        document.getElementById("auth-info").innerText = "Ciao, " + data.given_name;
     }
 }
 
@@ -298,18 +230,16 @@ async function loadFeeds() {
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`);
             const data = await res.json();
             document.getElementById(f.id).innerHTML = data.items.slice(0, 3).map(item => {
-                const date = new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+                const date = new Date(item.pubDate).toLocaleDateString('it-IT');
                 return `<a href="${item.link}" target="_blank" class="news-item">
                             <span class="news-date">${date}</span>
-                            <span class="news-title">${item.title}</span>
+                            <span style="font-size:14px; font-weight:500;">${item.title}</span>
                         </a>`;
             }).join('');
-        } catch(e) { document.getElementById(f.id).innerHTML = "News temporaneamente non disponibili."; }
+        } catch(e) { document.getElementById(f.id).innerHTML = "News offline."; }
     }
 }
 window.onload = loadFeeds;
 </script>
 </body>
 </html>
-
-
