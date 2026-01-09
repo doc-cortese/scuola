@@ -11,73 +11,68 @@
     :root {
       --unina-blue: #002d4d;
       --unina-light-blue: #004080;
-      --bg-gray: #f8f9fa;
+      --bg-gray: #f2f2f2;
       --text-dark: #333;
-      --text-muted: #666;
       --white: #ffffff;
-      --accent: #f7a81b;
     }
 
     body { margin: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); }
 
-    /* NAVBAR ISTITUZIONALE */
-    .top-nav { background-color: var(--unina-blue); color: white; padding: 10px 10%; display: flex; justify-content: space-between; align-items: center; }
+    /* NAVBAR SUPERIORE */
+    .top-nav { background-color: var(--unina-blue); color: white; padding: 12px 10%; display: flex; justify-content: space-between; align-items: center; }
     .logo-area { display: flex; align-items: center; gap: 15px; }
-    .nav-actions { display: flex; gap: 20px; align-items: center; }
-    .nav-actions a { color: white; text-decoration: none; font-size: 13px; font-weight: 500; text-transform: uppercase; }
-    .btn-accedi { border: 2px solid white; padding: 6px 18px; border-radius: 25px; transition: 0.3s; font-weight: bold; }
+    .btn-accedi-top { border: 2px solid white; padding: 8px 24px; border-radius: 25px; color: white; text-decoration: none; font-weight: bold; font-size: 16px; }
 
-    /* HERO BANNER STILE FEDERICO II */
-    .hero-banner { background-color: var(--unina-blue); color: white; padding: 50px 10%; display: flex; align-items: center; gap: 40px; }
-    .profile-img { width: 140px; height: 140px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.3); object-fit: cover; }
-    .hero-content h1 { font-size: 38px; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-    .hero-content p { font-size: 18px; opacity: 0.9; margin-top: 5px; }
+    /* BANNER DOCENTE (FONT GRANDE) */
+    .hero-banner { background-color: var(--unina-blue); color: white; padding: 60px 10%; display: flex; align-items: center; gap: 40px; }
+    .profile-img { width: 160px; height: 160px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
+    .hero-content h1 { font-size: 48px; margin: 0; text-transform: uppercase; font-weight: 500; }
+    .hero-content p { font-size: 20px; opacity: 0.9; margin-top: 10px; }
 
-    /* NAVIGAZIONE A TAB */
-    .tabs-nav { background: white; padding: 0 10%; display: flex; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
-    .tab-btn { padding: 18px 25px; cursor: pointer; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 13px; border-bottom: 4px solid transparent; transition: 0.2s; }
-    .tab-btn:hover { color: var(--unina-blue); }
-    .tab-btn.active { border-bottom-color: var(--unina-blue); color: var(--unina-blue); background: #f0f4f8; }
+    /* NAVIGAZIONE TABS */
+    .tabs-nav { background: white; padding: 0 10%; display: flex; border-bottom: 1px solid #ddd; }
+    .tab-btn { padding: 20px 40px; cursor: pointer; font-weight: 500; color: #666; text-transform: uppercase; font-size: 16px; border-bottom: 4px solid transparent; }
+    .tab-btn.active { border-bottom-color: var(--unina-blue); color: var(--unina-blue); background: #f9f9f9; }
 
-    /* CONTENUTI */
-    .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; min-height: 400px; }
-    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 30px; }
-    .info-card { background: white; padding: 25px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .info-card h3 { color: var(--unina-blue); margin: 0 0 15px 0; border-bottom: 2px solid #eee; padding-bottom: 8px; font-size: 15px; text-transform: uppercase; }
-    
-    /* RIGHE CLASSI DIDATTICA */
-    .course-row { background: white; padding: 18px 25px; border-left: 5px solid var(--unina-blue); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
-    .course-row:hover { transform: translateX(5px); }
-    .btn-group { display: flex; gap: 8px; }
-    .btn-sm { padding: 7px 14px; text-decoration: none; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-    .btn-primary { background: var(--unina-blue); color: white; }
-    .btn-outline { border: 1px solid var(--unina-blue); color: var(--unina-blue); }
+    /* CONTENITORE E CARD */
+    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; min-height: 500px; }
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 40px; }
+    .info-card { background: white; padding: 35px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .info-card h3 { color: var(--text-dark); margin: 0 0 20px 0; font-size: 24px; font-weight: 400; }
+    .info-card p { font-size: 16px; line-height: 1.6; color: #444; }
 
-    /* FOOTER */
-    footer { background: white; border-top: 1px solid #ddd; padding: 40px 10%; margin-top: 60px; text-align: center; color: var(--text-muted); font-size: 13px; }
-    footer a { color: var(--unina-blue); text-decoration: none; font-weight: bold; }
-    .hit-counter { margin-top: 20px; }
+    /* ICONE CONTATTI (STILE D'ALESSANDRO) */
+    .contact-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; text-decoration: none; color: inherit; }
+    .icon-circle { width: 45px; height: 45px; background: var(--unina-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-    /* LOGIN */
-    .login-box { background: white; padding: 40px; text-align: center; max-width: 450px; margin: 50px auto; border-top: 4px solid var(--accent); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    .feed-item { display: block; padding: 8px 0; border-bottom: 1px solid #f0f0f0; color: var(--text-dark); text-decoration: none; font-size: 12.5px; text-align: left; }
-    .feed-item:hover { color: var(--unina-light-blue); }
+    /* DIDATTICA - LISTA CLASSI */
+    .course-row { background: white; padding: 25px; border-left: 6px solid var(--unina-blue); display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .course-info h4 { margin: 0; font-size: 22px; color: var(--unina-blue); }
+    .btn-group { display: flex; gap: 10px; }
+    .btn-action { padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+    .btn-blue { background: var(--unina-blue); color: white; }
+    .btn-border { border: 1px solid var(--unina-blue); color: var(--unina-blue); }
+
+    /* FOOTER AGGIORNATO */
+    footer { background: #fff; border-top: 1px solid #ddd; padding: 30px 10%; margin-top: 50px; }
+    .footer-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 20px; font-size: 14px; }
+    .footer-bottom { padding-top: 20px; text-align: center; color: #888; font-size: 13px; }
+    .footer-bottom a { color: var(--unina-blue); text-decoration: none; font-weight: bold; }
+
+    /* LOGIN BOX */
+    .login-box { background: white; padding: 50px; text-align: center; max-width: 500px; margin: 50px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
 
 <nav class="top-nav">
     <div class="logo-area">
-        <div style="font-weight: 900; font-size: 22px; letter-spacing: -1px;">LSC</div>
-        <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.3);"></div>
-        <div style="font-size: 10px; line-height: 1.2; font-weight: 700;">LICEO SCIENTIFICO<br>NINO CORTESE</div>
+        <div style="font-weight: 900; font-size: 24px;">LSC</div>
+        <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.3); margin: 0 15px;"></div>
+        <div style="font-size: 12px; font-weight: bold; text-transform: uppercase;">Liceo Scientifico<br>Nino Cortese</div>
     </div>
-    <div class="nav-actions">
-        <div id="loggedInInfo" style="display:none; align-items: center; gap: 15px;">
-            <span id="userName" style="font-size: 12px; font-weight: bold;"></span>
-            <a href="#" onclick="handleLogout()" class="btn-accedi">ESCI</a>
-        </div>
-        <a href="#didattica" id="btnAccediInit" class="btn-accedi" onclick="showTab('didattica')">ACCEDI</a>
+    <div id="authLinks">
+        <a href="#didattica" class="btn-accedi-top" onclick="showTab('didattica')">Accedi <i class="fas fa-arrow-right"></i></a>
     </div>
 </nav>
 
@@ -85,7 +80,7 @@
     <img src="./immagini/foto_adinolfi.jpg" alt="Prof. Antonio Adinolfi" class="profile-img">
     <div class="hero-content">
         <h1>Antonio Adinolfi</h1>
-        <p>Docente di Informatica e Tecnologie Digitali</p>
+        <p>Professore di Informatica (Dipartimento di Informatica)</p>
     </div>
 </header>
 
@@ -96,100 +91,82 @@
 </nav>
 
 <main class="container">
-    <div id="welcomeMessage" style="display:none; background: #eef6ff; padding: 12px 20px; border-radius: 4px; margin-bottom: 25px; color: var(--unina-blue); font-weight: 600; border-left: 4px solid var(--unina-blue);">
-        <i class="fas fa-check-circle"></i> Accesso autenticato. Benvenuto nell'area didattica riservata.
-    </div>
-
     <div id="tab-profilo" class="tab-content">
         <div class="info-grid">
             <div class="info-card">
                 <h3>Dipartimento</h3>
-                <p style="font-size: 15px;">Dipartimento di Informatica</p>
+                <p>DIPARTIMENTO DI INFORMATICA</p>
             </div>
             <div class="info-card">
                 <h3>Ruolo</h3>
-                <p style="font-size: 15px;">Professore di Informatica (B016)<br>Responsabile Laboratorio</p>
+                <p>Professore di Informatica e Tecnologie Digitali (B016)</p>
             </div>
             <div class="info-card">
                 <h3>Informazioni</h3>
-                <p style="font-size: 14px;"><i class="fas fa-envelope" style="width: 20px;"></i> <a href="mailto:antonioadinolfi@lscortese.com" style="color:inherit; text-decoration:none;">antonioadinolfi@lscortese.com</a></p>
-                <p style="font-size: 14px;"><i class="fas fa-clock" style="width: 20px;"></i> Ricevimento: Mer 10:00 - 11:00</p>
-                <p style="font-size: 14px;"><i class="fab fa-github" style="width: 20px;"></i> <a href="#" style="color:inherit;">GitHub Profile</a></p>
+                <a href="mailto:antonioadinolfi@lscortese.com" class="contact-row">
+                    <div class="icon-circle"><i class="fas fa-envelope"></i></div>
+                    <span>antonioadinolfi@lscortese.com</span>
+                </a>
+                <div class="contact-row">
+                    <div class="icon-circle"><i class="fas fa-clock"></i></div>
+                    <span>Ricevimento: Mer 10:00 - 11:00</span>
+                </div>
+                <a href="https://github.com" class="contact-row">
+                    <div class="icon-circle"><i class="fab fa-github"></i></div>
+                    <span>GitHub Progetti</span>
+                </a>
             </div>
-        </div>
-    </div>
-
-    <div id="tab-bacheca" class="tab-content" style="display:none;">
-        <div class="info-grid">
-            <div class="info-card"><h3>Circolari Liceo</h3><div id="school-feed">Caricamento...</div></div>
-            <div class="info-card"><h3>Tecnica della Scuola</h3><div id="tecnica-feed">Caricamento...</div></div>
-            <div class="info-card"><h3>Orizzonte Scuola</h3><div id="rss-feed">Caricamento...</div></div>
         </div>
     </div>
 
     <div id="tab-didattica" class="tab-content" style="display:none;">
         <div id="loginSection" class="login-box">
-            <i class="fas fa-lock" style="font-size: 30px; color: var(--unina-blue); margin-bottom: 15px;"></i>
-            <h3>Area Riservata</h3>
-            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 25px;">Esegui il login con l'account <strong>@lscortese.com</strong> per accedere ai materiali.</p>
+            <h3 style="font-size: 28px;">Area Riservata</h3>
+            <p style="margin-bottom: 30px;">Accedi con il tuo account istituzionale @lscortese.com</p>
             <div id="g_id_onload" data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-            <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"></div>
-            <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
-                <a href="ospiti.html" style="font-size: 13px; color: var(--unina-light-blue); font-weight: bold;">Accedi come Ospite</a>
-            </div>
+            <div class="g_id_signin" data-type="standard" data-size="large"></div>
         </div>
 
         <div id="contenutoProtetto" style="display:none;">
-            <h3 style="margin-bottom: 20px; color: var(--unina-blue);">ELENCO CLASSI A.S. 2025/2026</h3>
-            <div id="courseList">
-                <div class="course-row">
-                    <div><strong>Primo Anno</strong><br><small>Pensiero computazionale e logica.</small></div>
-                    <div class="btn-group">
-                        <a href="materiali.html?classe=Prime" class="btn-sm btn-primary">Materiale</a>
-                        <a href="classe.html?classe=Prime" class="btn-sm btn-outline">Python</a>
-                    </div>
-                </div>
-                <div class="course-row">
-                    <div><strong>Secondo Anno</strong><br><small>Algoritmi e strutture basi.</small></div>
-                    <div class="btn-group">
-                        <a href="materiali.html?classe=Seconde" class="btn-sm btn-primary">Materiale</a>
-                        <a href="classe.html?classe=Seconde" class="btn-sm btn-outline">Python</a>
-                    </div>
-                </div>
-                <div class="course-row">
-                    <div><strong>Terzo Anno</strong><br><small>Sviluppo Web: HTML, CSS, JS.</small></div>
-                    <div class="btn-group">
-                        <a href="materiali.html?classe=Terze" class="btn-sm btn-primary">Materiale</a>
-                        <a href="classe.html?classe=Terze" class="btn-sm btn-outline">Python</a>
-                    </div>
-                </div>
-                <div class="course-row">
-                    <div><strong>Quarto Anno</strong><br><small>Progettazione Database e SQL.</small></div>
-                    <div class="btn-group">
-                        <a href="materiali.html?classe=Quarte" class="btn-sm btn-primary">Materiale</a>
-                        <a href="classe.html?classe=Quarte" class="btn-sm btn-outline">Python</a>
-                    </div>
-                </div>
-                <div class="course-row">
-                    <div><strong>Quinto Anno</strong><br><small>Reti, CyberSecurity e Maturità.</small></div>
-                    <div class="btn-group">
-                        <a href="materiali.html?classe=Quinte" class="btn-sm btn-primary">Materiale</a>
-                        <a href="classe.html?classe=Quinte" class="btn-sm btn-outline">Python</a>
-                    </div>
-                </div>
+            <h3 style="font-size: 28px; margin-bottom: 30px;">Classi e Insegnamenti</h3>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Prima</h4><p>Basi di Informatica e Pensiero Computazionale</p></div>
+                <div class="btn-group"><a href="materiali.html?classe=Prime" class="btn-action btn-blue">Materiali</a><a href="classe.html?classe=Prime" class="btn-action btn-border">Python</a></div>
+            </div>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Seconda</h4><p>Algoritmi e Logica</p></div>
+                <div class="btn-group"><a href="materiali.html?classe=Seconde" class="btn-action btn-blue">Materiali</a><a href="classe.html?classe=Seconde" class="btn-action btn-border">Python</a></div>
+            </div>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Terza</h4><p>Sviluppo Web e Strutture Dati</p></div>
+                <div class="btn-group"><a href="materiali.html?classe=Terze" class="btn-action btn-blue">Materiali</a><a href="classe.html?classe=Terze" class="btn-action btn-border">Python</a></div>
+            </div>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Quarta</h4><p>Database e Programmazione OOP</p></div>
+                <div class="btn-group"><a href="materiali.html?classe=Quarte" class="btn-action btn-blue">Materiali</a><a href="classe.html?classe=Quarte" class="btn-action btn-border">Python</a></div>
+            </div>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Quinta</h4><p>Reti, CyberSecurity e Maturità</p></div>
+                <div class="btn-group"><a href="materiali.html?classe=Quinte" class="btn-action btn-blue">Materiali</a><a href="classe.html?classe=Quinte" class="btn-action btn-border">Python</a></div>
             </div>
         </div>
     </div>
 </main>
 
 <footer>
-    <p>&copy; 2025 Prof. Antonio Adinolfi – Tutti i diritti riservati.</p>
-    <p>Risorse didattiche per il <a href="https://www.liceoscientificocortese.edu.it/" target="_blank">Liceo Scientifico "N. Cortese" Maddaloni</a>.</p>
-    
-    <div class="hit-counter">
-        <a href="https://hitscounter.dev/history?url=https://antonioadinolfi.it/">
-            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visitatori%20Oggi&icon=github&color=%23002d4d&style=flat-square" alt="Visitatori">
-        </a>
+    <div class="footer-top">
+        <div>© Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese" Maddaloni</div>
+        <div>
+            <a href="https://www.liceoscientificocortese.edu.it/" target="_blank">Sito del Liceo</a> | 
+            <a href="#">Privacy</a> | 
+            <a href="#">Contatti</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>Pagina realizzata per scopi didattici. Licenza CC BY-NC-SA 4.0</p>
+        <div style="margin-top: 15px;">
+            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visitatori%20Oggi&color=%23002d4d" alt="Visitatori">
+        </div>
     </div>
 </footer>
 
@@ -199,9 +176,7 @@ function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + tabId).style.display = 'block';
-    // Trova il bottone corretto per attivarlo
-    const btns = document.querySelectorAll('.tab-btn');
-    btns.forEach(btn => { if(btn.innerText.toLowerCase() === tabId) btn.classList.add('active'); });
+    event.currentTarget.classList.add('active');
 }
 
 function handleCredentialResponse(response) {
@@ -209,33 +184,10 @@ function handleCredentialResponse(response) {
     if (data.email.endsWith("@lscortese.com")) {
         document.getElementById("contenutoProtetto").style.display = "block";
         document.getElementById("loginSection").style.display = "none";
-        document.getElementById("welcomeMessage").style.display = "block";
-        document.getElementById("btnAccediInit").style.display = "none";
-        document.getElementById("loggedInInfo").style.display = "flex";
-        document.getElementById("userName").textContent = "Prof. " + data.family_name;
+        alert("Benvenuto Prof. " + data.family_name);
         showTab('didattica');
-    } else { alert("Attenzione: Accesso consentito solo con mail @lscortese.com"); }
+    } else { alert("Accesso negato!"); }
 }
-
-function handleLogout() { location.reload(); }
-
-async function loadFeeds() {
-    const feeds = [
-        { url: 'https://liceoscientificocortese.edu.it/feed/', id: 'school-feed' },
-        { url: 'https://www.tecnicadellascuola.it/feed/', id: 'tecnica-feed' },
-        { url: 'https://www.orizzontescuola.it/didattica/feed/', id: 'rss-feed' }
-    ];
-    for (const f of feeds) {
-        try {
-            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`);
-            const data = await res.json();
-            document.getElementById(f.id).innerHTML = data.items.slice(0, 3).map(item => `
-                <a href="${item.link}" target="_blank" class="feed-item"><i class="fas fa-chevron-right" style="font-size:10px; margin-right:5px;"></i> ${item.title}</a>
-            `).join('');
-        } catch (e) { document.getElementById(f.id).innerHTML = "News non disponibili."; }
-    }
-}
-document.addEventListener('DOMContentLoaded', loadFeeds);
 </script>
 </body>
 </html>
