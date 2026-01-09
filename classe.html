@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+  <script>
+    // Se non esiste la variabile di sessione, rimanda alla home
+    if (sessionStorage.getItem("isLoggedIn") !== "true") {
+        alert("Accesso negato. Effettua prima il login sulla home page.");
+        window.location.href = "index.html";
+    }
+  </script>
   <meta charset="UTF-8" />
   <title>Editor Python - Prof. Antonio Adinolfi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
