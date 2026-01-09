@@ -217,17 +217,26 @@ function showTab(id, e) {
 }
 
 function handleCredentialResponse(response) {
+    // Decodifica il token
     const data = JSON.parse(atob(response.credential.split('.')[1]));
+    
     if (data.email.endsWith("@lscortese.com")) {
-        // SALVA LO STATO: L'utente è autenticato
+        // --- QUESTA È LA PARTE CRUCIALE ---
+        // Salviamo lo stato nel sessionStorage
         sessionStorage.setItem("isLoggedIn", "true");
+        // Salviamo anche il nome per visualizzarlo nelle altre pagine se serve
+        sessionStorage.setItem("userName", data.given_name);
         
+        // Aggiorna l'interfaccia nella home
         document.getElementById("login-wall").style.display = "none";
         document.getElementById("protected-content").style.display = "block";
         document.getElementById("auth-info").innerText = "Ciao, " + data.given_name;
+        
+        console.log("Sessione salvata correttamente");
+    } else {
+        alert("Accesso negato: usa l'email @lscortese.com");
     }
 }
-
 async function loadFeeds() {
     const feeds = [
         { url: 'https://liceoscientificocortese.edu.it/feed/', id: 'school-feed' },
@@ -252,5 +261,6 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
 
 
