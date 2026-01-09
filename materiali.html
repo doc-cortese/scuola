@@ -3,214 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Materiali Didattici | Prof. Adinolfi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Materiale Didattico | Prof. Antonio Adinolfi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #004080;
-            --accent: #f7a81b;
-            --glass: rgba(255, 255, 255, 0.8);
-            --text: #1e293b;
+            --unina-blue: #002d4d;
+            --bg-light: #f4f4f4;
+            --text-gray: #4b5563;
+            --border-color: #d1d5db;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f4f7f9 0%, #e9eff5 100%);
-            color: var(--text);
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-light);
             margin: 0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
 
+        /* Navbar Superiore */
         header {
-            text-align: center;
-            padding: 40px 20px;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.3);
-            margin-bottom: 30px;
+            background-color: var(--unina-blue);
+            color: white;
+            padding: 15px 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            background: white;
+            padding: 10px 10%;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .breadcrumb a {
+            text-decoration: none;
+            color: var(--unina-blue);
+            font-weight: 500;
+            font-size: 14px;
         }
 
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
+            max-width: 1200px;
+            margin: 30px auto;
             padding: 0 20px;
+            flex: 1;
         }
 
-        /* Barra di Ricerca e Filtri */
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-            justify-content: center;
+        h2 { font-weight: 400; color: #111; margin-bottom: 5px; }
+        
+        /* Titoli di Classe */
+        .class-section-header {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 8px;
+            margin: 40px 0 20px 0;
+            font-size: 18px;
+            color: var(--unina-blue);
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
-        #searchBar {
-            padding: 12px 20px;
-            border-radius: 30px;
-            border: 1px solid #ddd;
-            width: 100%;
-            max-width: 400px;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        #searchBar:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(0,64,128,0.2); }
-
-        .filter-btn {
-            padding: 8px 20px;
-            border-radius: 20px;
-            border: none;
-            background: white;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: 500;
-        }
-
-        .filter-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Griglia Materiali */
+        /* Griglia Card */
         .materials-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
-            padding-bottom: 50px;
         }
 
-        .card {
+        .folder-card {
             background: white;
-            border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
             display: flex;
-            flex-direction: column;
-            border-left: 5px solid var(--primary);
-        }
-
-        .card:hover { transform: translateY(-5px); }
-
-        .card h3 { margin: 0 0 10px 0; color: var(--primary); font-size: 1.1rem; }
-        .card .tag {
-            display: inline-block;
-            background: #f0f4f8;
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .download-btn {
-            margin-top: auto;
-            text-align: center;
-            background: var(--accent);
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 600;
+            align-items: flex-start;
+            gap: 15px;
             transition: 0.2s;
+            text-decoration: none;
+            color: inherit;
         }
 
-        .download-btn:hover { opacity: 0.9; }
+        .folder-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: var(--unina-blue);
+        }
 
-        .hidden { display: none; }
+        .folder-icon {
+            background: var(--unina-blue);
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .card-content h3 {
+            margin: 0;
+            font-size: 14px;
+            color: #000;
+            text-transform: uppercase;
+            line-height: 1.4;
+        }
+
+        .card-content p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        footer {
+            background: white;
+            border-top: 1px solid #d1d5db;
+            padding: 20px 10%;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-gray);
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Materiali Didattici</h1>
-    <p>Risorse e dispense per le classi del Prof. Adinolfi</p>
+    <div style="font-weight: bold; font-size: 18px;">LIceo "N. Cortese" | Prof. Adinolfi</div>
 </header>
 
+<div class="breadcrumb">
+    <a href="index.html"><i class="fas fa-chevron-left"></i> Torna alla Home</a>
+</div>
+
 <div class="container">
-    <div class="controls">
-        <input type="text" id="searchBar" placeholder="Cerca argomento (es. Fisica, Informatica...)" onkeyup="filterMaterials()">
-        <div id="filterButtons">
-            <button class="filter-btn active" onclick="filterByClass('all', this)">Tutti</button>
-            <button class="filter-btn" onclick="filterByClass('1', this)">Classi 1^</button>
-            <button class="filter-btn" onclick="filterByClass('2', this)">Classi 2^</button>
-            <button class="filter-btn" onclick="filterByClass('3', this)">Classi 3^</button>
-            <button class="filter-btn" onclick="filterByClass('4', this)">Classi 4^</button>
-            <button class="filter-btn" onclick="filterByClass('5', this)">Classi 5^</button>
-        </div>
+    <h2>Materiale riservato</h2>
+    <p style="color: var(--text-gray); font-size: 14px;">Risorse didattiche suddivise per anno di corso.</p>
+
+    <div class="class-section-header">Classi Prime</div>
+    <div class="materials-grid">
+        <a href="#" class="folder-card">
+            <div class="folder-icon"><i class="fas fa-folder"></i></div>
+            <div class="card-content">
+                <h3>INTRODUZIONE_INFORMATICA</h3>
+                <p>Concetti base, hardware e software.</p>
+            </div>
+        </a>
+        <a href="#" class="folder-card">
+            <div class="folder-icon"><i class="fas fa-folder"></i></div>
+            <div class="card-content">
+                <h3>ALGORITMI_E_DIAGRAMMI</h3>
+                <p>Rappresentazione grafica dei processi.</p>
+            </div>
+        </a>
     </div>
 
-    <div class="materials-grid" id="grid">
-        <div class="card" data-class="1" data-title="Fondamenti di informatica">
-            <span class="tag">CLASSE 1^ - Dati e Informazioni</span>
-            <h3>Introduzione al pensiero computazionale</h3>
-            <p>I diagrammi di flusso.</p>
-            <a href="#" class="download-btn">Scarica PDF</a>
-        </div>
+    <div class="class-section-header">Classi Seconde</div>
+    <div class="materials-grid">
+        <a href="materiali/Cominciamo%20a%20programmare.pdf" class="folder-card">
+            <div class="folder-icon"><i class="fas fa-file-pdf"></i></div>
+            <div class="card-content">
+                <h3>BASI_DI_PYTHON</h3>
+                <p>Primi passi con la programmazione.</p>
+            </div>
+        </a>
+    </div>
 
-         <div class="card" data-class="2" data-title="Programmazione - livello base">
-            <span class="tag">CLASSE 2^ - Programmazione con Python</span>
-            <h3>Introduzione a Python</h3>
-            <p>Algoritmi fondamentali.</p>
-            <a href="materiali/Cominciamo%20a%20programmare.pdf" class="download-btn">Scarica PDF</a>
-        </div>
+    <div class="class-section-header">Classi Terze</div>
+    <div class="materials-grid">
+        <a href="materiali/Le%20strutture%20dati%20in%20Python.pdf" class="folder-card">
+            <div class="folder-icon"><i class="fas fa-folder"></i></div>
+            <div class="card-content">
+                <h3>STRUTTURE_DATI_PYTHON</h3>
+                <p>Liste, tuple e dizionari.</p>
+            </div>
+        </a>
+    </div>
 
-        <div class="card" data-class="3" data-title="Programmazione - livello intermedio">
-            <span class="tag">CLASSE 3^ - Programmazione con Python</span>
-            <h3>Strutture dati dinamiche in Python</h3>
-            <p>Liste, vettori e dizionari.</p>
-            <a href="materiali/Le%20strutture%20dati%20in%20Python.pdf" class="download-btn">Scarica PDF</a>
-        </div>
+    <div class="class-section-header">Classi Quarte</div>
+    <div class="materials-grid">
+        <a href="materiali/Programmazione%20a%20oggetti.pdf" class="folder-card">
+            <div class="folder-icon"><i class="fas fa-folder"></i></div>
+            <div class="card-content">
+                <h3>PROGRAMMAZIONE_OOP</h3>
+                <p>Classi, oggetti ed ereditarietà.</p>
+            </div>
+        </a>
+    </div>
 
-         <div class="card" data-class="4" data-title="Programmazione - livello avanzato">
-            <span class="tag">CLASSE 4^ - Programmazione con Python</span>
-            <h3>Programmazione Orientata agli Oggetti</h3>
-            <p>SQL & OOP.</p>
-            <a href="materiali/Programmazione%20a%20oggetti.pdf" class="download-btn">Scarica PDF</a>
-        </div>
-
-        <div class="card" data-class="5" data-title="Crittografia informatica">
-            <span class="tag">CLASSE 5^ - INFO</span>
-            <h3>Crittografia asimmetrica e sicurezza web</h3>
-            <p>Preparazione all' Esame di Stato.</p>
-            <a href="#" class="download-btn">Scarica PDF</a>
-        </div>
+    <div class="class-section-header">Classi Quinte</div>
+    <div class="materials-grid">
+        <a href="#" class="folder-card">
+            <div class="folder-icon"><i class="fas fa-folder"></i></div>
+            <div class="card-content">
+                <h3>CRITTOGRAFIA_E_RETI</h3>
+                <p>Sicurezza dei dati e preparazione esame.</p>
+            </div>
+        </a>
     </div>
 </div>
 
-<script>
-    let currentClass = 'all';
-
-    function filterByClass(classId, btn) {
-        currentClass = classId;
-        
-        // Gestione bottoni attivi
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        filterMaterials();
-    }
-
-    function filterMaterials() {
-        const searchText = document.getElementById('searchBar').value.toLowerCase();
-        const cards = document.querySelectorAll('.card');
-
-        cards.forEach(card => {
-            const title = card.getAttribute('data-title').toLowerCase();
-            const cardClass = card.getAttribute('data-class');
-            
-            const matchesSearch = title.includes(searchText);
-            const matchesClass = (currentClass === 'all' || cardClass === currentClass);
-
-            if (matchesSearch && matchesClass) {
-                card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden');
-            }
-        });
-    }
-</script>
+<footer>
+    © 2026 Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"
+</footer>
 
 </body>
 </html>
