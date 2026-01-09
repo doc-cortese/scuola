@@ -1,239 +1,213 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prof. Antonio Adinolfi - Liceo N. Cortese</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    :root {
+      --primary: #004080;
+      --primary-dark: #002d5a;
+      --accent: #f7a81b;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Header & Navigation */
+    header { background: var(--primary); color: var(--white); padding: 1rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); }
+    .nav-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo i { font-size: 1.5rem; color: var(--accent); }
+    .admin-key { cursor: pointer; opacity: 0.5; transition: 0.3s; }
+    .admin-key:hover { opacity: 1; color: var(--accent); }
+
+    /* Main Layout */
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 20px; }
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    .hero { text-align: center; margin-bottom: 3rem; background: var(--white); padding: 3rem; border-radius: 24px; box-shadow: var(--shadow); }
+    .hero h1 { font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem; }
+    .hero p { color: var(--text-light); font-size: 1.1rem; }
+
+    /* Login Area */
+    .login-box { max-width: 450px; margin: 0 auto 3rem; background: #eff6ff; border: 2px dashed #bfdbfe; padding: 2rem; border-radius: 20px; text-align: center; }
     
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    /* Grid System */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    
+    /* Card Protette (Nascoste di default) */
+    .protected { display: none; }
+    
+    .card { background: var(--white); padding: 2rem; border-radius: 20px; box-shadow: var(--shadow); transition: 0.3s; border: 1px solid #e2e8f0; }
+    .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+    .card h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; color: var(--primary); font-weight: 700; }
+    .card i { color: var(--accent); }
 
-    <style>
-        :root {
-            --primary: #004080;
-            --secondary: #002d5a;
-            --accent: #f7a81b;
-            --bg-slate: #f8fafc;
-        }
+    .btn-list { display: grid; gap: 0.8rem; }
+    .btn-item { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1.2rem; background: var(--bg); border-radius: 12px; text-decoration: none; color: var(--text); font-weight: 600; transition: 0.2s; }
+    .btn-item:hover { background: var(--primary); color: var(--white); }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-slate); color: #1e293b; }
-        
-        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        
-        .hero-gradient {
-            background: radial-gradient(circle at top right, #e2e8f0 0%, #f8fafc 100%);
-        }
+    /* Admin Styles */
+    #admin-panel { display: none; background: #fff7ed; border: 2px solid #fdba74; margin-top: 2rem; padding: 2rem; border-radius: 20px; }
 
-        .card-shadow { 
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .card-shadow:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-
-        .protected-content { display: none; }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-primary:hover { background-color: var(--secondary); transform: scale(1.02); }
-    </style>
+    footer { text-align: center; padding: 3rem; color: var(--text-light); font-size: 0.9rem; }
+  </style>
 </head>
-<body class="hero-gradient min-h-screen">
+<body>
 
-    <nav class="fixed w-full z-50 glass-nav">
-        <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-800 rounded-lg flex items-center justify-center text-white shadow-lg">
-                    <i class="fas fa-terminal"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-slate-800">Prof. Adinolfi</h1>
-                    <p class="text-[10px] uppercase tracking-widest font-bold text-blue-600">Liceo N. Cortese</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <button onclick="showSection('home')" class="text-sm font-semibold text-slate-600 hover:text-blue-800">Home</button>
-                <button id="admin-trigger" onclick="openAdminLogin()" class="p-2 text-slate-400 hover:text-blue-800">
-                    <i class="fas fa-user-gear"></i>
-                </button>
-            </div>
+  <header>
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-microchip"></i>
+        <div>
+          <h2 style="font-size: 1.2rem; line-height: 1;">Antonio Adinolfi</h2>
+          <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">Liceo Scientifico N. Cortese</span>
         </div>
-    </nav>
+      </div>
+      <i class="fas fa-user-shield admin-key" onclick="loginAdmin()"></i>
+    </div>
+  </header>
 
-    <main class="pt-32 pb-20 max-w-7xl mx-auto px-4">
-        
-        <section id="login-section" class="max-w-2xl mx-auto text-center py-10">
-            <h2 class="text-4xl font-black text-slate-900 mb-4">Benvenuti nel Portale Didattico</h2>
-            <p class="text-slate-500 mb-10 text-lg">L'accesso ai materiali e alle classi è riservato agli studenti con account <strong>@lscortese.com</strong></p>
-            
-            <div class="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 inline-block w-full max-w-md">
-                <div class="mb-8">
-                    <i class="fas fa-user-graduate text-5xl text-blue-600"></i>
-                </div>
-                
-                <div id="g_id_onload"
-                     data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-                     data-callback="handleStudentLogin">
-                </div>
-                <div class="g_id_signin flex justify-center" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
-                
-                <p class="mt-6 text-xs text-slate-400 font-medium italic">Il sistema verificherà automaticamente il dominio dell'email.</p>
+  <main>
+    <section class="hero">
+      <h1>Portale Didattico Informatica</h1>
+      <p>Risorse, Materiali e Gestione Classi</p>
+    </section>
+
+    <div id="login-area" class="login-box">
+      <h3 style="margin-bottom: 1rem;"><i class="fas fa-user-graduate"></i> Accesso Studenti</h3>
+      <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 1.5rem;">Utilizza l'account @lscortese.com per sbloccare i contenuti.</p>
+      
+      <div id="g_id_onload"
+           data-client_id="842416972740-9fgh8v2p4p3p9p9p9p9p9p9p.apps.googleusercontent.com" 
+           data-callback="handleCredentialResponse">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="card protected" id="classi-card">
+        <h3><i class="fas fa-users"></i> Le Mie Classi</h3>
+        <div class="btn-list">
+          <a href="classe.html?classe=Prime" class="btn-item">Classi Prime <i class="fas fa-chevron-right"></i></a>
+          <a href="classe.html?classe=Seconde" class="btn-item">Classi Seconde <i class="fas fa-chevron-right"></i></a>
+          <a href="classe.html?classe=Terze" class="btn-item">Classi Terze <i class="fas fa-chevron-right"></i></a>
+          <a href="classe.html?classe=Quarte" class="btn-item">Classi Quarte <i class="fas fa-chevron-right"></i></a>
+          <a href="classe.html?classe=Quinte" class="btn-item">Classi Quinte <i class="fas fa-chevron-right"></i></a>
+        </div>
+      </div>
+
+      <div class="card protected" id="materiali-card">
+        <h3><i class="fas fa-folder-open"></i> Materiali e Dispense</h3>
+        <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">Accedi all'archivio completo dei materiali didattici, slide e codice sorgente.</p>
+        <a href="materiali.html" class="btn-item" style="background: var(--accent); color: var(--primary);">Vai ai Materiali <i class="fas fa-external-link-alt"></i></a>
+      </div>
+
+      <div class="card">
+        <h3><i class="fas fa-rss"></i> News Informatica</h3>
+        <div id="tecnica-feed" style="font-size: 0.85rem;">
+          Caricamento news...
+        </div>
+      </div>
+    </div>
+
+    <div id="admin-panel">
+      <h3 style="color: #9a3412;"><i class="fas fa-cog"></i> Impostazioni Amministratore</h3>
+      <div style="margin-top: 1rem;">
+        <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Cambia Password Area Docente:</p>
+        <input type="password" id="new-admin-pass" placeholder="Nuova password" style="padding: 0.8rem; border-radius: 8px; border: 1px solid #ccc; width: 250px;">
+        <button onclick="changePass()" style="padding: 0.8rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">Salva</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Antonio Adinolfi • Maddaloni (CE)<br>Liceo Scientifico Statale "Nino Cortese"</p>
+  </footer>
+
+  <script>
+    // --- LOGICA DI ACCESSO GOOGLE (Mantenuta dal tuo totindex.html) ---
+    function handleCredentialResponse(response) {
+      const responsePayload = decodeJwtResponse(response.credential);
+      const email = responsePayload.email;
+
+      if (email.endsWith("@lscortese.com")) {
+        // Sblocca i contenuti
+        document.querySelectorAll('.protected').forEach(el => el.style.display = 'block');
+        document.getElementById('login-area').innerHTML = `
+          <div style="color: #15803d; font-weight: bold;">
+            <i class="fas fa-check-circle"></i> Accesso autorizzato: ${responsePayload.name}
+          </div>`;
+      } else {
+        alert("Accesso negato. Usa l'email @lscortese.com");
+      }
+    }
+
+    function decodeJwtResponse(token) {
+      let base64Url = token.split('.')[1];
+      let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    // --- LOGICA AMMINISTRATORE ---
+    const DEFAULT_PASS = "adinolfi2026";
+
+    function loginAdmin() {
+      const savedPass = localStorage.getItem('adminPass') || DEFAULT_PASS;
+      const pass = prompt("Inserisci Password Amministratore:");
+      
+      if (pass === savedPass) {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.querySelectorAll('.protected').forEach(el => el.style.display = 'block');
+      } else {
+        alert("Password errata.");
+      }
+    }
+
+    function changePass() {
+      const newPass = document.getElementById('new-admin-pass').value;
+      if (newPass.length < 5) {
+        alert("Password troppo corta.");
+        return;
+      }
+      localStorage.setItem('adminPass', newPass);
+      alert("Password aggiornata con successo!");
+      document.getElementById('new-admin-pass').value = '';
+    }
+
+    // --- CARICAMENTO FEED RSS (Dal tuo totindex.html) ---
+    async function loadFeeds() {
+      const container = document.getElementById('tecnica-feed');
+      const url = 'https://www.tecnicadellascuola.it/informatica/feed/';
+      try {
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        if (data.status === 'ok') {
+          container.innerHTML = data.items.slice(0, 3).map(item => `
+            <div style="margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+              <a href="${item.link}" target="_blank" style="text-decoration:none; color:var(--text); font-weight:600;">${item.title}</a>
             </div>
-        </section>
-
-        <section id="student-section" class="protected-content">
-            <div class="flex items-center justify-between mb-12 bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                <div>
-                    <h2 class="text-2xl font-bold text-blue-900" id="welcome-msg">Benvenuto Studente</h2>
-                    <p class="text-blue-700 text-sm">Hai effettuato l'accesso come studente del Liceo Cortese.</p>
-                </div>
-                <button onclick="logout()" class="text-sm font-bold text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition">Logout <i class="fas fa-sign-out-alt ml-1"></i></button>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="card-shadow p-8 flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-users-rectangle"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4 text-slate-800">Le tue Classi</h3>
-                    <div class="grid grid-cols-2 gap-2 w-full">
-                        <a href="classe.html?classe=Prime" class="bg-slate-50 p-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-blue-600 hover:text-white transition">Prime</a>
-                        <a href="classe.html?classe=Terze" class="bg-slate-50 p-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-blue-600 hover:text-white transition">Terze</a>
-                        <a href="classe.html?classe=Quinte" class="bg-slate-50 p-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-blue-600 hover:text-white transition">Quinte</a>
-                    </div>
-                </div>
-
-                <div class="card-shadow p-8 flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-folder-open"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-4 text-slate-800">Risorse Didattiche</h3>
-                    <p class="text-sm text-slate-500 mb-6">Accedi a dispense, presentazioni e codice sorgente.</p>
-                    <a href="materiali.html" class="btn-primary w-full">Apri Archivio</a>
-                </div>
-
-                <div class="card-shadow p-8">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center">
-                        <i class="fas fa-rss mr-2 text-accent"></i> News Informatica
-                    </h3>
-                    <div id="tecnica-feed" class="space-y-4">
-                        </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="admin-section" class="protected-content max-w-4xl mx-auto">
-            <h2 class="text-3xl font-black mb-8 text-slate-900 border-b-4 border-accent inline-block">Pannello Amministratore</h2>
-            
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-3xl border border-slate-200">
-                    <h4 class="font-bold mb-6 text-slate-800"><i class="fas fa-key mr-2"></i> Sicurezza Portale</h4>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase">Nuova Password Admin</label>
-                            <input type="password" id="new-pass" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <button onclick="changeAdminPass()" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition">Aggiorna Password</button>
-                    </div>
-                </div>
-
-                <div class="bg-white p-8 rounded-3xl border border-slate-200">
-                    <h4 class="font-bold mb-6 text-slate-800"><i class="fas fa-info-circle mr-2"></i> Stato Sistema</h4>
-                    <ul class="text-sm space-y-3">
-                        <li class="flex justify-between"><span>Dominio studenti:</span> <strong class="text-blue-600">@lscortese.com</strong></li>
-                        <li class="flex justify-between"><span>Sede:</span> <strong>Maddaloni</strong></li>
-                        <li class="flex justify-between"><span>Ricevimento:</span> <strong>Mer 10:00-11:00</strong></li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <script>
-        // LOGICA DI SICUREZZA
-        const DEFAULT_PASS = "adinolfi2026";
-
-        function parseJwt (token) {
-            var base64Url = token.split('.')[1];
-            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            return JSON.parse(window.atob(base64));
+          `).join('');
         }
+      } catch (e) { container.innerHTML = "News non disponibili."; }
+    }
 
-        // Login Studente via Google
-        function handleStudentLogin(response) {
-            const user = parseJwt(response.credential);
-            if (user.email.endsWith("@lscortese.com")) {
-                document.getElementById('welcome-msg').innerText = "Benvenuto, " + user.name;
-                showSection('student');
-            } else {
-                alert("ERRORE: Devi autenticarti con l'email istituzionale @lscortese.com");
-            }
-        }
-
-        // Login Admin via Password
-        function openAdminLogin() {
-            const pass = prompt("Inserisci la Password di Amministrazione:");
-            const savedPass = localStorage.getItem('adminPass') || DEFAULT_PASS;
-            if(pass === savedPass) {
-                showSection('admin');
-            } else {
-                alert("Password errata!");
-            }
-        }
-
-        function changeAdminPass() {
-            const np = document.getElementById('new-pass').value;
-            if(np.length < 5) return alert("Scegli una password più lunga (min 5 car.)");
-            localStorage.setItem('adminPass', np);
-            alert("Password aggiornata correttamente!");
-            document.getElementById('new-pass').value = '';
-        }
-
-        function showSection(type) {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('student-section').style.display = 'none';
-            document.getElementById('admin-section').style.display = 'none';
-
-            if(type === 'student') document.getElementById('student-section').style.display = 'block';
-            else if(type === 'admin') document.getElementById('admin-section').style.display = 'block';
-            else document.getElementById('login-section').style.display = 'block';
-        }
-
-        function logout() {
-            location.reload(); // Semplice reset della sessione per sito statico
-        }
-
-        // FEED RSS (Dal tuo codice originale)
-        async function loadFeed() {
-            try {
-                const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.tecnicadellascuola.it/informatica/feed/')}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                const container = document.getElementById('tecnica-feed');
-                container.innerHTML = data.items.slice(0, 3).map(item => `
-                    <a href="${item.link}" target="_blank" class="block p-3 hover:bg-slate-50 rounded-xl border border-transparent hover:border-slate-100 transition">
-                        <p class="text-xs font-bold text-blue-600 mb-1">${new Date(item.pubDate).toLocaleDateString()}</p>
-                        <h5 class="text-sm font-semibold leading-snug">${item.title}</h5>
-                    </a>
-                `).join('');
-            } catch (e) { console.error("Errore feed"); }
-        }
-
-        window.onload = loadFeed;
-    </script>
+    window.onload = loadFeeds;
+  </script>
 </body>
 </html>
