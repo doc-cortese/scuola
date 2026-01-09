@@ -148,12 +148,18 @@
     </div>
 
     <div id="tab-didattica" class="tab-content" style="display:none;">
-        <div id="login-wall" style="background:white; padding:50px; text-align:center;">
-            <i class="fas fa-lock" style="font-size: 40px; color: var(--unina-blue); margin-bottom: 20px;"></i>
-            <h3>Area Riservata Didattica</h3>
-            <div id="g_id_onload" data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-            <div class="g_id_signin" data-type="standard" data-size="large"></div>
+       <div id="login-wall" style="background:white; padding:50px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align:center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <i class="fas fa-lock" style="font-size: 40px; color: var(--unina-blue); margin-bottom: 20px;"></i>
+        <h3 style="margin-bottom: 25px;">Area Riservata Didattica</h3>
+        
+        <div id="g_id_onload" 
+             data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" 
+             data-callback="handleCredentialResponse" 
+             data-auto_prompt="false">
         </div>
+    
+    <div class="g_id_signin" data-type="standard" data-size="large"></div>
+</div>
 
         <div id="protected-content" style="display:none;">
             <h3 style="margin-bottom:30px;">I Miei Insegnamenti</h3>
@@ -243,3 +249,4 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
