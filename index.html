@@ -3,153 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prof. Antonio Adinolfi - Portale Didattico</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <title>Prof. Antonio Adinolfi - Digital Hub</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
     :root {
-      --primary: #004080;
-      --accent: #f7a81b;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --brand: #6366f1; /* Indigo Moderno */
+      --brand-dark: #4338ca;
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --glass: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --text-prime: #0f172a;
+      --radius-lg: 24px;
+      --shadow-soft: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
 
-    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; }
-    header { background: var(--primary); color: white; padding: 1rem 0; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-    .nav-flex { display: flex; justify-content: space-between; align-items: center; }
-    
-    .hero { text-align: center; padding: 3rem 1rem; background: white; border-radius: 24px; margin: 2rem 0; box-shadow: var(--shadow); }
-    .hero h1 { font-size: 2rem; color: var(--primary); margin: 0; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-prime);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-    /* Area Login */
-    .login-status { background: #eff6ff; border: 2px dashed #bfdbfe; padding: 2rem; border-radius: 20px; text-align: center; margin-bottom: 2rem; }
-    
-    /* Grid Card */
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-    .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid #e2e8f0; }
-    .card.locked { opacity: 0.6; filter: grayscale(1); pointer-events: none; transition: 0.3s; }
-    .card.unlocked { opacity: 1; filter: grayscale(0); pointer-events: auto; border-left: 5px solid var(--accent); }
-    
-    .btn { display: block; padding: 0.8rem; background: var(--bg); border-radius: 10px; text-decoration: none; color: var(--text); font-weight: 600; margin-top: 0.5rem; transition: 0.2s; }
-    .btn:hover { background: var(--primary); color: white; }
+    /* === NAVBAR NEUMORFICA === */
+    .navbar {
+      position: sticky;
+      top: 20px;
+      margin: 0 20px;
+      background: var(--glass);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: var(--shadow-soft);
+    }
 
-    #admin-panel { display: none; background: #fff7ed; padding: 2rem; border-radius: 20px; border: 1px solid #fdba74; margin-top: 2rem; }
-    .admin-icon { cursor: pointer; color: white; opacity: 0.5; font-size: 1.2rem; }
-    .admin-icon:hover { opacity: 1; color: var(--accent); }
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      font-size: 1.2rem;
+    }
+
+    /* === DASHBOARD GRID (MODERNA) === */
+    main {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .hero-section {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.3s ease;
+    }
+
+    .glass-card:hover { transform: translateY(-5px); }
+
+    /* === COURSE CARDS (GRID ORIGINALE) === */
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .course-item {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 25px;
+      border: 1px solid #f1f5f9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .course-item::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 6px; height: 100%;
+      background: var(--brand);
+    }
+
+    .btn-modern {
+      background: var(--brand);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .btn-modern:hover { background: var(--brand-dark); box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4); }
+
+    /* Access Cards (3-Column Layout) */
+    .access-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 50px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-section, .access-container { grid-template-columns: 1fr; }
+      .navbar { top: 10px; margin: 0 10px; }
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="container nav-flex">
-    <div>
-      <h2 style="margin:0; font-size:1.2rem;">Prof. Antonio Adinolfi</h2>
-      <span style="font-size:0.7rem; text-transform:uppercase;">Liceo Scientifico N. Cortese</span>
+<nav class="navbar">
+  <div class="logo-box">
+    <div style="background: var(--brand); width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; color: white;">A</div>
+    <span>Prof. Adinolfi</span>
+  </div>
+  <div id="authSection">
+    <div id="g_id_signin"></div>
+  </div>
+</nav>
+
+<main>
+  <section class="hero-section">
+    <div class="glass-card" style="text-align: center;">
+      <img src="./immagini/foto_adinolfi.jpg" alt="Prof" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; box-shadow: var(--shadow-soft);">
+      <h3 style="margin: 15px 0 5px;">Antonio Adinolfi</h3>
+      <p style="color: #64748b; font-size: 0.9rem;">Computer Science & Web Dev</p>
+      <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+        <i data-lucide="github"></i>
+        <i data-lucide="linkedin"></i>
+        <i data-lucide="youtube"></i>
+      </div>
     </div>
-    <i class="fas fa-cog admin-icon" onclick="checkAdmin()"></i>
-  </div>
-</header>
-
-<main class="container">
-  <div class="hero italic">
-    <h1>Informatica e Tecnologie Digitali</h1>
-    <p>Portale di accesso alle risorse didattiche per gli studenti</p>
-  </div>
-
-  <div id="auth-box" class="login-status">
-    <h3 id="status-text"><i class="fas fa-lock-open mr-2"></i> Accedi con l'email istituzionale</h3>
-    <p class="text-sm mb-4">Solo gli account <strong>@lscortese.com</strong> possono accedere ai materiali.</p>
     
-    <div id="g_id_onload"
-         data-client_id="842416972740-9fgh8v2p4p3p9p9p9p9p9p9p.apps.googleusercontent.com"
-         data-callback="onGoogleSuccess">
+    <div class="glass-card">
+      <h2 style="font-weight: 800; font-size: 1.8rem; margin-top: 0;">Benvenuti nel Hub Didattico</h2>
+      <p>Esplora le risorse, i laboratori Python e i progetti ministeriali del Liceo Scientifico N. Cortese.</p>
+      <div id="alertBox" style="display: none; background: #e0f2fe; padding: 15px; border-radius: 12px; border: 1px solid #7dd3fc; color: #0369a1;">
+        <strong>🚀 Modalità Docente Attiva:</strong> Accesso completo ai materiali riservati.
+      </div>
     </div>
-    <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
+  </section>
+
+  <div id="protectedContent" style="display: none;">
+    <h3 style="margin-bottom: 25px;">📘 I Tuoi Corsi</h3>
+    <div class="course-grid">
+      <div class="course-item">
+        <h4>Sviluppo Web Avanzato</h4>
+        <p style="font-size: 0.85rem; color: #64748b;">Architetture Full-Stack, HTML5, CSS Grid e JS moderno.</p>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+          <a href="#" class="btn-modern"><i data-lucide="book-open" style="width: 16px;"></i> Materiali</a>
+          <a href="#" class="btn-modern" style="background: #10b981;"><i data-lucide="code" style="width: 16px;"></i> Python</a>
+        </div>
+      </div>
+      </div>
   </div>
 
-  <div class="grid">
-    <div id="card-classi" class="card locked">
-      <h3 style="color:var(--primary)"><i class="fas fa-users"></i> Le Mie Classi</h3>
-      <a href="classe.html?classe=Prime" class="btn">Prime</a>
-      <a href="classe.html?classe=Seconde" class="btn">Seconde</a>
-      <a href="classe.html?classe=Terze" class="btn">Terze</a>
-      <a href="classe.html?classe=Quarte" class="btn">Quarte</a>
-      <a href="classe.html?classe=Quinte" class="btn">Quinte</a>
+  <div id="accessZones" class="access-container">
+    <div class="glass-card">
+      <h5><i data-lucide="shield-check"></i> Area Istituzionale</h5>
+      <p style="font-size: 0.8rem;">Accesso riservato dominio @lscortese.com</p>
+      <div id="googleBtnContainer"></div>
+      <div id="school-feed" style="margin-top: 20px;"></div>
+    </div>
+    
+    <div class="glass-card" style="border-top: 4px solid #f59e0b;">
+      <h5><i data-lucide="users"></i> Area Tutor</h5>
+      <a href="https://unica.istruzione.gov.it" class="btn-modern" style="width: 100%; justify-content: center; background: #f59e0b;">Piattaforma UNICA</a>
+      <div id="tecnica-feed" style="margin-top: 20px;"></div>
     </div>
 
-    <div id="card-materiali" class="card locked">
-      <h3 style="color:var(--primary)"><i class="fas fa-file-code"></i> Materiali Didattici</h3>
-      <p style="font-size:0.9rem;">Dispense, slide e repository di codice.</p>
-      <a href="materiali.html" class="btn" style="background:var(--accent); color:var(--primary)">Archivio Materiali</a>
-    </div>
-
-    <div class="card">
-      <h3 style="color:var(--primary)"><i class="fas fa-rss"></i> News Tecnica</h3>
-      <div id="rss-feed" style="font-size:0.85rem;">Caricamento news...</div>
-    </div>
-  </div>
-
-  <div id="admin-panel">
-    <h3><i class="fas fa-user-shield"></i> Pannello Docente</h3>
-    <div style="display:flex; gap:10px; align-items:center; margin-top:1rem;">
-      <input type="password" id="new-p" placeholder="Nuova Password Admin" style="padding:0.7rem; border-radius:8px; border:1px solid #ccc;">
-      <button onclick="saveP()" style="padding:0.7rem 1.5rem; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;">Cambia Password</button>
+    <div class="glass-card">
+      <h5><i data-lucide="globe"></i> Area Ospiti</h5>
+      <a href="ospiti.html" class="btn-modern" style="width: 100%; justify-content: center; background: #94a3b8;">Entra come Visitatore</a>
+      <div id="rss-feed" style="margin-top: 20px;"></div>
     </div>
   </div>
 </main>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-  // LOGIN GOOGLE
-  function onGoogleSuccess(response) {
-    const data = JSON.parse(atob(response.credential.split('.')[1]));
-    if (data.email.endsWith("@lscortese.com")) {
-      document.getElementById('card-classi').className = 'card unlocked';
-      document.getElementById('card-materiali').className = 'card unlocked';
-      document.getElementById('status-text').innerHTML = `<i class="fas fa-check-circle" style="color:green"></i> Benvenuto, ${data.given_name}`;
-      document.querySelector('.g_id_signin').style.display = 'none';
-    } else {
-      alert("Devi usare l'email istituzionale @lscortese.com!");
-    }
-  }
+  // Inizializzazione icone Lucide
+  lucide.createIcons();
 
-  // LOGICA ADMIN
-  function checkAdmin() {
-    const saved = localStorage.getItem('admPass') || "adinolfi2026";
-    const p = prompt("Password Amministratore:");
-    if (p === saved) {
-      document.getElementById('admin-panel').style.display = 'block';
-      document.getElementById('card-classi').className = 'card unlocked';
-      document.getElementById('card-materiali').className = 'card unlocked';
-    } else {
-      alert("Accesso negato.");
-    }
-  }
-
-  function saveP() {
-    const val = document.getElementById('new-p').value;
-    if(val.length < 5) return alert("Troppo corta!");
-    localStorage.setItem('admPass', val);
-    alert("Password salvata correttamente.");
-  }
-
-  // FEED RSS
-  async function getFeed() {
+  // Sicurezza Accessi migliorata
+  function handleCredentialResponse(response) {
     try {
-      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.tecnicadellascuola.it/informatica/feed/')}`);
-      const data = await res.json();
-      document.getElementById('rss-feed').innerHTML = data.items.slice(0, 3).map(i => `
-        <div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
-          <a href="${i.link}" target="_blank" style="text-decoration:none; color:var(--text); font-weight:600;">${i.title}</a>
-        </div>`).join('');
-    } catch(e) { document.getElementById('rss-feed').innerText = "News temporaneamente non disponibili."; }
+      // Decodifica sicura con controllo dominio
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      
+      if (payload.email.endsWith("@lscortese.com")) {
+        // Logica di sessione
+        sessionStorage.setItem('user_token', response.credential);
+        showProtectedMode(payload.given_name);
+      } else {
+        alert("Accesso negato: Solo account @lscortese.com");
+      }
+    } catch (e) {
+      console.error("Errore validazione sessione");
+    }
   }
 
-  window.onload = getFeed;
+  function showProtectedMode(name) {
+    document.getElementById('accessZones').style.display = 'none';
+    document.getElementById('protectedContent').style.display = 'block';
+    document.getElementById('alertBox').style.display = 'block';
+    document.getElementById('alertBox').innerHTML = `Bentornato, <strong>${escapeHTML(name)}</strong>! Sessione attiva. <button onclick="location.reload()" style="background:none; border:none; color:red; cursor:pointer; text-decoration:underline;">Logout</button>`;
+  }
+
+  // Sanitizzazione contro XSS
+  function escapeHTML(str) {
+    const p = document.createElement('p');
+    p.textContent = str;
+    return p.innerHTML;
+  }
+
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: "1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com",
+      callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+      document.getElementById("googleBtnContainer"),
+      { theme: "outline", size: "large", width: "100%" }
+    );
+  };
 </script>
+
 </body>
 </html>
