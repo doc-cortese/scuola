@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prof. Antonio Adinolfi - Portale Didattico</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <style>
+    :root {
+      --primary: #004080;
+      --accent: #f7a81b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; }
+    header { background: var(--primary); color: white; padding: 1rem 0; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+    
+    .hero { text-align: center; padding: 3rem 1rem; background: white; border-radius: 24px; margin: 2rem 0; box-shadow: var(--shadow); }
+    .hero h1 { font-size: 2rem; color: var(--primary); margin: 0; }
+
+    /* Area Login */
+    .login-status { background: #eff6ff; border: 2px dashed #bfdbfe; padding: 2rem; border-radius: 20px; text-align: center; margin-bottom: 2rem; }
+    
+    /* Grid Card */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid #e2e8f0; }
+    .card.locked { opacity: 0.6; filter: grayscale(1); pointer-events: none; transition: 0.3s; }
+    .card.unlocked { opacity: 1; filter: grayscale(0); pointer-events: auto; border-left: 5px solid var(--accent); }
+    
+    .btn { display: block; padding: 0.8rem; background: var(--bg); border-radius: 10px; text-decoration: none; color: var(--text); font-weight: 600; margin-top: 0.5rem; transition: 0.2s; }
+    .btn:hover { background: var(--primary); color: white; }
+
+    #admin-panel { display: none; background: #fff7ed; padding: 2rem; border-radius: 20px; border: 1px solid #fdba74; margin-top: 2rem; }
+    .admin-icon { cursor: pointer; color: white; opacity: 0.5; font-size: 1.2rem; }
+    .admin-icon:hover { opacity: 1; color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container nav-flex">
+    <div>
+      <h2 style="margin:0; font-size:1.2rem;">Prof. Antonio Adinolfi</h2>
+      <span style="font-size:0.7rem; text-transform:uppercase;">Liceo Scientifico N. Cortese</span>
+    </div>
+    <i class="fas fa-cog admin-icon" onclick="checkAdmin()"></i>
+  </div>
+</header>
+
+<main class="container">
+  <div class="hero italic">
+    <h1>Informatica e Tecnologie Digitali</h1>
+    <p>Portale di accesso alle risorse didattiche per gli studenti</p>
+  </div>
+
+  <div id="auth-box" class="login-status">
+    <h3 id="status-text"><i class="fas fa-lock-open mr-2"></i> Accedi con l'email istituzionale</h3>
+    <p class="text-sm mb-4">Solo gli account <strong>@lscortese.com</strong> possono accedere ai materiali.</p>
+    
+    <div id="g_id_onload"
+         data-client_id="842416972740-9fgh8v2p4p3p9p9p9p9p9p9p.apps.googleusercontent.com"
+         data-callback="onGoogleSuccess">
+    </div>
+    <div class="g_id_signin" data-type="standard" data-shape="pill"></div>
+  </div>
+
+  <div class="grid">
+    <div id="card-classi" class="card locked">
+      <h3 style="color:var(--primary)"><i class="fas fa-users"></i> Le Mie Classi</h3>
+      <a href="classe.html?classe=Prime" class="btn">Prime</a>
+      <a href="classe.html?classe=Seconde" class="btn">Seconde</a>
+      <a href="classe.html?classe=Terze" class="btn">Terze</a>
+      <a href="classe.html?classe=Quarte" class="btn">Quarte</a>
+      <a href="classe.html?classe=Quinte" class="btn">Quinte</a>
+    </div>
+
+    <div id="card-materiali" class="card locked">
+      <h3 style="color:var(--primary)"><i class="fas fa-file-code"></i> Materiali Didattici</h3>
+      <p style="font-size:0.9rem;">Dispense, slide e repository di codice.</p>
+      <a href="materiali.html" class="btn" style="background:var(--accent); color:var(--primary)">Archivio Materiali</a>
+    </div>
+
+    <div class="card">
+      <h3 style="color:var(--primary)"><i class="fas fa-rss"></i> News Tecnica</h3>
+      <div id="rss-feed" style="font-size:0.85rem;">Caricamento news...</div>
+    </div>
+  </div>
+
+  <div id="admin-panel">
+    <h3><i class="fas fa-user-shield"></i> Pannello Docente</h3>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:1rem;">
+      <input type="password" id="new-p" placeholder="Nuova Password Admin" style="padding:0.7rem; border-radius:8px; border:1px solid #ccc;">
+      <button onclick="saveP()" style="padding:0.7rem 1.5rem; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer;">Cambia Password</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // LOGIN GOOGLE
+  function onGoogleSuccess(response) {
+    const data = JSON.parse(atob(response.credential.split('.')[1]));
+    if (data.email.endsWith("@lscortese.com")) {
+      document.getElementById('card-classi').className = 'card unlocked';
+      document.getElementById('card-materiali').className = 'card unlocked';
+      document.getElementById('status-text').innerHTML = `<i class="fas fa-check-circle" style="color:green"></i> Benvenuto, ${data.given_name}`;
+      document.querySelector('.g_id_signin').style.display = 'none';
+    } else {
+      alert("Devi usare l'email istituzionale @lscortese.com!");
+    }
+  }
+
+  // LOGICA ADMIN
+  function checkAdmin() {
+    const saved = localStorage.getItem('admPass') || "adinolfi2026";
+    const p = prompt("Password Amministratore:");
+    if (p === saved) {
+      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('card-classi').className = 'card unlocked';
+      document.getElementById('card-materiali').className = 'card unlocked';
+    } else {
+      alert("Accesso negato.");
+    }
+  }
+
+  function saveP() {
+    const val = document.getElementById('new-p').value;
+    if(val.length < 5) return alert("Troppo corta!");
+    localStorage.setItem('admPass', val);
+    alert("Password salvata correttamente.");
+  }
+
+  // FEED RSS
+  async function getFeed() {
+    try {
+      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.tecnicadellascuola.it/informatica/feed/')}`);
+      const data = await res.json();
+      document.getElementById('rss-feed').innerHTML = data.items.slice(0, 3).map(i => `
+        <div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
+          <a href="${i.link}" target="_blank" style="text-decoration:none; color:var(--text); font-weight:600;">${i.title}</a>
+        </div>`).join('');
+    } catch(e) { document.getElementById('rss-feed').innerText = "News temporaneamente non disponibili."; }
+  }
+
+  window.onload = getFeed;
+</script>
+</body>
+</html>
