@@ -219,6 +219,9 @@ function showTab(id, e) {
 function handleCredentialResponse(response) {
     const data = JSON.parse(atob(response.credential.split('.')[1]));
     if (data.email.endsWith("@lscortese.com")) {
+        // SALVA LO STATO: L'utente è autenticato
+        sessionStorage.setItem("isLoggedIn", "true");
+        
         document.getElementById("login-wall").style.display = "none";
         document.getElementById("protected-content").style.display = "block";
         document.getElementById("auth-info").innerText = "Ciao, " + data.given_name;
@@ -249,4 +252,5 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
 
