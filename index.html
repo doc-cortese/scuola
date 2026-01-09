@@ -60,18 +60,79 @@
     .news-title { font-size: 14px; font-weight: 500; }
 
     /* FOOTER ISTITUZIONALE */
-    footer { background: white; border-top: 1px solid #ddd; padding: 40px 10%; margin-top: 60px; color: #444; }
-    .footer-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 30px; border-bottom: 1px solid #eee; padding-bottom: 30px; margin-bottom: 20px; }
-    .footer-links a { color: var(--unina-blue); text-decoration: none; font-size: 14px; margin-right: 15px; font-weight: 500; }
-    .footer-links a:hover { text-decoration: underline; }
-    .footer-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #777; }
-
-    /* RESPONSIVE */
+    footer {
+      background: #fff;
+      border-top: 1px solid #d1d5db;
+      padding: 20px 10%;
+      margin-top: 60px;
+      display: flex;
+      flex-direction: column; /* Cambiato per ospitare due righe */
+      gap: 15px;
+      font-size: 13px;
+      color: #4b5563;
+    }
+    
+    .footer-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .footer-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #f3f4f6;
+      padding-top: 15px;
+      width: 100%;
+    }
+    
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .footer-right {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .footer-right a {
+      color: #002d4d;
+      text-decoration: none;
+    }
+    
+    .footer-right a:hover {
+      text-decoration: underline;
+    }
+    
+    .social-icons {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .social-icons a {
+      color: #002d4d;
+      font-size: 18px;
+      transition: opacity 0.2s;
+    }
+    
+    .social-icons a:hover {
+      opacity: 0.7;
+    }
+    
     @media (max-width: 768px) {
-        .hero-banner { flex-direction: column; text-align: center; }
-        .info-grid { grid-template-columns: 1fr; }
-        .course-row { flex-direction: column; gap: 15px; text-align: center; }
-        .footer-top { flex-direction: column; text-align: center; }
+      .footer-top-row, .footer-bottom-row {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      .footer-right {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -180,23 +241,28 @@
 </main>
 
 <footer>
-    <div class="footer-top">
-        <div style="max-width: 400px;">
-            <h4 style="color: var(--unina-blue); margin-top: 0;">Prof. Antonio Adinolfi</h4>
-            <p style="font-size: 14px;">Docente di Informatica presso il Liceo Scientifico Statale "Nino Cortese" di Maddaloni (CE).</p>
+    <div class="footer-top-row">
+        <div class="social-icons">
+            <a href="https://github.com/tuo-profilo" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://linkedin.com/in/tuo-profilo" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+            <a href="https://youtube.com/tuo-canale" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="mailto:antonioadinolfi@lscortese.com" title="Email"><i class="fas fa-envelope"></i></a>
         </div>
-        <div class="footer-links">
-            <h4 style="color: var(--unina-blue); margin-top: 0;">Link Utili</h4>
-            <a href="https://www.liceoscientificocortese.edu.it/" target="_blank">Sito Web Liceo</a><br>
-            <a href="#">Privacy Policy</a><br>
-            <a href="#">Note Legali</a><br>
+        <div class="footer-right">
+            <a href="https://www.liceoscientificocortese.edu.it/" target="_blank">Sito del Liceo</a>
+            <a href="#">Cookies e Privacy</a>
             <a href="#">Accessibilità</a>
         </div>
     </div>
-    <div class="footer-bottom">
-        <div>© 2026 Antonio Adinolfi. Tutti i diritti riservati.</div>
-        <div>
-            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visite&color=%23002d4d">
+
+    <div class="footer-bottom-row">
+        <div class="footer-left">
+            <span>© 2026 Prof. Antonio Adinolfi - Liceo Scientifico "N. Cortese"</span>
+            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visite&color=%23002d4d" alt="Contatore Visite" style="height: 20px;">
+        </div>
+        <div class="footer-right">
+            <a href="#">Contatti</a>
+            <a href="#">Mappa del Sito</a>
         </div>
     </div>
 </footer>
@@ -245,3 +311,4 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
