@@ -20,6 +20,7 @@
       --unina-blue: #002d4d;
       --bg-gray: #f2f2f2;
       --text-dark: #333;
+      --accent: #f7a81b;
     }
 
     body { margin: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); }
@@ -32,7 +33,6 @@
     .hero-banner { background-color: var(--unina-blue); color: white; padding: 50px 10%; display: flex; align-items: center; gap: 40px; }
     .profile-img { width: 160px; height: 160px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); background: white; }
     .hero-content h1 { font-size: 42px; margin: 0; text-transform: uppercase; font-weight: 500; }
-    .hero-content p { font-size: 18px; opacity: 0.9; margin-top: 10px; }
 
     /* TABS */
     .tabs-nav { background: white; padding: 0 10%; display: flex; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 100; }
@@ -49,25 +49,30 @@
     .course-row { background: white; padding: 20px; border-left: 5px solid var(--unina-blue); display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .course-info h4 { margin: 0; font-size: 18px; color: var(--unina-blue); }
     .btn-group { display: flex; gap: 10px; }
-    .btn-action { padding: 8px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+    .btn-action { padding: 8px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase; transition: 0.2s; }
     .btn-blue { background: var(--unina-blue); color: white; }
     .btn-border { border: 1px solid var(--unina-blue); color: var(--unina-blue); }
+    .btn-blue:hover { opacity: 0.9; }
 
     /* FEED RSS */
     .news-item { display: block; padding: 10px 0; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: var(--unina-blue); }
     .news-date { font-size: 11px; color: #888; display: block; margin-bottom: 3px; font-weight: bold; }
     .news-title { font-size: 14px; font-weight: 500; }
 
+    /* FOOTER ISTITUZIONALE */
+    footer { background: white; border-top: 1px solid #ddd; padding: 40px 10%; margin-top: 60px; color: #444; }
+    .footer-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 30px; border-bottom: 1px solid #eee; padding-bottom: 30px; margin-bottom: 20px; }
+    .footer-links a { color: var(--unina-blue); text-decoration: none; font-size: 14px; margin-right: 15px; font-weight: 500; }
+    .footer-links a:hover { text-decoration: underline; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #777; }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
-        .hero-banner { flex-direction: column; text-align: center; padding: 30px 5%; }
-        .hero-content h1 { font-size: 28px; }
+        .hero-banner { flex-direction: column; text-align: center; }
         .info-grid { grid-template-columns: 1fr; }
-        .tabs-nav { overflow-x: auto; white-space: nowrap; padding: 0 5%; }
-        .course-row { flex-direction: column; text-align: center; gap: 15px; }
+        .course-row { flex-direction: column; gap: 15px; text-align: center; }
+        .footer-top { flex-direction: column; text-align: center; }
     }
-
-    footer { background: #fff; border-top: 1px solid #ddd; padding: 40px 10%; margin-top: 60px; text-align: center; }
   </style>
 </head>
 <body>
@@ -77,7 +82,7 @@
         <div style="font-weight: 900; font-size: 22px;">LSC</div>
         <div style="font-size: 11px; font-weight: bold; text-transform: uppercase;">Liceo Scientifico<br>Nino Cortese</div>
     </div>
-    <div id="auth-info" style="font-size: 13px;"></div>
+    <div id="auth-info" style="font-size: 13px; font-weight: bold;"></div>
 </nav>
 
 <header class="hero-banner">
@@ -124,34 +129,76 @@
     </div>
 
     <div id="tab-didattica" class="tab-content" style="display:none;">
-        <div id="login-wall" style="background:white; padding:50px; text-align:center;">
-            <h3>Area Riservata</h3>
+        <div id="login-wall" style="background:white; padding:50px; text-align:center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <i class="fas fa-lock" style="font-size: 40px; color: var(--unina-blue); margin-bottom: 20px;"></i>
+            <h3>Area Riservata Didattica</h3>
+            <p>Esegui il login con l'account istituzionale <strong>@lscortese.com</strong></p>
             <div id="g_id_onload" data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-            <div class="g_id_signin" data-type="standard"></div>
+            <div class="g_id_signin" data-type="standard" data-size="large" style="display: inline-block; margin-top: 20px;"></div>
         </div>
 
         <div id="protected-content" style="display:none;">
-            <h3 style="margin-bottom:30px;">Classi e Insegnamenti</h3>
+            <h3 style="margin-bottom:30px; border-bottom: 2px solid var(--unina-blue); padding-bottom: 10px;">I Miei Insegnamenti - A.S. 2025/26</h3>
+            
             <div class="course-row">
-                <div class="course-info"><h4>Classe Prima</h4><p>Programmazione</p></div>
+                <div class="course-info"><h4>Classe Prima</h4><p>Coding e Problem Solving</p></div>
                 <div class="btn-group">
                     <a href="materiali.html?classe=Prime" class="btn-action btn-blue">Materiali</a>
                     <a href="classe.html?classe=Prime" class="btn-action btn-border">Lezioni</a>
                 </div>
             </div>
             <div class="course-row">
-                <div class="course-info"><h4>Classe Seconda</h4><p>Algoritmi</p></div>
+                <div class="course-info"><h4>Classe Seconda</h4><p>Algoritmi e Flowchart</p></div>
                 <div class="btn-group">
                     <a href="materiali.html?classe=Seconde" class="btn-action btn-blue">Materiali</a>
                     <a href="classe.html?classe=Seconde" class="btn-action btn-border">Lezioni</a>
                 </div>
             </div>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Terza</h4><p>Sviluppo Web (HTML/CSS)</p></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Terze" class="btn-action btn-blue">Materiali</a>
+                    <a href="classe.html?classe=Terze" class="btn-action btn-border">Lezioni</a>
+                </div>
             </div>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Quarta</h4><p>Database e SQL</p></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Quarte" class="btn-action btn-blue">Materiali</a>
+                    <a href="classe.html?classe=Quarte" class="btn-action btn-border">Lezioni</a>
+                </div>
+            </div>
+            <div class="course-row">
+                <div class="course-info"><h4>Classe Quinta</h4><p>Sistemi, Reti e Maturità</p></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Quinte" class="btn-action btn-blue">Materiali</a>
+                    <a href="classe.html?classe=Quinte" class="btn-action btn-border">Lezioni</a>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
 <footer>
-    <p>© 2026 Prof. Antonio Adinolfi | <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visite&color=%23002d4d"></p>
+    <div class="footer-top">
+        <div style="max-width: 400px;">
+            <h4 style="color: var(--unina-blue); margin-top: 0;">Prof. Antonio Adinolfi</h4>
+            <p style="font-size: 14px;">Docente di Informatica presso il Liceo Scientifico Statale "Nino Cortese" di Maddaloni (CE).</p>
+        </div>
+        <div class="footer-links">
+            <h4 style="color: var(--unina-blue); margin-top: 0;">Link Utili</h4>
+            <a href="https://www.liceoscientificocortese.edu.it/" target="_blank">Sito Web Liceo</a><br>
+            <a href="#">Privacy Policy</a><br>
+            <a href="#">Note Legali</a><br>
+            <a href="#">Accessibilità</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div>© 2026 Antonio Adinolfi. Tutti i diritti riservati.</div>
+        <div>
+            <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fantonioadinolfi.it%2F&label=Visite&color=%23002d4d">
+        </div>
+    </div>
 </footer>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -168,7 +215,9 @@ function handleCredentialResponse(response) {
     if (data.email.endsWith("@lscortese.com")) {
         document.getElementById("login-wall").style.display = "none";
         document.getElementById("protected-content").style.display = "block";
-        document.getElementById("auth-info").innerText = "Ciao, " + data.given_name;
+        document.getElementById("auth-info").innerHTML = `<i class="fas fa-user-circle"></i> ${data.given_name} ${data.family_name}`;
+    } else {
+        alert("Accesso negato. Utilizza l'email @lscortese.com");
     }
 }
 
@@ -183,13 +232,13 @@ async function loadFeeds() {
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`);
             const data = await res.json();
             document.getElementById(f.id).innerHTML = data.items.slice(0, 3).map(item => {
-                const date = new Date(item.pubDate).toLocaleDateString('it-IT');
+                const date = new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
                 return `<a href="${item.link}" target="_blank" class="news-item">
                             <span class="news-date">${date}</span>
                             <span class="news-title">${item.title}</span>
                         </a>`;
             }).join('');
-        } catch(e) { document.getElementById(f.id).innerHTML = "News offline."; }
+        } catch(e) { document.getElementById(f.id).innerHTML = "News temporaneamente non disponibili."; }
     }
 }
 window.onload = loadFeeds;
