@@ -18,350 +18,195 @@
       --accent: #f7a81b;
     }
 
-    body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: var(--bg-gray);
-      color: var(--text-dark);
-    }
+    body { margin: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-gray); color: var(--text-dark); }
 
-    /* === HEADER ISTITUZIONALE === */
-    .top-nav {
-      background-color: var(--unina-blue);
-      color: white;
-      padding: 15px 10%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    /* NAVBAR */
+    .top-nav { background-color: var(--unina-blue); color: white; padding: 15px 10%; display: flex; justify-content: space-between; align-items: center; }
     .logo-area { display: flex; align-items: center; gap: 15px; }
-    .logo-area img { height: 45px; filter: brightness(0) invert(1); }
-
     .nav-actions { display: flex; gap: 20px; align-items: center; }
     .nav-actions a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; text-transform: uppercase; }
-    
-    .btn-accedi {
-      border: 2px solid white;
-      padding: 8px 20px;
-      border-radius: 25px;
-      transition: 0.3s;
-    }
-    .btn-accedi:hover { background: white; color: var(--unina-blue); }
+    .btn-accedi { border: 2px solid white; padding: 8px 20px; border-radius: 25px; transition: 0.3s; }
 
-    /* === BANNER DOCENTE === */
-    .hero-banner {
-      background-color: var(--unina-blue);
-      color: white;
-      padding: 60px 10%;
-      position: relative;
-    }
+    /* HERO */
+    .hero-banner { background-color: var(--unina-blue); color: white; padding: 60px 10%; display: flex; align-items: center; gap: 40px; }
+    .profile-img { width: 150px; height: 150px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); object-fit: cover; }
+    .hero-content h1 { font-size: 42px; margin: 0; text-transform: uppercase; }
 
-    .hero-content { position: relative; z-index: 2; }
-    .hero-content h1 { font-size: 42px; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-    .hero-content p { font-size: 18px; opacity: 0.9; margin-top: 10px; }
+    /* TABS */
+    .tabs-nav { background: white; padding: 0 10%; display: flex; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 100; }
+    .tab-btn { padding: 20px 30px; cursor: pointer; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 14px; border-bottom: 4px solid transparent; }
+    .tab-btn.active { border-bottom-color: var(--unina-blue); color: var(--unina-blue); }
 
-    .hero-icons { margin-top: 20px; display: flex; gap: 15px; }
-    .hero-icons i { font-size: 20px; cursor: pointer; transition: 0.3s; }
-    .hero-icons i:hover { color: var(--accent); }
-
-    /* === TABS NAVIGATION === */
-    .tabs-nav {
-      background: white;
-      padding: 0 10%;
-      display: flex;
-      border-bottom: 1px solid #ddd;
-      sticky: top;
-    }
-
-    .tab-btn {
-      padding: 20px 30px;
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-size: 14px;
-      border-bottom: 4px solid transparent;
-      transition: 0.3s;
-    }
-
-    .tab-btn.active {
-      border-bottom-color: var(--unina-blue);
-      color: var(--unina-blue);
-      background: #f0f4f8;
-    }
-
-    /* === GRID LAYOUT === */
+    /* GRID & CARDS */
     .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
+    .info-card { background: white; padding: 30px; border-radius: 4px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); }
+    .info-card h3 { color: var(--unina-blue); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 16px; text-transform: uppercase; }
     
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 25px;
-      margin-bottom: 40px;
-    }
-
-    .info-card {
-      background: white;
-      padding: 30px;
-      border-radius: 4px;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-    }
-
-    .info-card h3 { color: var(--unina-blue); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-    
-    .contact-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-    .icon-circle {
-      width: 40px; height: 40px;
-      background: var(--unina-blue);
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* === SEZIONE DIDATTICA (PROTETTA) === */
-    #contenutoProtetto { display: none; }
-    
-    .course-list {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .course-row {
-        background: white;
-        padding: 20px;
-        border-left: 5px solid var(--unina-blue);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
+    .course-row { background: white; padding: 20px; border-left: 5px solid var(--unina-blue); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     .btn-group { display: flex; gap: 10px; }
-    .btn-sm {
-        padding: 8px 15px;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: bold;
-        text-transform: uppercase;
-    }
+    .btn-sm { padding: 8px 15px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
     .btn-primary { background: var(--unina-blue); color: white; }
     .btn-outline { border: 1px solid var(--unina-blue); color: var(--unina-blue); }
 
-    /* === LOGIN SECTION === */
-    .login-box {
-        background: white;
-        padding: 40px;
-        text-align: center;
-        max-width: 500px;
-        margin: 0 auto;
-        border-top: 5px solid var(--accent);
-    }
-
-    /* === FEED RSS === */
-    .feed-container { font-size: 13px; margin-top: 15px; }
-    .feed-item { display: block; padding: 8px 0; border-bottom: 1px solid #eee; color: var(--text-dark); text-decoration: none; }
-    .feed-item:hover { color: var(--unina-light-blue); }
-
-    @media (max-width: 768px) {
-      .info-grid { grid-template-columns: 1fr; }
-      .hero-content h1 { font-size: 28px; }
-      .tabs-nav { overflow-x: auto; }
-    }
+    .login-box { background: white; padding: 40px; text-align: center; max-width: 500px; margin: 0 auto; border-top: 5px solid var(--accent); }
+    .feed-item { display: block; padding: 10px 0; border-bottom: 1px solid #eee; color: var(--text-dark); text-decoration: none; font-size: 13px; }
   </style>
 </head>
 <body>
 
 <nav class="top-nav">
     <div class="logo-area">
-        <div style="font-weight: 800; font-size: 20px; letter-spacing: -1px;">LSC</div>
+        <div style="font-weight: 800; font-size: 20px;">LSC</div>
         <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.3);"></div>
-        <div style="font-size: 11px; line-height: 1.1;">LICEO SCIENTIFICO<br>NINO CORTESE</div>
+        <div style="font-size: 11px;">LICEO SCIENTIFICO<br>NINO CORTESE</div>
     </div>
     <div class="nav-actions">
-        <a href="#" onclick="toggleSearch()"><i class="fas fa-search"></i> CERCA</a>
         <div id="loggedInInfo" style="display:none; align-items: center; gap: 15px;">
-            <span id="userName" style="font-size: 12px;"></span>
-            <a href="#" onclick="handleLogout()" class="btn-accedi">ESCI <i class="fas fa-sign-out-alt"></i></a>
+            <span id="userName"></span>
+            <a href="#" onclick="handleLogout()" class="btn-accedi">ESCI</a>
         </div>
-        <a href="#login" id="btnAccediInit" class="btn-accedi">ACCEDI <i class="fas fa-arrow-right"></i></a>
+        <a href="#didattica" id="btnAccediInit" class="btn-accedi" onclick="showTab('didattica')">ACCEDI</a>
     </div>
 </nav>
 
 <header class="hero-banner">
+    <img src="./immagini/foto_adinolfi.jpg" alt="Prof. Antonio Adinolfi" class="profile-img">
     <div class="hero-content">
         <h1>Antonio Adinolfi</h1>
-        <p>Professore di Informatica e Tecnologie Digitali (B016)</p>
-        <div class="hero-icons">
-            <i class="fas fa-envelope" onclick="window.location.href='mailto:antonioadinolfi@lscortese.com'"></i>
-            <i class="fab fa-github"></i>
-            <i class="fab fa-linkedin"></i>
-            <i class="fab fa-youtube"></i>
-        </div>
+        <p>Docente di Informatica e Tecnologie Digitali</p>
     </div>
 </header>
 
 <nav class="tabs-nav">
     <div class="tab-btn active" onclick="showTab('profilo')">Profilo</div>
-    <div class="tab-btn" onclick="showTab('bacheca')">Bacheca News</div>
+    <div class="tab-btn" onclick="showTab('bacheca')">Bacheca</div>
     <div class="tab-btn" onclick="showTab('didattica')">Didattica</div>
 </nav>
 
 <main class="container">
     
     <div id="welcomeMessage" style="display:none; background: #e7f3ff; padding: 15px; border-radius: 4px; margin-bottom: 20px; color: var(--unina-blue); font-weight: 500;">
-        <i class="fas fa-info-circle"></i> Accesso effettuato. Stai visualizzando i materiali riservati per l'A.S. 2025/26.
+        Accesso effettuato: Materiali didattici disponibili.
     </div>
 
     <div id="tab-profilo" class="tab-content">
         <div class="info-grid">
             <div class="info-card">
                 <h3>Dipartimento</h3>
-                <p>Dipartimento di Informatica, Matematica e Fisica.<br>Responsabile Laboratorio Tecnologico.</p>
+                <p>Dipartimento di Informatica</p>
             </div>
             <div class="info-card">
-                <h3>Ruolo</h3>
-                <p>Docente di ruolo presso Liceo "N. Cortese" di Maddaloni.</p>
+                <h3>Contatti</h3>
+                <p><i class="fas fa-envelope"></i> antonioadinolfi@lscortese.com</p>
+                <p><i class="fas fa-clock"></i> Ricevimento: Mer 10:00 - 11:00</p>
             </div>
             <div class="info-card">
-                <h3>Informazioni</h3>
-                <div class="contact-item">
-                    <div class="icon-circle"><i class="fas fa-phone"></i></div>
-                    <span>Ricevimento: Mer 10:00</span>
-                </div>
-                <div class="contact-item">
-                    <div class="icon-circle"><i class="fas fa-envelope"></i></div>
-                    <span style="font-size: 12px;">antonioadinolfi@lscortese.com</span>
-                </div>
-                <div class="contact-item">
-                    <div class="icon-circle"><i class="fas fa-link"></i></div>
-                    <a href="https://classroom.google.com" style="color: inherit; text-decoration: none;">Google Classroom</a>
-                </div>
+                <h3>Link Utili</h3>
+                <a href="https://github.com/tuo-profilo" class="feed-item"><i class="fab fa-github"></i> GitHub Profile</a>
+                <a href="https://classroom.google.com" class="feed-item"><i class="fas fa-graduation-cap"></i> Google Classroom</a>
             </div>
         </div>
     </div>
 
     <div id="tab-bacheca" class="tab-content" style="display:none;">
         <div class="info-grid">
-            <div class="info-card">
-                <h3>Circolari Liceo</h3>
-                <div id="school-feed" class="feed-container">Caricamento...</div>
-            </div>
-            <div class="info-card">
-                <h3>Tecnica della Scuola</h3>
-                <div id="tecnica-feed" class="feed-container">Caricamento...</div>
-            </div>
-            <div class="info-card">
-                <h3>Orizzonte Scuola</h3>
-                <div id="rss-feed" class="feed-container">Caricamento...</div>
-            </div>
+            <div class="info-card"><h3>Circolari Liceo</h3><div id="school-feed">Caricamento...</div></div>
+            <div class="info-card"><h3>Tecnica della Scuola</h3><div id="tecnica-feed">Caricamento...</div></div>
+            <div class="info-card"><h3>Orizzonte Scuola</h3><div id="rss-feed">Caricamento...</div></div>
         </div>
     </div>
 
     <div id="tab-didattica" class="tab-content" style="display:none;">
         <div id="loginSection" class="login-box">
-            <i class="fas fa-lock" style="font-size: 40px; color: var(--unina-blue); margin-bottom: 20px;"></i>
             <h3>Area Riservata</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">
-                Per accedere ai materiali didattici, esegui il login con il tuo account istituzionale <b>@lscortese.com</b>
-            </p>
-            
+            <p>Accedi con @lscortese.com per vedere le classi.</p>
             <div id="g_id_onload" data-client_id="1011752872320-713mjtge9ofhtnclhjfvdoc2h2q2uelv.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
-            
-            <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
-                <a href="ospiti.html" style="font-size: 13px; color: var(--unina-light-blue); font-weight: 500;">Accedi come Ospite (Risorse Pubbliche)</a>
+            <div class="g_id_signin" data-type="standard"></div>
+            <p style="margin-top:20px;"><a href="ospiti.html">Accesso Ospite</a></p>
+        </div>
+
+        <div id="contenutoProtetto" style="display:none;">
+            <div class="course-row">
+                <div><strong>Primo Anno</strong><br><small>Pensiero computazionale e basi.</small></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Prime" class="btn-sm btn-primary">Materiale</a>
+                    <a href="classe.html?classe=Prime" class="btn-sm btn-outline">Python</a>
+                </div>
+            </div>
+            <div class="course-row">
+                <div><strong>Secondo Anno</strong><br><small>Algoritmi e logica strutturata.</small></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Seconde" class="btn-sm btn-primary">Materiale</a>
+                    <a href="classe.html?classe=Seconde" class="btn-sm btn-outline">Python</a>
+                </div>
+            </div>
+            <div class="course-row">
+                <div><strong>Terzo Anno</strong><br><small>Sviluppo Web HTML/CSS.</small></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Terze" class="btn-sm btn-primary">Materiale</a>
+                    <a href="classe.html?classe=Terze" class="btn-sm btn-outline">Python</a>
+                </div>
+            </div>
+            <div class="course-row">
+                <div><strong>Quarto Anno</strong><br><small>Database SQL e OOP.</small></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Quarte" class="btn-sm btn-primary">Materiale</a>
+                    <a href="classe.html?classe=Quarte" class="btn-sm btn-outline">Python</a>
+                </div>
+            </div>
+            <div class="course-row">
+                <div><strong>Quinto Anno</strong><br><small>Esame di Stato e Reti.</small></div>
+                <div class="btn-group">
+                    <a href="materiali.html?classe=Quinte" class="btn-sm btn-primary">Materiale</a>
+                    <a href="classe.html?classe=Quinte" class="btn-sm btn-outline">Python</a>
+                </div>
             </div>
         </div>
-
-        <div id="contenutoProtetto">
-            <h2 style="margin-bottom: 25px;">Classi e Insegnamenti</h2>
-            <div class="course-list" id="courseList">
-                <div class="course-row">
-                    <div>
-                        <strong style="font-size: 18px; color: var(--unina-blue);">Classi Quarte</strong>
-                        <div style="font-size: 13px; color: var(--text-muted);">Database SQL, OOP e Web App.</div>
-                    </div>
-                    <div class="btn-group">
-                        <a href="materiali.html?classe=Quarte" class="btn-sm btn-primary">Materiali</a>
-                        <a href="classe.html?classe=Quarte" class="btn-sm btn-outline">Python Lab</a>
-                    </div>
-                </div>
-                </div>
-        </div>
     </div>
-
 </main>
-
-<footer style="background: white; border-top: 1px solid #ddd; padding: 40px 10%; margin-top: 60px; font-size: 13px; color: var(--text-muted); text-align: center;">
-    <p>&copy; 2026 Prof. Antonio Adinolfi – Liceo Scientifico "N. Cortese" Maddaloni (CE)</p>
-    <div style="margin-top: 10px;">
-        <a href="#" style="color: var(--unina-blue); text-decoration: none; margin: 0 10px;">Privacy Policy</a> | 
-        <a href="#" style="color: var(--unina-blue); text-decoration: none; margin: 0 10px;">Note Legali</a>
-    </div>
-</footer>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-// GESTIONE TABS
 function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
     document.getElementById('tab-' + tabId).style.display = 'block';
-    event.currentTarget.classList.add('active');
+    const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.textContent.toLowerCase() === tabId);
+    if(activeBtn) activeBtn.classList.add('active');
 }
 
-// GESTIONE LOGIN (Logica identica al tuo originale)
 function handleCredentialResponse(response) {
     const data = JSON.parse(atob(response.credential.split('.')[1]));
-    
-    if (data.email.endsWith("@lscortese.com") || data.email === "tua-email-test@gmail.com") {
+    if (data.email.endsWith("@lscortese.com")) {
         document.getElementById("contenutoProtetto").style.display = "block";
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("welcomeMessage").style.display = "block";
         document.getElementById("btnAccediInit").style.display = "none";
         document.getElementById("loggedInInfo").style.display = "flex";
-        document.getElementById("userName").textContent = "Benvenuto, " + data.given_name;
-        showTab('didattica');
-    } else {
-        alert("Accesso negato: usa l'account istituzionale!");
-    }
+        document.getElementById("userName").textContent = "Prof. " + data.family_name;
+    } else { alert("Usa l'email @lscortese.com!"); }
 }
 
-function handleLogout() {
-    location.reload();
-}
+function handleLogout() { location.reload(); }
 
-// CARICAMENTO FEED RSS (Logica identica al tuo originale)
 async function loadFeeds() {
     const feeds = [
         { url: 'https://liceoscientificocortese.edu.it/feed/', id: 'school-feed' },
         { url: 'https://www.tecnicadellascuola.it/feed/', id: 'tecnica-feed' },
         { url: 'https://www.orizzontescuola.it/didattica/feed/', id: 'rss-feed' }
     ];
-
     for (const f of feeds) {
         try {
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`);
             const data = await res.json();
-            const container = document.getElementById(f.id);
-            container.innerHTML = data.items.slice(0, 3).map(item => `
-                <a href="${item.link}" target="_blank" class="feed-item">
-                    <div style="font-size:10px; color:var(--accent); font-weight:bold;">${new Date(item.pubDate).toLocaleDateString()}</div>
-                    ${item.title}
-                </a>
+            document.getElementById(f.id).innerHTML = data.items.slice(0, 3).map(item => `
+                <a href="${item.link}" target="_blank" class="feed-item">${item.title}</a>
             `).join('');
-        } catch (e) { console.error("Errore feed", e); }
+        } catch (e) { document.getElementById(f.id).innerHTML = "Errore caricamento."; }
     }
 }
-
 document.addEventListener('DOMContentLoaded', loadFeeds);
 </script>
-
 </body>
 </html>
