@@ -187,6 +187,7 @@
       color: var(--danger-color) !important;
     }
   </style>
+  
 </head>
 
 <body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
@@ -198,15 +199,7 @@
         <input type="password" id="pass-docente" placeholder="Password" style="padding:10px; border:1px solid #ccc; border-radius:5px;">
         <button onclick="controllaAccesso()" style="padding:10px 20px; background-color:#0056b3; color:white; border:none; border-radius:5px; cursor:pointer;">Entra</button>
     </div>
-    <script>
-    function controllaAccesso() {
-        if (document.getElementById('pass-docente').value === "adinolfi2026") {
-            document.getElementById('schermata-manutenzione').style.display = 'none';
-            sessionStorage.setItem('ok', 'true');
-        } else { alert("Password errata!"); }
-    }
-    if (sessionStorage.getItem('ok') === 'true') { document.getElementById('schermata-manutenzione').style.display = 'none'; }
-    </script>
+    <script src="sicurezza.js"></script>
 </div>
 <div id="main-layout">
   <div id="traccia">
