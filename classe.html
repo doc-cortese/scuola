@@ -241,7 +241,18 @@
         <button class="btn-z" onclick="resetEditorZoom()" style="background:#64748b;">Reset</button>
         <button class="btn-z" id="focusBtn" onclick="toggleFocusMode()" style="background: #8b5cf6; margin-left: 5px;">Solo Editor</button>
     </div>
-    <div id="monaco-container"></div>
+    <div id="monaco-container" style="border: 2px solid #004080; border-radius: 8px; overflow: hidden; background: white;">
+        <iframe 
+            src="https://trinket.io/embed/python3/ed99266782?runMode=console" 
+            width="100%" 
+            height="100%" 
+            frameborder="0" 
+            marginwidth="0" 
+            marginheight="0" 
+            allowfullscreen
+            style="min-height: 500px;">
+        </iframe>
+    </div>
 
     <div class="controls" style="margin-top: 10px;">
       <button class="btn-drive" onclick="inviaConsegnaDrive()" style="padding: 12px 24px; font-size: 16px;">☁️ INVIA CONSEGNA AL PROF</button>
@@ -472,7 +483,7 @@
 }
 
   require(['vs/editor/editor.main'], function () {
-    editor = monaco.editor.create(document.getElementById('monaco-container'), {
+   /* editor = monaco.editor.create(document.getElementById('monaco-container'), {
       value: "# Scrivi qui il tuo codice Python\n",
       language: 'python',
       theme: 'vs-dark',
@@ -480,7 +491,7 @@
       fontSize: 14,
       contextmenu: false,
       minimap: { enabled: false }
-    });
+    });*/
     editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
     editor.onDidChangeModelContent(() => { resetActivityTimer(); });
 
