@@ -190,7 +190,11 @@
 </head>
 
 <body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
-
+<div id="manutenzione" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <img src="./immagini/logo_liceo.png" width="150">
+    <h1 style="color:#0056b3; font-family: sans-serif;">Manutenzione in corso...</h1>
+    <button onclick="document.getElementById('manutenzione').style.display='none'" style="margin-top:20px; padding:10px; cursor:pointer;">Accesso Prof (Sblocca)</button>
+</div>
 <div id="main-layout">
   <div id="traccia">
     <div class="controls">
