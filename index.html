@@ -190,14 +190,28 @@
             <h3 style="margin-bottom:30px;">I Miei Insegnamenti</h3>
             <script>
                 const classi = ["Prime", "Seconde", "Terze", "Quarte", "Quinte"];
-                classi.forEach(c => {                    
+                classi.forEach(c => {
+                    // Qui decidi a quale classe assegnare il quiz. 
+                    // Se vuoi assegnarlo solo alla prima, scrivi "Prime".
+                    // Se vuoi disattivarlo per una classe, scrivi un nome diverso.
+                    let linkQuiz = "#"; 
+                    let stilePulsante = "opacity: 0.5; cursor: not-allowed;"; // Stile per pulsante disattivato
+                
+                    if (c === "Prime") {
+                        linkQuiz = "https://take.panquiz.com/9692-3116-6680";
+                        stilePulsante = ""; // Rimuove le restrizioni per la classe selezionata
+                    }
+                
                     document.write(`
                         <div class="course-row">
                             <div><h4>Classe ${c}</h4></div>
                             <div class="btn-group">
                                 <a href="materiali.html?classe=${c}" class="btn-action btn-blue">Lezioni</a>
                                 <a href="classe.html?classe=${c}" class="btn-action btn-border">Esercizi</a>
-                                <a href="https://take.panquiz.com/9692-3116-6680?classe=${c}" class="pulsante-quiz" target="_blank">Quiz</a>
+                                <a href="${linkQuiz}" 
+                                   class="pulsante-quiz" 
+                                   style="${stilePulsante}" 
+                                   target="${linkQuiz !== '#' ? '_blank' : '_self'}">Quiz</a>
                             </div>
                         </div>
                     `);
@@ -287,6 +301,7 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
 
 
 
