@@ -190,19 +190,14 @@
             <h3 style="margin-bottom:30px;">I Miei Insegnamenti</h3>
             <script>
                 const classi = ["Prime", "Seconde", "Terze", "Quarte", "Quinte"];
-                classi.forEach(c => {
-                    // Verifichiamo se la classe corrente è "Prime"
-                    let pulsanteQuiz = "";
-                    if (c === "Prime") {
-                        pulsanteQuiz = `<a href="https://take.panquiz.com/9692-3116-6680" class="pulsante-quiz" target="_blank">Quiz</a>`;
-                    }
+                classi.forEach(c => {                    
                     document.write(`
                         <div class="course-row">
                             <div><h4>Classe ${c}</h4></div>
                             <div class="btn-group">
                                 <a href="materiali.html?classe=${c}" class="btn-action btn-blue">Lezioni</a>
                                 <a href="classe.html?classe=${c}" class="btn-action btn-border">Esercizi</a>
-                                 ${pulsanteQuiz}
+                                <a href="https://take.panquiz.com/9692-3116-6680?classe=${c}" class="pulsante-quiz" target="_blank">Quiz</a>
                             </div>
                         </div>
                     `);
@@ -292,6 +287,7 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
 
 
 
