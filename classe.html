@@ -482,8 +482,8 @@
     window.location.href = '../index.html'; 
 }
 
-  require(['vs/editor/editor.main'], function () {
-   /* editor = monaco.editor.create(document.getElementById('monaco-container'), {
+  /*require(['vs/editor/editor.main'], function () {
+      editor = monaco.editor.create(document.getElementById('monaco-container'), {
       value: "# Scrivi qui il tuo codice Python\n",
       language: 'python',
       theme: 'vs-dark',
@@ -491,7 +491,7 @@
       fontSize: 14,
       contextmenu: false,
       minimap: { enabled: false }
-    });*/
+    });
     editor.onDidPaste((e) => { e.stopImmediatePropagation(); alert('🚫 Incolla disabilitato.'); });
     editor.onDidChangeModelContent(() => { resetActivityTimer(); });
 
@@ -500,7 +500,7 @@
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
     const lastCode = localStorage.getItem(`codiceSalvato_${classKey}`);
     if (lastCode) editor.setValue(lastCode);
-  });
+  });*/
 
   async function runCode() {
     const out = document.getElementById('output');
