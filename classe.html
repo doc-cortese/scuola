@@ -238,8 +238,8 @@
 
     <div class="controls" style="margin-top: 10px;">
       <button class="btn-drive" onclick="inviaConsegnaDrive()" style="padding: 12px 24px; font-size: 16px;">☁️ INVIA CONSEGNA AL PROF</button>
-      
       <button class="btn-z" onclick="scaricaFileLocale()" style="background:#64748b; padding: 12px 24px;">💾 Salva copia sul PC (.py)</button>
+      <button id="eseguiBtn" class="btn-run" onclick="apriPopupTest()" style="background-color: #f9ab00; color: black; padding: 12px 24px;">🚀 TESTA CODICE (Popup)</button>
     </div>
 
     
@@ -593,6 +593,27 @@ sys.stdout = io.StringIO()
         }
     }, 120000);
   });
+  function apriPopupTest() {
+      const codice = editor.getValue();
+      
+      // Tentativo di copia automatica negli appunti per agevolare lo studente
+      navigator.clipboard.writeText(codice).then(() => {
+          alert("Codice copiato negli appunti!\n\nSi aprirà una nuova finestra: incolla il codice (Ctrl+V) e premi 'Run'.");
+      }).catch(err => {
+          alert("Si aprirà il tester. Ricorda di copiare il tuo codice manualmente.");
+      });
+  
+      // Opzione A: Programiz (Molto leggero e stabile)
+      const urlTester = "https://www.programiz.com/python-programming/online-compiler/";
+      
+      // Apre il popup con dimensioni specifiche
+      const width = 1000;
+      const height = 700;
+      const left = (window.screen.width / 2) - (width / 2);
+      const top = (window.screen.height / 2) - (height / 2);
+      
+      window.open(urlTester, "TesterPython", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
+  }
 </script>
 </body>
 </html>
