@@ -190,10 +190,23 @@
 </head>
 
 <body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
-<div id="manutenzione" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <img src="./immagini/logo_liceo.png" width="150">
-    <h1 style="color:#0056b3; font-family: sans-serif;">Manutenzione in corso...</h1>
-    <button onclick="document.getElementById('manutenzione').style.display='none'" style="margin-top:20px; padding:10px; cursor:pointer;">Accesso Prof (Sblocca)</button>
+<div id="schermata-manutenzione" style="position:fixed; top:0; left:0; width:100%; height:100%; background-color:#ffffff; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;">
+    <img src="./immagini/logo_liceo.png" width="120" style="margin-bottom:20px;">
+    <h2 style="color:#0056b3;">Sito in Manutenzione</h2>
+    <p>Accesso riservato al Prof. Adinolfi</p>
+    <div style="margin-top: 20px;">
+        <input type="password" id="pass-docente" placeholder="Password" style="padding:10px; border:1px solid #ccc; border-radius:5px;">
+        <button onclick="controllaAccesso()" style="padding:10px 20px; background-color:#0056b3; color:white; border:none; border-radius:5px; cursor:pointer;">Entra</button>
+    </div>
+    <script>
+    function controllaAccesso() {
+        if (document.getElementById('pass-docente').value === "adinolfi2026") {
+            document.getElementById('schermata-manutenzione').style.display = 'none';
+            sessionStorage.setItem('ok', 'true');
+        } else { alert("Password errata!"); }
+    }
+    if (sessionStorage.getItem('ok') === 'true') { document.getElementById('schermata-manutenzione').style.display = 'none'; }
+    </script>
 </div>
 <div id="main-layout">
   <div id="traccia">
@@ -245,7 +258,13 @@
 </div>
 
 <iframe name="gasTarget" id="gasTarget" style="display:none;"></iframe>
+<div class="esercitazione" style="padding:20px; border:1px solid #ddd; margin-top:20px; border-radius:10px;">
+    <h3 style="color:#0056b3;">1. Esercitazione Python: Gestione Magazzino</h3>
+    <iframe src="https://trinket.io/embed/python3/ed99266782?runMode=console" width="100%" height="500" frameborder="0" allowfullscreen></iframe>
 
+    <h3 style="color:#0056b3; margin-top:40px;">2. Verifica le tue conoscenze (PanQuiz)</h3>
+    <iframe src="https://take.panquiz.com/9692-3116-6680" width="100%" height="600" style="border:1px solid #ccc;" allowfullscreen></iframe>
+</div>
 <script>
   // CONFIGURAZIONE CARTELLE PER CLASSE
   const EXERCISES_BY_CLASS = {
