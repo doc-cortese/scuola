@@ -7,8 +7,8 @@
       { "file": "Terze/Esercizio_III_1.jpg", "title": "Esercizio 1 - Liste" }
     ],
     "Quarte": [
-      { "file": "Quarte/Esercizio_IV_1.jpg", "title": "Esercizio 1 - OOP" },
-      { "file": "Quarte/Esercizio_IV_2.jpg", "title": "Esercizio 2 - File" }
+      { "file": "Quarte/Esercizio_IV_1.jpg", "title": "Esercizio 1 - OOP", "data": "2026-01-11" },
+      { "file": "Quarte/Esercizio_IV_2.jpg", "title": "Esercizio 2 - File","data": "2026-01-15" }
     ]
   },
   "impostazioni": {
@@ -17,3 +17,4 @@
     "passwordDocente": "adinolfi2026"
   }
 }
+
