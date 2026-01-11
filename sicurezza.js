@@ -7,6 +7,8 @@ function controllaAccesso() {
     if (btoa(passInserita) === passSegreta) {
         document.getElementById('schermata-manutenzione').style.display = 'none';
         sessionStorage.setItem('ok', 'true');
+        // AGGIUNGI QUESTA RIGA PER RESETTARE IL TIMER:
+        localStorage.clear(); 
     } else {
         alert("Password errata!");
     }
