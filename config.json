@@ -1,0 +1,19 @@
+{
+  "classi": {
+    "Seconde": [
+      { "file": "Seconde/Esercizio_II_1.jpg", "title": "Esercizio 1 - Algoritmi" }
+    ],
+    "Terze": [
+      { "file": "Terze/Esercizio_III_1.jpg", "title": "Esercizio 1 - Liste" }
+    ],
+    "Quarte": [
+      { "file": "Quarte/Esercizio_IV_1.jpg", "title": "Esercizio 1 - OOP" },
+      { "file": "Quarte/Esercizio_IV_2.jpg", "title": "Esercizio 2 - File" }
+    ]
+  },
+  "impostazioni": {
+    "timerDefault": 2700,
+    "intervalloBackup": 120000,
+    "passwordDocente": "adinolfi2026"
+  }
+}
