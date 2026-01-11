@@ -519,18 +519,7 @@ sys.stdout = io.StringIO()
     link.click();
   }
  document.addEventListener("DOMContentLoaded", async () => {
-     // 1. Verifica se il docente è già autenticato tramite sessionStorage
-    const isDocenteLoggato = sessionStorage.getItem('ok') === 'true';
     
-    // 2. Carica la configurazione
-    const response = await fetch('config.json');
-    const config = await response.json();
-
-    // 3. Se la manutenzione è attiva e NON sei il docente, mostra il blocco
-    if (config.impostazioni.manutenzione === true && !isDocenteLoggato) {
-        document.getElementById('schermata-manutenzione').style.display = 'flex';
-        return; // Ferma l'esecuzione per gli studenti
-    }
     try {
         // 1. CARICAMENTO CONFIGURAZIONE
         const response = await fetch('config.json');
