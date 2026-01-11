@@ -518,48 +518,49 @@ sys.stdout = io.StringIO()
     link.download = `Esercizio_${nome.replace(/\s+/g, '_')}.py`;
     link.click();
   }
- document.addEventListener("DOMContentLoaded", async () => {
-    
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. CONTROLLO IMMEDIATO ACCESSO (DOCENTE)
+    // Verifichiamo se l'utente ha già inserito la password correttamente
+    const isDocenteLoggato = sessionStorage.getItem('ok') === 'true';
+    const schermata = document.getElementById('schermata-manutenzione');
+
     try {
-        // --- NUOVO CONTROLLO ACCESSO ---
-        const isDocenteLoggato = sessionStorage.getItem('ok') === 'true';
-        const schermata = document.getElementById('schermata-manutenzione');
-        // 1. CARICAMENTO CONFIGURAZIONE
+        // 2. CARICAMENTO CONFIGURAZIONE
         const response = await fetch('config.json');
-        if (!response.ok) throw new Error("File config.json non trovato");
+        if (!response.ok) throw new Error("File config.json non trovato sul server");
         const config = await response.json();
         
-        // 2. CONTROLLO MANUTENZIONE (LOGICA DOCENTE/STUDENTE)
-        const isManutenzioneAttiva = config.impostazioni.manutenzione === true;
-        const isDocenteLoggato = sessionStorage.getItem('ok') === 'true';
-        const schermata = document.getElementById('schermata-manutenzione');
+        // 3. LOGICA DI VISUALIZZAZIONE MANUTENZIONE
+        // Se nel JSON 'manutenzione' è true e non sei loggato, blocca la pagina
+        const isManutenzioneAttiva = config.impostazioni && config.impostazioni.manutenzione === true;
 
         if (isManutenzioneAttiva && !isDocenteLoggato) {
-            // Se la manutenzione è attiva e non è il docente, blocca tutto qui
             if (schermata) schermata.style.display = 'flex';
-            return; 
+            return; // Interrompe l'esecuzione per gli studenti
         } else {
-            // Se non è in manutenzione o è il docente, nascondi la schermata ed entra
+            // Se la manutenzione è disattivata o sei il docente, nascondi il blocco
             if (schermata) schermata.style.display = 'none';
         }
 
-        // 3. IDENTIFICAZIONE CLASSE E DATA
+        // 4. IDENTIFICAZIONE CLASSE E DATA ODIERNA
         const urlParams = new URLSearchParams(window.location.search);
         const cl = urlParams.get('classe') || 'default';
         const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+        
+        // Data in formato ISO (YYYY-MM-DD) per chiavi univoche ogni giorno
         const oggi = new Date().toISOString().split('T')[0];
 
-        // 4. FILTRO ESERCIZI PER DATA
+        // 5. FILTRO ESERCIZI PER DATA
         const allExercises = config.classi[classKey] || config.classi['default'] || [];
         const exercises = allExercises.filter(ex => ex.data === oggi);
 
         if (exercises.length === 0) {
-            alert(`Nessuna traccia programmata per ${classKey} in data ${oggi}`);
+            alert(`Nessuna traccia programmata per ${classKey} in data ${oggi}.`);
             if (typeof updateTraccia === 'function') updateTraccia('tracce/default.pdf');
             return;
         }
 
-        // 5. ASSEGNAZIONE TRACCIA CASUALE
+        // 6. ASSEGNAZIONE TRACCIA (Univoca per studente/giorno)
         const select = document.getElementById('tracciaSelect');
         const tracciaKey = `tracciaAssegnata_${classKey}_${oggi}`;
         let assignedIndex = localStorage.getItem(tracciaKey);
@@ -571,7 +572,7 @@ sys.stdout = io.StringIO()
             assignedIndex = parseInt(assignedIndex);
         }
 
-        // 6. POPOLAMENTO INTERFACCIA
+        // 7. POPOLAMENTO INTERFACCIA
         if (select) {
             select.innerHTML = "";
             exercises.forEach((ex, index) => {
@@ -581,43 +582,51 @@ sys.stdout = io.StringIO()
                 if (index === assignedIndex) opt.selected = true;
                 select.appendChild(opt);
             });
-            select.disabled = true;
+            select.disabled = true; // Impedisce allo studente di cambiare traccia
         }
         
         if (typeof updateTraccia === 'function') {
             updateTraccia(`tracce/${exercises[assignedIndex].file}`);
         }
 
-        // 7. GESTIONE TIMER (CHIAVE PER DATA)
+        // 8. GESTIONE TIMER PERSISTENTE PER DATA
         const timerKey = `timer_${classKey}_${oggi}`;
         const savedTime = localStorage.getItem(timerKey);
+        
+        // Se non c'è tempo salvato per oggi, usa il default del config
         maxTimeLeft = savedTime !== null ? parseInt(savedTime) : (config.impostazioni.timerDefault || 2700);
 
         if (typeof aggiornaDisplayTimer === 'function') aggiornaDisplayTimer();
 
-        // 8. CICLO UNIFICATO TIMER E BACKUP
+        // 9. AVVIO CICLO TIMER E BACKUP
         setInterval(() => {
-            if (maxTimeLeft <= 0) {
+            if (maxTimeLeft <= 0 || timeLeft <= 0) {
                 alert("Tempo scaduto!");
                 if (typeof tornaAllaPaginaPrincipale === 'function') tornaAllaPaginaPrincipale();
                 return;
             }
+            
             maxTimeLeft--;
+            timeLeft--;
+            
+            // Salva lo stato ogni secondo per prevenire ricaricamenti furbi
             localStorage.setItem(timerKey, maxTimeLeft);
             if (typeof aggiornaDisplayTimer === 'function') aggiornaDisplayTimer();
         }, 1000);
 
-        // Backup automatico ogni X millisecondi (dal config)
+        // Backup automatico del codice
         const backupInterval = config.impostazioni.intervalloBackup || 120000;
         setInterval(() => {
             if (typeof editor !== 'undefined' && editor) {
                 const codiceKey = `codiceSalvato_${classKey}_${oggi}`;
                 localStorage.setItem(codiceKey, editor.getValue());
+                console.log("Backup eseguito con successo.");
             }
         }, backupInterval);
 
     } catch (err) {
-        console.error("Errore inizializzazione dinamica:", err);
+        console.error("Errore critico:", err);
+        alert("Errore di caricamento. Controlla la connessione o il file config.json.");
     }
 });
   function apriPopupTest() {
