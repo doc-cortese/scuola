@@ -520,30 +520,43 @@ sys.stdout = io.StringIO()
   }
  document.addEventListener("DOMContentLoaded", async () => {
     try {
-        // 1. CARICAMENTO DINAMICO DELLA CONFIGURAZIONE
+        // 1. CARICAMENTO CONFIGURAZIONE DA FILE ESTERNO
         const response = await fetch('config.json');
+        if (!response.ok) throw new Error("Impossibile caricare config.json");
         const config = await response.json();
         
+        // 2. IDENTIFICAZIONE CLASSE E DATA ODIERNA
         const urlParams = new URLSearchParams(window.location.search);
         const cl = urlParams.get('classe') || 'default';
         const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
         
-        // 2. RECUPERO ESERCIZI PER LA CLASSE SELEZIONATA
-        const exercises = config.classi[classKey] || config.classi['default'] || [];
-        const select = document.getElementById('tracciaSelect');
-
-        // 3. ASSEGNAZIONE CASUALE PERSISTENTE
-        const tracciaKey = `tracciaAssegnata_${classKey}`;
-        let assignedIndex = localStorage.getItem(tracciaKey);
+        // Ottieni data in formato YYYY-MM-DD (es. 2026-01-11)
+        const oggi = new Date().toISOString().split('T')[0];
         
-        if (assignedIndex === null || assignedIndex >= exercises.length) {
+        // 3. FILTRO ESERCIZI PER CLASSE E DATA
+        const allExercises = config.classi[classKey] || config.classi['default'] || [];
+        const exercises = allExercises.filter(ex => ex.data === oggi);
+
+        if (exercises.length === 0) {
+            alert("Nessun esercizio programmato per la classe " + classKey + " in data odierna (" + oggi + ").");
+            updateTraccia('tracce/default.pdf');
+            return;
+        }
+
+        // 4. ASSEGNAZIONE CASUALE PERSISTENTE (Univoca per Giorno)
+        const select = document.getElementById('tracciaSelect');
+        const tracciaKey = `tracciaAssegnata_${classKey}_${oggi}`;
+        
+        let assignedIndex = localStorage.getItem(tracciaKey);
+        if (assignedIndex === null || parseInt(assignedIndex) >= exercises.length) {
             assignedIndex = Math.floor(Math.random() * exercises.length);
             localStorage.setItem(tracciaKey, assignedIndex);
         } else {
             assignedIndex = parseInt(assignedIndex);
         }
 
-        // 4. POPOLAMENTO MENU E VISUALIZZAZIONE TRACCIA
+        // 5. POPOLAMENTO MENU TRACCE
+        select.innerHTML = ""; // Pulisce eventuali residui statici
         exercises.forEach((ex, index) => {
             const opt = document.createElement('option');
             opt.value = `tracce/${ex.file}`; 
@@ -552,42 +565,51 @@ sys.stdout = io.StringIO()
             select.appendChild(opt);
         });
         
-        select.disabled = true; // Impedisce allo studente di cambiare traccia
-        if (exercises[assignedIndex]) {
-            updateTraccia(`tracce/${exercises[assignedIndex].file}`);
-        }
+        select.disabled = true; // Impedisce modifiche manuali dello studente
+        const selectedExercise = exercises[assignedIndex];
+        if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
 
-        // 5. GESTIONE TIMER PERSISTENTE
-        const timerKey = `timer_${classKey}`;
+        // 6. GESTIONE TIMER PERSISTENTE (Univoco per Giorno)
+        const timerKey = `timer_${classKey}_${oggi}`;
         const savedTime = localStorage.getItem(timerKey);
-        maxTimeLeft = savedTime !== null ? parseInt(savedTime) : config.impostazioni.timerDefault;
+        
+        // Usa il tempo salvato o quello di default dal JSON
+        maxTimeLeft = savedTime !== null ? parseInt(savedTime) : (config.impostazioni.timerDefault || 2700);
 
         aggiornaDisplayTimer(); 
 
-        // 6. AVVIO CICLI (Timer e Backup)
+        // 7. AVVIO CICLO TIMER (1 secondo)
         setInterval(() => {
-            if (maxTimeLeft <= 0) {
+            // Se scade il timer di inattività (timeLeft) o quello della prova (maxTimeLeft)
+            if (timeLeft <= 0 || maxTimeLeft <= 0) {
                 alert("Tempo scaduto!");
                 tornaAllaPaginaPrincipale();
                 return;
             }
+            
+            timeLeft--;
             maxTimeLeft--;
+            
+            // Salvataggio stato timer
             localStorage.setItem(timerKey, maxTimeLeft);
             aggiornaDisplayTimer();
         }, 1000);
 
+        // 8. AVVIO CICLO BACKUP CODICE (Tempo definito in config.json)
+        const backupInterval = config.impostazioni.intervalloBackup || 120000;
         setInterval(() => {
             if (editor) {
-                localStorage.setItem(`codiceSalvato_${classKey}`, editor.getValue());
-                console.log("Backup dinamico eseguito");
+                const codiceKey = `codiceSalvato_${classKey}_${oggi}`;
+                localStorage.setItem(codiceKey, editor.getValue());
+                console.log("Backup dinamico eseguito per " + classKey);
             }
-        }, config.impostazioni.intervalloBackup);
+        }, backupInterval);
 
     } catch (err) {
-        console.error("Errore nel caricamento dinamico:", err);
-        alert("Errore critico nel caricamento della configurazione classi.");
+        console.error("Errore critico durante l'inizializzazione:", err);
+        alert("Errore tecnico: assicurati che il file config.json sia presente e corretto.");
     }
-});
+  });
   function apriPopupTest() {
       const codice = editor.getValue();
       
