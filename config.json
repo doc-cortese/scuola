@@ -12,7 +12,7 @@
     ]
   },
   "impostazioni": {
-    "manutenzione": true,
+    "manutenzione": false,
     "timerDefault": 2700,
     "intervalloBackup": 120000,
     
