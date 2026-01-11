@@ -7,8 +7,13 @@ function controllaAccesso() {
     if (btoa(passInserita) === passSegreta) {
         document.getElementById('schermata-manutenzione').style.display = 'none';
         sessionStorage.setItem('ok', 'true');
-        // AGGIUNGI QUESTA RIGA PER RESETTARE IL TIMER:
-        localStorage.clear(); 
+        // Reset del blocco timer solo per il docente
+        const urlParams = new URLSearchParams(window.location.search);
+        const cl = urlParams.get('classe') || 'default';
+        const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+        localStorage.removeItem(`timer_${classKey}`); 
+        
+        console.log("Timer resettato per il docente.");
     } else {
         alert("Password errata!");
     }
