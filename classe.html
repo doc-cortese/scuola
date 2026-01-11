@@ -519,40 +519,47 @@ sys.stdout = io.StringIO()
     link.click();
   }
  document.addEventListener("DOMContentLoaded", async () => {
-   // CONTROLLO ACCESSO: Se il docente ha già effettuato l'accesso, nascondi la manutenzione
-    if (sessionStorage.getItem('ok') === 'true') {
-        const manutenzione = document.getElementById('schermata-manutenzione');
-        if (manutenzione) manutenzione.style.display = 'none';
-    }
     try {
-        // 1. CARICAMENTO CONFIGURAZIONE DA FILE ESTERNO
+        // 1. CARICAMENTO CONFIGURAZIONE
         const response = await fetch('config.json');
-        if (!response.ok) throw new Error("Impossibile caricare config.json");
+        if (!response.ok) throw new Error("File config.json non trovato");
         const config = await response.json();
         
-        // 2. IDENTIFICAZIONE CLASSE E DATA ODIERNA
+        // 2. CONTROLLO MANUTENZIONE (LOGICA DOCENTE/STUDENTE)
+        const isManutenzioneAttiva = config.impostazioni.manutenzione === true;
+        const isDocenteLoggato = sessionStorage.getItem('ok') === 'true';
+        const schermata = document.getElementById('schermata-manutenzione');
+
+        if (isManutenzioneAttiva && !isDocenteLoggato) {
+            // Se la manutenzione è attiva e non è il docente, blocca tutto qui
+            if (schermata) schermata.style.display = 'flex';
+            return; 
+        } else {
+            // Se non è in manutenzione o è il docente, nascondi la schermata ed entra
+            if (schermata) schermata.style.display = 'none';
+        }
+
+        // 3. IDENTIFICAZIONE CLASSE E DATA
         const urlParams = new URLSearchParams(window.location.search);
         const cl = urlParams.get('classe') || 'default';
         const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
-        
-        // Ottieni data in formato YYYY-MM-DD (es. 2026-01-11)
         const oggi = new Date().toISOString().split('T')[0];
-        
-        // 3. FILTRO ESERCIZI PER CLASSE E DATA
+
+        // 4. FILTRO ESERCIZI PER DATA
         const allExercises = config.classi[classKey] || config.classi['default'] || [];
         const exercises = allExercises.filter(ex => ex.data === oggi);
 
         if (exercises.length === 0) {
-            alert("Nessun esercizio programmato per la classe " + classKey + " in data odierna (" + oggi + ").");
-            updateTraccia('tracce/default.pdf');
+            alert(`Nessuna traccia programmata per ${classKey} in data ${oggi}`);
+            if (typeof updateTraccia === 'function') updateTraccia('tracce/default.pdf');
             return;
         }
 
-        // 4. ASSEGNAZIONE CASUALE PERSISTENTE (Univoca per Giorno)
+        // 5. ASSEGNAZIONE TRACCIA CASUALE
         const select = document.getElementById('tracciaSelect');
         const tracciaKey = `tracciaAssegnata_${classKey}_${oggi}`;
-        
         let assignedIndex = localStorage.getItem(tracciaKey);
+
         if (assignedIndex === null || parseInt(assignedIndex) >= exercises.length) {
             assignedIndex = Math.floor(Math.random() * exercises.length);
             localStorage.setItem(tracciaKey, assignedIndex);
@@ -560,61 +567,55 @@ sys.stdout = io.StringIO()
             assignedIndex = parseInt(assignedIndex);
         }
 
-        // 5. POPOLAMENTO MENU TRACCE
-        select.innerHTML = ""; // Pulisce eventuali residui statici
-        exercises.forEach((ex, index) => {
-            const opt = document.createElement('option');
-            opt.value = `tracce/${ex.file}`; 
-            opt.textContent = ex.title;
-            if (index === assignedIndex) opt.selected = true;
-            select.appendChild(opt);
-        });
+        // 6. POPOLAMENTO INTERFACCIA
+        if (select) {
+            select.innerHTML = "";
+            exercises.forEach((ex, index) => {
+                const opt = document.createElement('option');
+                opt.value = `tracce/${ex.file}`;
+                opt.textContent = ex.title;
+                if (index === assignedIndex) opt.selected = true;
+                select.appendChild(opt);
+            });
+            select.disabled = true;
+        }
         
-        select.disabled = true; // Impedisce modifiche manuali dello studente
-        const selectedExercise = exercises[assignedIndex];
-        if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
+        if (typeof updateTraccia === 'function') {
+            updateTraccia(`tracce/${exercises[assignedIndex].file}`);
+        }
 
-        // 6. GESTIONE TIMER PERSISTENTE (Univoco per Giorno)
+        // 7. GESTIONE TIMER (CHIAVE PER DATA)
         const timerKey = `timer_${classKey}_${oggi}`;
         const savedTime = localStorage.getItem(timerKey);
-        
-        // Usa il tempo salvato o quello di default dal JSON
         maxTimeLeft = savedTime !== null ? parseInt(savedTime) : (config.impostazioni.timerDefault || 2700);
 
-        aggiornaDisplayTimer(); 
+        if (typeof aggiornaDisplayTimer === 'function') aggiornaDisplayTimer();
 
-        // 7. AVVIO CICLO TIMER (1 secondo)
+        // 8. CICLO UNIFICATO TIMER E BACKUP
         setInterval(() => {
-            // Se scade il timer di inattività (timeLeft) o quello della prova (maxTimeLeft)
-            if (timeLeft <= 0 || maxTimeLeft <= 0) {
+            if (maxTimeLeft <= 0) {
                 alert("Tempo scaduto!");
-                tornaAllaPaginaPrincipale();
+                if (typeof tornaAllaPaginaPrincipale === 'function') tornaAllaPaginaPrincipale();
                 return;
             }
-            
-            timeLeft--;
             maxTimeLeft--;
-            
-            // Salvataggio stato timer
             localStorage.setItem(timerKey, maxTimeLeft);
-            aggiornaDisplayTimer();
+            if (typeof aggiornaDisplayTimer === 'function') aggiornaDisplayTimer();
         }, 1000);
 
-        // 8. AVVIO CICLO BACKUP CODICE (Tempo definito in config.json)
+        // Backup automatico ogni X millisecondi (dal config)
         const backupInterval = config.impostazioni.intervalloBackup || 120000;
         setInterval(() => {
-            if (editor) {
+            if (typeof editor !== 'undefined' && editor) {
                 const codiceKey = `codiceSalvato_${classKey}_${oggi}`;
                 localStorage.setItem(codiceKey, editor.getValue());
-                console.log("Backup dinamico eseguito per " + classKey);
             }
         }, backupInterval);
 
     } catch (err) {
-        console.error("Errore critico durante l'inizializzazione:", err);
-        alert("Errore tecnico: assicurati che il file config.json sia presente e corretto.");
+        console.error("Errore inizializzazione dinamica:", err);
     }
-  });
+});
   function apriPopupTest() {
       const codice = editor.getValue();
       
