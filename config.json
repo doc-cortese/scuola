@@ -1,21 +1,19 @@
 {
   "classi": {
     "Seconde": [
-      { "file": "Seconde/Esercizio_II_1.jpg", "title": "Esercizio 1 - Algoritmi" }
+      { "file": "Seconde/Esercizio_II_1.jpg", "title": "Esercizio 1 - Algoritmi", "data": "2026-01-11" }
     ],
     "Terze": [
-      { "file": "Terze/Esercizio_III_1.jpg", "title": "Esercizio 1 - Liste" }
+      { "file": "Terze/Esercizio_III_1.jpg", "title": "Esercizio 1 - Liste", "data": "2026-01-11" }
     ],
     "Quarte": [
-      { "file": "Quarte/Esercizio_IV_1.jpg", "title": "Esercizio 1 - OOP", "data": "2026-01-15" },
-      { "file": "Quarte/Esercizio_IV_2.jpg", "title": "Esercizio 2 - File","data": "2026-01-11" }
+      { "file": "Quarte/Esercizio_IV_1.jpg", "title": "Esercizio 1 - OOP", "data": "2026-01-11" },
+      { "file": "Quarte/Esercizio_IV_2.jpg", "title": "Esercizio 2 - File", "data": "2026-01-11" }
     ]
   },
   "impostazioni": {
     "manutenzione": false,
     "timerDefault": 2700,
-    "intervalloBackup": 120000,
-    
+    "intervalloBackup": 120000
   }
 }
-
