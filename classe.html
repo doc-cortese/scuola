@@ -254,22 +254,7 @@
 
 <script>
   // CONFIGURAZIONE CARTELLE PER CLASSE
-  const EXERCISES_BY_CLASS = {
-    'Seconde': [
-      { file: 'Seconde/Esercizio_II_1.jpg', title: 'Esercizio 1' }            
-    ],
-    'Terze': [
-      { file: 'Terze/Esercizio_III_1.jpg', title: 'Esercizio 1' }
-      
-    ],
-    'Quarte': [
-      { file: 'Quarte/Esercizio_IV_1.jpg', title: 'Esercizio 1' },
-      { file: 'Quarte/Esercizio_IV_2.jpg', title: 'Esercizio 2' },
-      { file: 'Quarte/Esercizio_IV_3.jpg', title: 'Esercizio 3' }
-      
-    ],
-    'default': [{ file: 'default.pdf', title: 'Traccia Standard' }]
-  };
+  
 
   let editor, pyodide, timeLeft = 300;
   let maxTimeLeft = 2700; // Valore di default (45 min)
@@ -533,66 +518,76 @@ sys.stdout = io.StringIO()
     link.download = `Esercizio_${nome.replace(/\s+/g, '_')}.py`;
     link.click();
   }
-  document.addEventListener("DOMContentLoaded", async () => {
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const cl = urlParams.get('classe') || 'default';
-    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
-    const exercises = EXERCISES_BY_CLASS[classKey] || EXERCISES_BY_CLASS['default'];
-    const select = document.getElementById('tracciaSelect');
-
-    const tracciaKey = `tracciaAssegnata_${classKey}`;
-    let assignedIndex = localStorage.getItem(tracciaKey);
-    if (assignedIndex === null) {
-        assignedIndex = Math.floor(Math.random() * exercises.length);
-        localStorage.setItem(tracciaKey, assignedIndex);
-    } else {
-        assignedIndex = parseInt(assignedIndex);
-        if (assignedIndex >= exercises.length) assignedIndex = 0;
-    }
-    const selectedExercise = exercises[assignedIndex];
-
-    exercises.forEach((ex, index) => {
-      const opt = document.createElement('option');
-      opt.value = `tracce/${ex.file}`; opt.textContent = ex.title;
-      if (index === assignedIndex) opt.selected = true;
-      select.appendChild(opt);
-    });
-    select.disabled = true;
-    if (selectedExercise) updateTraccia(`tracce/${selectedExercise.file}`);
-
-    // --- GESTIONE TIMER FINE PROVA PERSISTENTE ---
-    // RECUPERO TIMER PERSISTENTE
-    const timerKey = `timer_${classKey}`;
-    const savedTime = localStorage.getItem(timerKey);
-    if (savedTime !== null) {
-        maxTimeLeft = parseInt(savedTime);
-    }
-
-    // AGGIORNAMENTO IMMEDIATO DELLO SCHERMO (Prima che parta il setInterval)
-    aggiornaDisplayTimer(); 
-
-    // AVVIO DEL CICLO
-    setInterval(() => {
-        if (timeLeft <= 0 || maxTimeLeft <= 0) {
-            alert("Tempo scaduto!");
-            tornaAllaPaginaPrincipale();
-            return;
-        }
-        timeLeft--;
-        maxTimeLeft--;
-        localStorage.setItem(timerKey, maxTimeLeft);
+ document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        // 1. CARICAMENTO DINAMICO DELLA CONFIGURAZIONE
+        const response = await fetch('config.json');
+        const config = await response.json();
         
-        aggiornaDisplayTimer(); // Continua ad aggiornare ogni secondo
-    }, 1000);
+        const urlParams = new URLSearchParams(window.location.search);
+        const cl = urlParams.get('classe') || 'default';
+        const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
+        
+        // 2. RECUPERO ESERCIZI PER LA CLASSE SELEZIONATA
+        const exercises = config.classi[classKey] || config.classi['default'] || [];
+        const select = document.getElementById('tracciaSelect');
 
-    setInterval(() => {
-        if (editor) {
-            localStorage.setItem(`codiceSalvato_${classKey}`, editor.getValue());
-            console.log("Backup eseguito");
+        // 3. ASSEGNAZIONE CASUALE PERSISTENTE
+        const tracciaKey = `tracciaAssegnata_${classKey}`;
+        let assignedIndex = localStorage.getItem(tracciaKey);
+        
+        if (assignedIndex === null || assignedIndex >= exercises.length) {
+            assignedIndex = Math.floor(Math.random() * exercises.length);
+            localStorage.setItem(tracciaKey, assignedIndex);
+        } else {
+            assignedIndex = parseInt(assignedIndex);
         }
-    }, 120000);
-  });
+
+        // 4. POPOLAMENTO MENU E VISUALIZZAZIONE TRACCIA
+        exercises.forEach((ex, index) => {
+            const opt = document.createElement('option');
+            opt.value = `tracce/${ex.file}`; 
+            opt.textContent = ex.title;
+            if (index === assignedIndex) opt.selected = true;
+            select.appendChild(opt);
+        });
+        
+        select.disabled = true; // Impedisce allo studente di cambiare traccia
+        if (exercises[assignedIndex]) {
+            updateTraccia(`tracce/${exercises[assignedIndex].file}`);
+        }
+
+        // 5. GESTIONE TIMER PERSISTENTE
+        const timerKey = `timer_${classKey}`;
+        const savedTime = localStorage.getItem(timerKey);
+        maxTimeLeft = savedTime !== null ? parseInt(savedTime) : config.impostazioni.timerDefault;
+
+        aggiornaDisplayTimer(); 
+
+        // 6. AVVIO CICLI (Timer e Backup)
+        setInterval(() => {
+            if (maxTimeLeft <= 0) {
+                alert("Tempo scaduto!");
+                tornaAllaPaginaPrincipale();
+                return;
+            }
+            maxTimeLeft--;
+            localStorage.setItem(timerKey, maxTimeLeft);
+            aggiornaDisplayTimer();
+        }, 1000);
+
+        setInterval(() => {
+            if (editor) {
+                localStorage.setItem(`codiceSalvato_${classKey}`, editor.getValue());
+                console.log("Backup dinamico eseguito");
+            }
+        }, config.impostazioni.intervalloBackup);
+
+    } catch (err) {
+        console.error("Errore nel caricamento dinamico:", err);
+        alert("Errore critico nel caricamento della configurazione classi.");
+    }
+});
   function apriPopupTest() {
       const codice = editor.getValue();
       
