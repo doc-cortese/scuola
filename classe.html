@@ -519,6 +519,11 @@ sys.stdout = io.StringIO()
     link.click();
   }
  document.addEventListener("DOMContentLoaded", async () => {
+   // CONTROLLO ACCESSO: Se il docente ha già effettuato l'accesso, nascondi la manutenzione
+    if (sessionStorage.getItem('ok') === 'true') {
+        const manutenzione = document.getElementById('schermata-manutenzione');
+        if (manutenzione) manutenzione.style.display = 'none';
+    }
     try {
         // 1. CARICAMENTO CONFIGURAZIONE DA FILE ESTERNO
         const response = await fetch('config.json');
