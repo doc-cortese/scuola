@@ -2,7 +2,8 @@
   "classi": {
     "Seconde": [
       { "file": "Seconde/Esercizio_II_1.jpg", "title": "Esercizio 1 - Algoritmi", "data": "2026-01-12" },
-      { "file": "Seconde/Esercizio_II_1_13012026.jpg", "title": "Esercizio 1 - Algoritmi", "data": "2026-01-13" }
+      { "file": "Seconde/Esercizio_II_1_13012026.jpg", "title": "Esercizio 1 - Algoritmi", "data": "2026-01-13" },
+      { "file": "Seconde/Esercizio_II_1_14012026.jpg", "title": "Esercizio 1 - Algoritmi", "data": "2026-01-14" },
       
     ],
     "Terze": [
@@ -10,14 +11,14 @@
       { "file": "Terze/Esercizio_III_1_12012026.jpg", "title": "Esercizio 1 - Liste", "data": "2026-01-12" },
       { "file": "Terze/Esercizio_III_2_12012026.jpg", "title": "Esercizio 2 - Liste", "data": "2026-01-12" },
       { "file": "Terze/Esercizio_III_3_12012026.jpg", "title": "Esercizio 3 - Liste", "data": "2026-01-12" },
-      { "file": "Terze/Esercizio_III_1_13012026.jpg", "title": "Esercizio 1 - Liste", "data": "2026-01-13" },
+      { "file": "Terze/Esercizio_III_1_13012026.jpg", "title": "Esercizio 1 - Liste", "data": "2026-01-14" },
       { "file": "Terze/Esercizio_III_2_13012026.jpg", "title": "Esercizio 2 - Liste", "data": "2026-01-13" },
       { "file": "Terze/Esercizio_III_3_13012026.jpg", "title": "Esercizio 3 - Liste", "data": "2026-01-13" }
     ],
     "Quarte": [
       { "file": "Quarte/Esercizio_IV_1.jpg", "title": "Esercizio 1 - OOP", "data": "2026-01-11" },
       { "file": "Quarte/Esercizio_IV_2.jpg", "title": "Esercizio 2 - File", "data": "2026-01-11" },
-      { "file": "Quarte/Esercizio_IV_1_12012026.jpg", "title": "Esercizio 1 - OOP", "data": "2026-01-13" },
+      { "file": "Quarte/Esercizio_IV_1_12012026.jpg", "title": "Esercizio 1 - OOP", "data": "2026-01-14" },
       { "file": "Quarte/Esercizio_IV_2_12012026.jpg", "title": "Esercizio 2 - OOP", "data": "2026-01-12" },
       { "file": "Quarte/Esercizio_IV_3_12012026.jpg", "title": "Esercizio 3 - OOP", "data": "2026-01-12" }
     ]
