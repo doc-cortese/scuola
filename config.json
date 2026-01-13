@@ -7,7 +7,10 @@
       { "file": "Terze/Esercizio_III_1.jpg", "title": "Esercizio 1 - Liste", "data": "2026-01-11" },
       { "file": "Terze/Esercizio_III_1_12012026.jpg", "title": "Esercizio 1 - Liste", "data": "2026-01-12" },
       { "file": "Terze/Esercizio_III_2_12012026.jpg", "title": "Esercizio 2 - Liste", "data": "2026-01-12" },
-      { "file": "Terze/Esercizio_III_3_12012026.jpg", "title": "Esercizio 3 - Liste", "data": "2026-01-12" }
+      { "file": "Terze/Esercizio_III_3_12012026.jpg", "title": "Esercizio 3 - Liste", "data": "2026-01-12" },
+      { "file": "Terze/Esercizio_III_1_13012026.jpg", "title": "Esercizio 1 - Liste", "data": "2026-01-13" },
+      { "file": "Terze/Esercizio_III_2_13012026.jpg", "title": "Esercizio 2 - Liste", "data": "2026-01-13" },
+      { "file": "Terze/Esercizio_III_3_13012026.jpg", "title": "Esercizio 3 - Liste", "data": "2026-01-13" }
     ],
     "Quarte": [
       { "file": "Quarte/Esercizio_IV_1.jpg", "title": "Esercizio 1 - OOP", "data": "2026-01-11" },
@@ -18,7 +21,7 @@
     ]
   },
   "impostazioni": {
-    "manutenzione": true,
+    "manutenzione": false,
     "timerDefault": 2700,
     "intervalloBackup": 120000
   }
