@@ -386,61 +386,76 @@
     }
   }
 
-  window.inviaConsegnaDrive = function() {
-    const nome = document.getElementById("nomeStudente").value.trim();
-    if (!nome) return alert("Inserisci Nome e Cognome!");
-
-    const endTime = new Date();
-    const diffMs = endTime - startTime;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffSecs = Math.floor((diffMs % 60000) / 1000);
-    const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
-
-    const codice = editor.getValue();
-    // Cerca l'elemento 'output' (se esiste ancora) oppure usa un testo di default
-    const outputElement = document.getElementById("output");
-    const outputText = outputElement ? outputElement.textContent : "Output non disponibile (compilatore disattivato)";
-    const urlParams = new URLSearchParams(window.location.search);
-    const classe = urlParams.get("classe") || "ND";
-
-    const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par\\par INIZIO PROVA: ${startTime.toLocaleString()}\\par FINE PROVA: ${endTime.toLocaleString()}\\par TEMPO TOTALE: ${tempoTotale}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
-
-    const blob = new Blob([rtfContent], { type: 'application/rtf' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
-    a.click();
-
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
-    const form = document.createElement('form');
-    form.method = 'POST'; form.action = GAS_URL; form.target = 'gasTarget';
-    
-    const add = (n, v) => {
-      const i = document.createElement('input'); i.type = 'hidden'; i.name = n; i.value = v;
-      form.appendChild(i);
-    };
-
-    add('nomeStudente', nome);
-    add('classe', classe);
-    add('dataOra', endTime.toLocaleString());
-    add('rtfContent', rtfContent);
-    add('pyContent', codice);
-    
-    document.body.appendChild(form);
-    form.submit();
-    alert("✅ Consegna inviata al Drive!");
-    // --- LOGICA DI PULIZIA ---
-    const oggi = new Date().toISOString().split('T')[0];
-    const urlParams = new URLSearchParams(window.location.search);
-    const cl = urlParams.get("classe") || "ND";
-    const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
-
-    // Cancella il backup persistente così non ricompare al prossimo accesso
-    localStorage.removeItem(`codiceSalvato_${classKey}_${oggi}`);
-    
-    // Svuota l'editor visivamente
-    editor.setValue("# Prova completata e inviata.\n");
-    maxTimeLeft=2700;
+   window.inviaConsegnaDrive = function(isAutomatico = false) {
+      let nome = document.getElementById("nomeStudente").value.trim();
+      
+      // Se è automatico e il nome manca, assegna un valore di default per non bloccare l'invio
+      if (!nome) {
+          if (isAutomatico) {
+              nome = "Studente_Anonimo_Tempo_Scaduto";
+          } else {
+              return alert("Inserisci Nome e Cognome!");
+          }
+      }
+  
+      const endTime = new Date();
+      const diffMs = endTime - startTime;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffSecs = Math.floor((diffMs % 60000) / 1000);
+      const tempoTotale = `${diffMins} minuti e ${diffSecs} secondi`;
+  
+      const codice = editor.getValue();
+      const outputElement = document.getElementById("output");
+      const outputText = outputElement ? outputElement.textContent : "Output non disponibile";
+      const urlParams = new URLSearchParams(window.location.search);
+      const classe = urlParams.get("classe") || "ND";
+  
+      const rtfContent = `{\\rtf1\\ansi Studente: ${nome}\\par Classe: ${classe}\\par\\par INIZIO PROVA: ${startTime.toLocaleString()}\\par FINE PROVA: ${endTime.toLocaleString()}\\par TEMPO TOTALE: ${tempoTotale}\\par\\par CODICE:\\par ${codice.replace(/\n/g, '\\par ')}\\par\\par OUTPUT:\\par ${outputText.replace(/\n/g, '\\par ')} }`;
+  
+      // Scarica il file locale SOLO se l'invio è manuale
+      if (!isAutomatico) {
+          const blob = new Blob([rtfContent], { type: 'application/rtf' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `Consegna_${nome.replace(/\s+/g, '_')}.rtf`;
+          a.click();
+      }
+  
+      const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
+      const form = document.createElement('form');
+      form.method = 'POST'; 
+      form.action = GAS_URL; 
+      form.target = 'gasTarget';
+      
+      const add = (n, v) => {
+          const i = document.createElement('input'); 
+          i.type = 'hidden'; i.name = n; i.value = v;
+          form.appendChild(i);
+      };
+  
+      add('nomeStudente', nome);
+      add('classe', classe);
+      add('dataOra', endTime.toLocaleString());
+      add('rtfContent', rtfContent);
+      add('pyContent', codice);
+      
+      document.body.appendChild(form);
+      form.submit();
+      
+      if (!isAutomatico) alert("✅ Consegna inviata al Drive!");
+  
+      // --- LOGICA DI PULIZIA ---
+      const oggi = new Date().toISOString().split('T')[0];
+      const classKey = classe.charAt(0).toUpperCase() + classe.slice(1);
+  
+      localStorage.removeItem(`codiceSalvato_${classKey}_${oggi}`);
+      editor.setValue("# Prova completata e inviata.\n");
+      maxTimeLeft = 2700;
+  
+      // Se automatico, chiudi i popup e torna alla home dopo l'invio
+      if (isAutomatico) {
+          setTimeout(() => { tornaAllaPaginaPrincipale(); }, 3000);
+      }
   };
 
   function resetActivityTimer() { timeLeft = 300; }
@@ -613,17 +628,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (typeof aggiornaDisplayTimer === 'function') aggiornaDisplayTimer();
 
         // 9. AVVIO CICLO TIMER E BACKUP
+        // Modifica all'interno di DOMContentLoaded
         setInterval(() => {
             if (maxTimeLeft <= 0 || timeLeft <= 0) {
-                alert("Tempo scaduto!");
-                if (typeof tornaAllaPaginaPrincipale === 'function') tornaAllaPaginaPrincipale();
+                // Se il tempo scade, avvisa l'utente e invia automaticamente
+                alert("Tempo scaduto! Il tuo lavoro verrà inviato automaticamente.");
+                
+                // Verifica se il nome è presente, altrimenti assegna un nome di default
+                const nomeInput = document.getElementById("nomeStudente");
+                if (!nomeInput.value.trim()) {
+                    nomeInput.value = "Studente_Tempo_Scaduto";
+                }
+                
+                // Forza l'invio al Drive
+                inviaConsegnaDrive();
+                
+                // Dopo l'invio, torna alla home
+                setTimeout(() => {
+                    tornaAllaPaginaPrincipale();
+                }, 2000); // Attende 2 secondi per assicurarsi che il form venga inviato
                 return;
             }
             
             maxTimeLeft--;
             timeLeft--;
             
-            // Salva lo stato ogni secondo per prevenire ricaricamenti furbi
             localStorage.setItem(timerKey, maxTimeLeft);
             if (typeof aggiornaDisplayTimer === 'function') aggiornaDisplayTimer();
         }, 1000);
