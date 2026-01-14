@@ -675,19 +675,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 function apriPopupTest() {
     const codice = editor.getValue();
     
-    // Codifichiamo il codice per passarlo nell'URL
+    // Copia forzata negli appunti per sicurezza
+    navigator.clipboard.writeText(codice).then(() => {
+        console.log("Codice copiato negli appunti");
+    });
+
     const codiceCodificato = encodeURIComponent(codice);
-    
-    // Utilizziamo Trinket: carica ed esegue automaticamente il codice passato in 'code'
     const urlTester = `https://trinket.io/python3?code=${codiceCodificato}`;
     
-    // Dimensioni popup ottimizzate
     const width = 1100;
     const height = 800;
     const left = (window.screen.width / 2) - (width / 2);
     const top = (window.screen.height / 2) - (height / 2);
     
-    window.open(urlTester, "TesterPython", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
+    window.popupTester = window.open(urlTester, "TesterPython", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
 }
 </script>
 </body>
