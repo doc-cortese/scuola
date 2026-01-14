@@ -429,6 +429,7 @@
     document.body.appendChild(form);
     form.submit();
     alert("✅ Consegna inviata al Drive!");
+    localStorage.removeItem(codiceKey);
     maxTimeLeft=2700;
   };
 
