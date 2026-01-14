@@ -439,15 +439,18 @@
     const cl = urlParams.get('classe') || 'default';
     const classKey = cl.charAt(0).toUpperCase() + cl.slice(1);
     
-    // RIMUOVI queste righe se vuoi che la traccia rimanga la stessa al rientro:
-    // localStorage.removeItem(`tracciaAssegnata_${classKey}`); 
-    
-    // Mantieni invece la pulizia dei dati sensibili se necessario
+    // Identifichiamo la data odierna come fatto nel backup
+    const oggi = new Date().toISOString().split('T')[0];
+
+    // Rimuoviamo il codice specifico salvato per oggi
     localStorage.removeItem(`codiceSalvato_${classKey}_${oggi}`);
+    
+    // Rimuoviamo anche la vecchia versione della chiave (per pulizia)
+    localStorage.removeItem(`codiceSalvato_${classKey}`);
     localStorage.removeItem("nomeStudente");
     
     window.location.href = '../index.html'; 
-}
+  }
 
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monaco-container'), {
