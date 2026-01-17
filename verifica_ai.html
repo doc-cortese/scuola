@@ -1,103 +1,115 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <script>
+        // Controllo accesso come in classe.html 
+        if (sessionStorage.getItem("isLoggedIn") !== "true") {
+            alert("Accesso negato. Effettua prima il login sulla home page.");
+            window.location.href = "index.html";
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifica Quarta: AI e Algoritmi</title>
+    <title>Verifica Quarta: AI e Algoritmi - Prof. Adinolfi</title>
     <style>
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; background-color: #f4f7f6; }
-        #left-panel { width: 50%; height: 100%; overflow-y: auto; background: white; padding: 40px; border-right: 3px solid #002d4d; box-sizing: border-box; }
-        #right-panel { width: 50%; height: 100%; overflow-y: auto; padding: 40px; box-sizing: border-box; }
+        :root {
+            --primary-color: #002d4d; /* Blu Unina/Cortese [cite: 3] */
+            --secondary-color: #28a745;
+            --bg-color: #f8f9fa;
+        }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; background-color: var(--bg-color); }
         
-        .header-box { background: #002d4d; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        /* Layout Split-Screen */
+        #left-panel { width: 50%; height: 100%; overflow-y: auto; background: white; padding: 40px; border-right: 3px solid var(--primary-color); box-sizing: border-box; }
+        #right-panel { width: 50%; height: 100%; overflow-y: auto; padding: 40px; box-sizing: border-box; display: flex; flex-direction: column; }
+        
+        /* Header stile classe.html  */
+        .header-box { background: var(--primary-color); color: white; padding: 15px 25px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
         .question-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; transition: 0.3s; }
-        .question-card.correct { border-left: 10px solid #27ae60; background: #fafffa; }
-        .question-card.wrong { border-left: 10px solid #e74c3c; background: #fffafa; }
+        .question-card.active { border-left: 5px solid var(--primary-color); }
         
-        .btn-send { background-color: #27ae60; color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
-        .btn-send:hover { background-color: #219150; }
+        /* Pulsante Invia stile portale  */
+        .btn-send { background-color: var(--secondary-color); color: white; border: none; padding: 18px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; text-transform: uppercase; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-send:hover { background-color: #218838; filter: brightness(1.1); }
         
-        label { display: block; padding: 10px; margin: 5px 0; border: 1px solid #eee; border-radius: 4px; cursor: pointer; }
-        input[type="radio"] { margin-right: 10px; }
+        label { display: block; padding: 12px; margin: 8px 0; border: 1px solid #eee; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        label:hover { background: #f0f4f8; }
+        input[type="radio"] { transform: scale(1.2); margin-right: 10px; }
     </style>
 </head>
 <body>
 
     <div id="left-panel">
-        <h1>QUANTIFICAZIONE E COMPUTAZIONE</h1>
-        <p><em>Contenuto di Federica Pilotti</em> [cite: 3]</p>
-        <div style="line-height: 1.6; text-align: justify;">
-            <p>Viviamo nella quarta rivoluzione, quella dell'infosfera[cite: 5]. Il valore economico è oggi legato alle informazioni possedute (Capitalismo digitale)[cite: 6].</p>
-            <p>La <strong>datification</strong> trasforma aspetti della vita in dati di valore[cite: 8].</p>
-            <p>La piramide <strong>DIKW</strong> vede al primo gradino i dati (materiale grezzo), seguiti da informazione, conoscenza e saggezza[cite: 11, 14].</p>
-            <p>I <strong>Big Data</strong> si definiscono per volume, velocità e varietà[cite: 15]. Le <strong>Big Tech (GAFAM)</strong> utilizzano algoritmi complessi per gestire il "database dei desideri"[cite: 19, 20].</p>
-            <p>L'<strong>IA</strong> mira a sistemi che risolvono problemi dell'intelletto[cite: 32]. Il <strong>Machine Learning</strong> permette ai software di imparare dall'esperienza tramite feedback[cite: 34, 35].</p>
+        <h1 style="color: var(--primary-color);">QUANTIFICAZIONE E COMPUTAZIONE</h1>
+        <div style="font-size: 1.05em; line-height: 1.7; color: #333;">
+            <p><strong>L'Infosfera:</strong> Secondo Floridi (2017), viviamo nella quarta rivoluzione dove il valore economico è legato alle informazioni possedute (Capitalismo digitale)[cite: 1].</p>
+            <p><strong>Datification:</strong> È la trasformazione di molti aspetti della vita in dati da cui estrarre valore[cite: 1].</p>
+            <p><strong>Piramide DIKW:</strong> Gerarchia che parte dai <em>Dati</em> (grezzi), passa per <em>Informazione</em> e <em>Conoscenza</em>, fino alla <em>Saggezza</em>[cite: 1].</p>
+            <p><strong>Machine Learning:</strong> A differenza del software tradizionale, questi sistemi "imparano" modificando l'algoritmo tramite feedback[cite: 2].</p>
         </div>
     </div>
 
     <div id="right-panel">
         <div class="header-box">
-            <span>STUDENTE: Area Quarta</span>
-            <span id="timer">Fine Prova: 45:00</span>
+            <div id="user-display">Studente: <span id="student-name">...</span></div>
+            <div id="timer-display" style="font-family: monospace; font-size: 1.2em;">Fine Prova: 45:00</div>
         </div>
 
         <form id="quizForm">
-            <div class="question-card" id="q1-card">
-                <span style="font-weight:bold;">1. Qual è il primo gradino della piramide DIKW?</span> [cite: 11]
-                <label><input type="radio" name="q1" value="wrong"> Saggezza</label>
-                <label><input type="radio" name="q1" value="correct"> Dati (Materiale grezzo)</label>
-                <label><input type="radio" name="q1" value="wrong"> Algoritmi</label>
+            <div class="question-card">
+                <span style="font-weight:bold; color: var(--primary-color);">1. Qual è l'ordine gerarchico della piramide DIKW? [cite: 1]</span>
+                <label><input type="radio" name="q1" value="A"> Dati, Conoscenza, Informazione, Saggezza</label>
+                <label><input type="radio" name="q1" value="B"> Dati, Informazione, Conoscenza, Saggezza</label>
             </div>
 
-            <div class="question-card" id="q2-card">
-                <span style="font-weight:bold;">2. Cosa si intende per "Datification"?</span> [cite: 7, 8]
-                <label><input type="radio" name="q2" value="correct"> Trasformazione della vita in dati di valore</label>
-                <label><input type="radio" name="q2" value="wrong"> Protezione dei dati con password</label>
-                <label><input type="radio" name="q2" value="wrong"> Cancellazione della cronologia</label>
+            <div class="question-card">
+                <span style="font-weight:bold; color: var(--primary-color);">2. Cosa distingue il Machine Learning dal software "vecchio tipo"? [cite: 2]</span>
+                <label><input type="radio" name="q2" value="A"> La necessità di istruzioni fisse e immutabili</label>
+                <label><input type="radio" name="q2" value="B"> La capacità di modificare l'algoritmo tramite feedback</label>
             </div>
 
-            <div class="question-card" id="q3-card">
-                <span style="font-weight:bold;">3. Quale acronimo indica i colossi come Google e Amazon?</span> [cite: 20]
-                <label><input type="radio" name="q3" value="wrong"> DIKW</label>
-                <label><input type="radio" name="q3" value="correct"> GAFAM</label>
-                <label><input type="radio" name="q3" value="wrong"> NLP</label>
-            </div>
-
-            <div class="question-card" id="q4-card">
-                <span style="font-weight:bold;">4. Caratteristica principale del Machine Learning (ML):</span> [cite: 35]
-                <label><input type="radio" name="q4" value="wrong"> Esegue solo ordini fissi</label>
-                <label><input type="radio" name="q4" value="correct"> Modifica l'algoritmo tramite feedback</label>
-                <label><input type="radio" name="q4" value="wrong"> Non ha bisogno di dati</label>
-            </div>
-
-            <button type="button" class="btn-send" onclick="inviaRisultati()">Invia Consegna al Prof</button>
+            <button type="button" class="btn-send" onclick="consegnaVerifica()">
+                <i class="fas fa-paper-plane"></i> INVIA CONSEGNA AL PROF
+            </button>
         </form>
     </div>
 
     <script>
-        function inviaRisultati() {
-            let punteggio = 0;
-            const risposte = { q1: "correct", q2: "correct", q3: "correct", q4: "correct" };
-            
-            for (let i = 1; i <= 4; i++) {
-                const selected = document.querySelector(`input[name="q${i}"]:checked`);
-                const card = document.getElementById(`q${i}-card`);
-                
-                if (selected) {
-                    if (selected.value === "correct") {
-                        punteggio++;
-                        card.className = "question-card correct";
-                    } else {
-                        card.className = "question-card wrong";
-                    }
-                } else {
-                    card.className = "question-card wrong";
-                }
-            }
+        // Recupero nome studente dalla sessione [cite: 3]
+        const nomeStudente = sessionStorage.getItem("userName") || "Studente Ospite";
+        document.getElementById("student-name").innerText = nomeStudente;
 
-            alert("CONSEGNA EFFETTUATA!\nPunteggio: " + punteggio + "/4\nI tuoi dati sono stati inviati al sistema del Prof. Adinolfi.");
-            // Qui puoi aggiungere un redirect o disabilitare il form
+        // Logica Timer (come in classe.html) 
+        let timeLeft = 45 * 60;
+        const timerElement = document.getElementById("timer-display");
+        
+        const countdown = setInterval(() => {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            timerElement.innerText = `Fine Prova: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                consegnaVerifica(true); // Consegna automatica
+            }
+            timeLeft--;
+        }, 1000);
+
+        function consegnaVerifica(isAutomatic = false) {
+            const form = document.getElementById("quizForm");
+            const data = new FormData(form);
+            let risposte = "";
+            data.forEach((value, key) => { risposte += `${key}: ${value}\n`; });
+
+            if (!isAutomatic && !confirm("Vuoi inviare la verifica definitiva?")) return;
+
+            // Simulazione invio al database del Prof 
+            console.log("Inviando dati per:", nomeStudente);
+            alert(`Grazie ${nomeStudente}.\nConsegna effettuata con successo!\nLe tue risposte sono state registrate.`);
+            
+            window.location.href = "index.html"; // Ritorno alla home dopo consegna
         }
     </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
