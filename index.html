@@ -191,26 +191,32 @@
             <script>
                 const classi = ["Prime", "Seconde", "Terze", "Quarte", "Quinte"];
                 classi.forEach(c => {
-                    // Qui decidi a quale classe assegnare il quiz. 
-                    // Se vuoi assegnarlo solo alla prima, scrivi "Prime".
-                    // Se vuoi disattivarlo per una classe, scrivi un nome diverso.
+                    // --- GESTIONE QUIZ (Tua logica esistente) ---
                     let linkQuiz = "#"; 
-                    let stilePulsante = "opacity: 0.5; cursor: not-allowed;"; // Stile per pulsante disattivato
-                
-                    if (c === "Nessuna") {
+                    let stilePulsanteQuiz = "opacity: 0.5; cursor: not-allowed;"; 
+                    
+                    if (c === "Nessuna") { // Cambia "Nessuna" in "Prime" se vuoi attivare il quiz
                         linkQuiz = "https://take.panquiz.com/9692-3116-6680";
-                        stilePulsante = ""; // Rimuove le restrizioni per la classe selezionata
+                        stilePulsanteQuiz = ""; 
                     }
-                
+            
+                    // --- GESTIONE ESERCIZI (Videoscrittura per le Prime, Python per le altre) ---
+                    let linkEsercizio = `classe.html?classe=${c}`; // Default per tutte le classi
+                    
+                    if (c === "Prime") {
+                        // Per le prime carichiamo il file di videoscrittura che abbiamo creato
+                        linkEsercizio = `videoscrittura.html?classe=${c}`;
+                    }
+            
                     document.write(`
                         <div class="course-row">
                             <div><h4>Classe ${c}</h4></div>
                             <div class="btn-group">
                                 <a href="materiali.html?classe=${c}" class="btn-action btn-blue">Lezioni</a>
-                                <a href="classe.html?classe=${c}" class="btn-action btn-border">Esercizi</a>
+                                <a href="${linkEsercizio}" class="btn-action btn-border">Esercizi</a>
                                 <a href="${linkQuiz}" 
                                    class="pulsante-quiz" 
-                                   style="${stilePulsante}" 
+                                   style="${stilePulsanteQuiz}" 
                                    target="${linkQuiz !== '#' ? '_blank' : '_self'}">Quiz</a>
                             </div>
                         </div>
@@ -301,6 +307,7 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
 
 
 
