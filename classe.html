@@ -190,7 +190,7 @@
   
 </head>
 
-<body oncontextmenu="return false;" oncut="return false;" onpaste="return false;">
+<body oncontextmenu="return false;" onpaste="return false;">
 <div id="schermata-manutenzione" style="position:fixed; top:0; left:0; width:100%; height:100%; background-color:#ffffff; z-index:999999; display:none; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;">
     <img src="./immagini/logo_liceo.png" width="120" style="margin-bottom:20px;">
     <h2 style="color:#0056b3;">Sito in Manutenzione</h2>
@@ -584,21 +584,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Data in formato ISO (YYYY-MM-DD) per chiavi univoche ogni giorno
         const oggi = new Date().toISOString().split('T')[0];
 
-        // 5. FILTRO ESERCIZI
+       // 5. FILTRO ESERCIZI (Oggi vs Archivio)
         const allExercises = config.classi[classKey] || config.classi['default'] || [];
         let exercises = allExercises.filter(ex => ex.data === oggi);
         
-        // --- AGGIUNTA: SE NON CI SONO ESERCIZI OGGI, MOSTRA QUELLI PASSATI ---
+        // Se non ci sono esercizi per oggi, carica tutto l'archivio storico
         if (exercises.length === 0) {
-            console.warn("Nessuna traccia programmata per oggi. Caricamento archivio storico.");
-            // Mostriamo tutti gli esercizi della classe disponibili nel config
-            exercises = allExercises; 
+            console.warn("Nessuna traccia per oggi. Caricamento archivio.");
+            exercises = allExercises;
             
-            // Opzionale: aggiungiamo un avviso visivo nell'interfaccia
-            const viewerHeader = document.querySelector('.viewer-header h3');
-            if (viewerHeader) viewerHeader.innerHTML = "📂 Archivio Esercizi Passati";
+            // Cambia il titolo per avvisare lo studente
+            const viewerTitle = document.querySelector('.viewer-header h3');
+            if (viewerTitle) viewerTitle.innerHTML = "📂 Archivio Esercizi Passati";
         }
-        // --------------------------------------------------------------------
 
         // 6. ASSEGNAZIONE TRACCIA (Univoca per studente/giorno)
         const select = document.getElementById('tracciaSelect');
