@@ -348,6 +348,11 @@
 
   
  function updateTraccia(filePath) {
+   if (!file) return;
+    
+    // Se lo studente cambia esercizio dall'archivio, chiedi conferma o svuota
+    // editor.setValue("# Nuovo esercizio selezionato\n"); 
+    
     const container = document.getElementById('viewerContainer');
     const zoomControls = document.getElementById('imgZoomControls');
     // Verifica se il file è un'immagine [cite: 187]
@@ -579,15 +584,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Data in formato ISO (YYYY-MM-DD) per chiavi univoche ogni giorno
         const oggi = new Date().toISOString().split('T')[0];
 
-        // 5. FILTRO ESERCIZI PER DATA
+        // 5. FILTRO ESERCIZI
         const allExercises = config.classi[classKey] || config.classi['default'] || [];
-        const exercises = allExercises.filter(ex => ex.data === oggi);
-
+        let exercises = allExercises.filter(ex => ex.data === oggi);
+        
+        // --- AGGIUNTA: SE NON CI SONO ESERCIZI OGGI, MOSTRA QUELLI PASSATI ---
         if (exercises.length === 0) {
-            alert(`Nessuna traccia programmata per ${classKey} in data ${oggi}.`);
-            if (typeof updateTraccia === 'function') updateTraccia('tracce/default.pdf');
-            return;
+            console.warn("Nessuna traccia programmata per oggi. Caricamento archivio storico.");
+            // Mostriamo tutti gli esercizi della classe disponibili nel config
+            exercises = allExercises; 
+            
+            // Opzionale: aggiungiamo un avviso visivo nell'interfaccia
+            const viewerHeader = document.querySelector('.viewer-header h3');
+            if (viewerHeader) viewerHeader.innerHTML = "📂 Archivio Esercizi Passati";
         }
+        // --------------------------------------------------------------------
 
         // 6. ASSEGNAZIONE TRACCIA (Univoca per studente/giorno)
         const select = document.getElementById('tracciaSelect');
