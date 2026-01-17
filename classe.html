@@ -348,7 +348,7 @@
 
   
  function updateTraccia(filePath) {
-   if (!file) return;
+    if (!filePath) return; // Corretto: usa filePath, non file
     
     // Se lo studente cambia esercizio dall'archivio, chiedi conferma o svuota
     // editor.setValue("# Nuovo esercizio selezionato\n"); 
