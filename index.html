@@ -199,6 +199,13 @@
                         linkQuiz = "https://take.panquiz.com/9692-3116-6680";
                         stilePulsanteQuiz = ""; 
                     }
+
+                    // Attivazione specifica per le Quarte
+                    if (c === "Quarte") { 
+                        // Assicurati che il nome del file coincida con quello caricato sul server
+                        linkQuiz = "verifica_ai.html"; 
+                        stilePulsanteQuiz = ""; // Rimuove il blocco e abilita il tasto
+                    }
             
                     // --- GESTIONE ESERCIZI (Videoscrittura per le Prime, Python per le altre) ---
                     let linkEsercizio = `classe.html?classe=${c}`; // Default per tutte le classi
@@ -307,6 +314,7 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
 
 
 
