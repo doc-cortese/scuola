@@ -52,6 +52,7 @@
         </div>
 
         <form id="quizForm">
+            <input type="hidden" id="inputNomeStudente" name="nomeStudente">
             <div class="question-card">
                 <h4>1. Qual è l'ordine gerarchico della piramide DIKW?</h4>
                 <label><input type="radio" name="q1" value="Dati-Conoscenza-Informazione"> Dati, Conoscenza, Informazione, Saggezza</label>
@@ -62,7 +63,7 @@
                 <h4>2. Descrivi brevemente come il Machine Learning modifica il proprio algoritmo:</h4>
                 <textarea name="q2" rows="4" placeholder="Scrivi qui la tua risposta..."></textarea>
             </div>
-
+            
             <button type="button" class="btn-send" onclick="inviaConsegnaAI()">
                 <i class="fas fa-paper-plane"></i> INVIA VERIFICA AL DRIVE
             </button>
@@ -126,8 +127,20 @@
             let s = secondsLeft % 60;
             document.getElementById("timer-display").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
         }, 1000);
+        // 1. Recupera il nome dalla sessione (salvato al login in index.html)
+        const nomeSalvato = sessionStorage.getItem("userName");
+        
+        // 2. Se il nome esiste, scrivilo a video e inseriscilo nel form
+        if (nomeSalvato) {
+            document.getElementById("student-name").innerText = nomeSalvato; // Lo mostra nel box blu
+            document.getElementById("inputNomeStudente").value = nomeSalvato; // Lo prepara per l'invio
+        } else {
+            // Se non c'è il nome (es. accesso diretto senza login), avvisa o rimanda alla home
+            document.getElementById("student-name").innerText = "Utente non loggato";
+        }
     </script>
 </body>
 </html>
+
 
 
