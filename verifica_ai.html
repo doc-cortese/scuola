@@ -48,22 +48,106 @@
             <input type="text" id="manual-name" class="input-studente" placeholder="Inserisci qui il tuo nome completo..." required>
             <span id="timer-display"><i class="fas fa-clock"></i> Tempo Rimanente: 15:00</span>
         </div>
-
+        // quizForm
         <form id="quizForm">
-            <div class="question-card">
-                <h4>1. Cos'è un algoritmo di apprendimento supervisionato?</h4>
-                <textarea name="Risposta_1" rows="3" placeholder="Scrivi qui la tua risposta..."></textarea>
-            </div>
-
-            <div class="question-card">
-                <h4>2. L'intelligenza Artificiale "Forte" (Generale) esiste già?</h4>
-                <label><input type="radio" name="Risposta_2" value="Sì"> Sì, la usiamo tutti i giorni</label><br>
-                <label><input type="radio" name="Risposta_2" value="No"> No, è ancora teorica/futuristica</label>
-            </div>
-
-            <button type="button" class="btn-send" onclick="inviaConsegna(false)">
-                <i class="fas fa-paper-plane"></i> INVIA VERIFICA ADESSO
-            </button>
+          <div class="question-card">
+            <h4>1. Qual è la principale differenza tra un "utente" e un "cittadino digitale"?</h4>
+            <label><input type="radio" name="Risposta_1" value="A"> L'utente usa solo servizi gratuiti, il cittadino solo quelli pubblici.</label><br>
+            <label><input type="radio" name="Risposta_1" value="B"> L'utente utilizza un servizio tramite un regolamento; il cittadino ha diritti, doveri e competenze per navigare in sicurezza.</label><br>
+            <label><input type="radio" name="Risposta_1" value="C"> Non c'è differenza, sono sinonimi nel mondo del web.</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>2. Completa la frase: L'insieme dei dati che identificano l'utente di un servizio digitale e a cui si accede tramite login si chiama __________.</h4>
+            <textarea name="Risposta_2" rows="2" placeholder="Scrivi il termine corretto..."></textarea>
+          </div>
+        
+          <div class="question-card">
+            <h4>3. Cos'è la "Netiquette"?</h4>
+            <label><input type="radio" name="Risposta_3" value="A"> Un software per la protezione della privacy.</label><br>
+            <label><input type="radio" name="Risposta_3" value="B"> Il regolamento contrattuale di Google.</label><br>
+            <label><input type="radio" name="Risposta_3" value="C"> L'insieme delle buone maniere da usare in rete.</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>4. Cosa stabilisce il principio di "Minimizzazione dei dati" nel GDPR?</h4>
+            <label><input type="radio" name="Risposta_4" value="A"> Le aziende devono chiedere solo le informazioni strettamente utili a fornire il servizio.</label><br>
+            <label><input type="radio" name="Risposta_4" value="B"> I dati devono essere scritti con caratteri molto piccoli per risparmiare spazio.</label><br>
+            <label><input type="radio" name="Risposta_4" value="C"> Gli utenti devono passare meno tempo possibile online.</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>5. Spiega brevemente cosa garantisce il "Diritto all'oblio".</h4>
+            <textarea name="Risposta_5" rows="3" placeholder="Scrivi la tua risposta..."></textarea>
+          </div>
+        
+          <div class="question-card">
+            <h4>6. Il GDPR è stato varato dall'Unione Europea nel:</h4>
+            <label><input type="radio" name="Risposta_6" value="2016"> 2016</label><br>
+            <label><input type="radio" name="Risposta_6" value="2020"> 2020</label><br>
+            <label><input type="radio" name="Risposta_6" value="2021"> 2021</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>7. Perché il "Like" può generare dipendenza, secondo il testo?</h4>
+            <label><input type="radio" name="Risposta_7" value="A"> Perché fa guadagnare soldi immediati all'utente.</label><br>
+            <label><input type="radio" name="Risposta_7" value="B"> Perché stimola il rilascio di dopamina, legata alla sensazione di piacere.</label><br>
+            <label><input type="radio" name="Risposta_7" value="C"> Perché obbliga l'utente a rimanere connesso per ore.</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>8. Cos'è lo "Sharenting"?</h4>
+            <textarea name="Risposta_8" rows="2" placeholder="Definisci il fenomeno descritto nel testo..."></textarea>
+          </div>
+        
+          <div class="question-card">
+            <h4>9. Qual è il rischio principale degli influencer citato nel testo?</h4>
+            <label><input type="radio" name="Risposta_9" value="A"> Che non sappiano usare bene i social network.</label><br>
+            <label><input type="radio" name="Risposta_9" value="B"> Che i loro consigli non siano genuini perché legati a sponsorizzazioni non dichiarate.</label><br>
+            <label><input type="radio" name="Risposta_9" value="C"> Che pubblichino troppi video di alta qualità.</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>10. Perché il cyberbullismo è considerato più grave del bullismo fisico per certi aspetti?</h4>
+            <label><input type="radio" name="Risposta_10" value="A"> Perché le offese possono essere replicate all'infinito e restano tracce online.</label><br>
+            <label><input type="radio" name="Risposta_10" value="B"> Perché non esistono leggi per punirlo.</label><br>
+            <label><input type="radio" name="Risposta_10" value="C"> Perché accade solo di notte.</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>11. La tecnica di adescamento in rete da parte di adulti malintenzionati è chiamata:</h4>
+            <label><input type="radio" name="Risposta_11" value="A"> Tagging</label><br>
+            <label><input type="radio" name="Risposta_11" value="B"> Grooming</label><br>
+            <label><input type="radio" name="Risposta_11" value="C"> Happy Slapping</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>12. Secondo la legge italiana, a che età un minore inizia a rispondere personalmente davanti al Tribunale per i minorenni?</h4>
+            <label><input type="radio" name="Risposta_12" value="14"> Dai 14 anni</label><br>
+            <label><input type="radio" name="Risposta_12" value="18"> Dai 18 anni</label><br>
+            <label><input type="radio" name="Risposta_12" value="10"> Dai 10 anni</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>13. Quali sono i due fattori che determinano il "Digital Divide"?</h4>
+            <textarea name="Risposta_13" rows="3" placeholder="Indica il primo e il secondo livello citati..."></textarea>
+          </div>
+        
+          <div class="question-card">
+            <h4>14. Il digital divide di 2° livello riguarda:</h4>
+            <label><input type="radio" name="Risposta_14" value="A"> La mancanza di una connessione veloce.</label><br>
+            <label><input type="radio" name="Risposta_14" value="B"> Il costo troppo elevato dei dispositivi.</label><br>
+            <label><input type="radio" name="Risposta_14" value="C"> La mancanza di competenze per gestire gli ambienti digitali.</label>
+          </div>
+        
+          <div class="question-card">
+            <h4>15. Indica un ente o associazione (tra quelli citati nel testo) a cui ci si può rivolgere se si è vittime di comportamenti lesivi online.</h4>
+            <textarea name="Risposta_15" rows="2" placeholder="Esempio: Polizia Postale..."></textarea>
+          </div>
+        
+          <button type="button" class="btn-send" onclick="inviaConsegna(true)">
+            <i class="fas fa-paper-plane"></i> INVIA VERIFICA ADESSO
+          </button>
         </form>
     </div>
 
@@ -139,4 +223,5 @@
     </script>
 </body>
 </html>
+
 
