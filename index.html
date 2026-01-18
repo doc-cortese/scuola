@@ -281,8 +281,7 @@ function handleCredentialResponse(response) {
         sessionStorage.setItem("userName", data.given_name);
         
         // Aggiorna l'interfaccia nella home
-        //document.getElementById("login-wall").style.display = "none";
-        document.getElementById("login-container").style.display = "none";
+        document.getElementById("login-wall").style.display = "none";
         document.getElementById("protected-content").style.display = "block";
         document.getElementById("auth-info").innerText = "Ciao, " + data.given_name;
         
@@ -315,6 +314,7 @@ window.onload = loadFeeds;
 </script>
 </body>
 </html>
+
 
 
 
