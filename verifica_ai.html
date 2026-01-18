@@ -155,33 +155,34 @@
 
     <script>
         // --- CONFIGURAZIONE TIMER (20 MINUTI) ---
-        let secondsLeft = 20 * 60; 
+      
+        let secondsLeft = 20 * 60; // <--- IMPOSTATO A 20 MINUTI
         const timerDisplay = document.getElementById("timer-display");
-
+        
         const timerInterval = setInterval(() => {
             secondsLeft--;
             let m = Math.floor(secondsLeft / 60);
             let s = secondsLeft % 60;
             timerDisplay.innerHTML = `<i class="fas fa-clock"></i> Tempo Rimanente: ${m}:${s < 10 ? '0' : ''}${s}`;
-
+        
             if (secondsLeft <= 0) {
                 clearInterval(timerInterval);
-                alert("TEMPO SCADUTO! La verifica verrà inviata automaticamente.");
-                inviaConsegna(true); // Invio automatico
+                alert("⏰ TEMPO SCADUTO! La verifica verrà inviata automaticamente.");
+                inviaConsegna(true); // Invio automatico forzato
             }
             
             if (secondsLeft < 60) timerDisplay.style.color = "#ff4d4d"; // Diventa rosso l'ultimo minuto
         }, 1000);
-
+        
         // --- FUNZIONE DI INVIO ---
         function inviaConsegna(isAutomatico) {
             const nomeInput = document.getElementById("manual-name");
             const nomeStudente = nomeInput.value.trim();
             const formElement = document.getElementById("quizForm");
         
-            // --- 1. CONTROLLI DI VALIDAZIONE (Solo per invio manuale) ---
+            // Validazione rigorosa solo se l'invio è manuale (tasto premuto dallo studente)
             if (!isAutomatico) {
-                // Obbligo Nome e Cognome
+                // 1. Obbligo Nome e Cognome
                 if (nomeStudente === "") {
                     alert("⚠️ ERRORE: Devi inserire Nome e Cognome prima di consegnare!");
                     nomeInput.focus();
@@ -189,18 +190,17 @@
                     return;
                 }
         
-                // Obbligo di rispondere a TUTTE le domande (sfrutta l'attributo 'required' nell'HTML)
+                // 2. Obbligo di rispondere a TUTTE le domande (controlla i 'required' nell'HTML)
                 if (!formElement.checkValidity()) {
                     alert("⚠️ ATTENZIONE: Non hai risposto a tutte le domande obbligatorie!");
-                    formElement.reportValidity(); // Evidenzia automaticamente i campi mancanti
+                    formElement.reportValidity(); 
                     return;
                 }
         
                 if (!confirm("Vuoi inviare la verifica definitivamente?")) return;
             }
         
-            // --- 2. PREPARAZIONE DATI ---
-            // Se scade il tempo e il nome è vuoto, usiamo un placeholder
+            // Preparazione dati per Google Drive
             const identificativo = (nomeStudente === "") ? "Studente_Anonimo_Timeout" : nomeStudente;
             const formData = new FormData(formElement);
             
@@ -208,12 +208,10 @@
             report += `STUDENTE: ${identificativo}\n`;
             report += `DATA: ${new Date().toLocaleString()}\n--------------------------\n\n`;
             
-            // Raccogliamo tutte le risposte
             formData.forEach((value, key) => {
                 report += `${key}: ${value}\n`;
             });
         
-            // --- 3. INVIO AL DRIVE (Google Apps Script) ---
             const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
         
             const tempForm = document.createElement('form');
@@ -235,18 +233,13 @@
             document.body.appendChild(tempForm);
             tempForm.submit();
         
-            // --- 4. FEEDBACK FINALE ---
-            if (isAutomatico) {
-                alert("⏰ TEMPO SCADUTO! La tua verifica è stata inviata automaticamente.");
-            } else {
-                alert("✅ Verifica consegnata con successo!");
-            }
-            
+            alert("✅ Consegna effettuata con successo!");
             window.location.href = "index.html";
         }
     </script>
 </body>
 </html>
+
 
 
 
