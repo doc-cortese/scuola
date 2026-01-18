@@ -1,110 +1,131 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifica Quarta: AI e Algoritmi - Prof. Adinolfi</title>
     <style>
         :root {
-            --primary-color: #002d4d; /* Blu Unina/Cortese [cite: 3] */
+            --primary-color: #002d4d;
             --secondary-color: #28a745;
             --bg-color: #f8f9fa;
         }
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; background-color: var(--bg-color); }
         
         /* Layout Split-Screen */
-        #left-panel { width: 50%; height: 100%; overflow-y: auto; background: white; padding: 40px; border-right: 3px solid var(--primary-color); box-sizing: border-box; }
-        #right-panel { width: 50%; height: 100%; overflow-y: auto; padding: 40px; box-sizing: border-box; display: flex; flex-direction: column; }
+        #left-panel { width: 45%; height: 100%; display: flex; flex-direction: column; background: #e0e0e0; border-right: 3px solid var(--primary-color); }
+        #right-panel { width: 55%; height: 100%; overflow-y: auto; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* Header stile classe.html  */
-        .header-box { background: var(--primary-color); color: white; padding: 15px 25px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .viewer-header { background: #fff; padding: 10px; border-bottom: 1px solid #ccc; display: flex; gap: 10px; }
+        #pdf-viewer { flex-grow: 1; width: 100%; border: none; }
+
+        .header-box { background: var(--primary-color); color: white; padding: 15px 25px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         
-        .question-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; transition: 0.3s; }
-        .question-card.active { border-left: 5px solid var(--primary-color); }
+        .question-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        .question-card h4 { margin-top: 0; color: var(--primary-color); }
         
-        /* Pulsante Invia stile portale  */
-        .btn-send { background-color: var(--secondary-color); color: white; border: none; padding: 18px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; text-transform: uppercase; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-send:hover { background-color: #218838; filter: brightness(1.1); }
+        textarea { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit; resize: vertical; }
+
+        .btn-send { background-color: var(--secondary-color); color: white; border: none; padding: 18px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
         
-        label { display: block; padding: 12px; margin: 8px 0; border: 1px solid #eee; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        label { display: block; padding: 10px; margin: 5px 0; border: 1px solid #eee; border-radius: 6px; cursor: pointer; }
         label:hover { background: #f0f4f8; }
-        input[type="radio"] { transform: scale(1.2); margin-right: 10px; }
     </style>
 </head>
 <body>
 
     <div id="left-panel">
-        <h1 style="color: var(--primary-color);">QUANTIFICAZIONE E COMPUTAZIONE</h1>
-        <div style="font-size: 1.05em; line-height: 1.7; color: #333;">
-            <p><strong>L'Infosfera:</strong> Secondo Floridi (2017), viviamo nella quarta rivoluzione dove il valore economico è legato alle informazioni possedute (Capitalismo digitale)[cite: 1].</p>
-            <p><strong>Datification:</strong> È la trasformazione di molti aspetti della vita in dati da cui estrarre valore[cite: 1].</p>
-            <p><strong>Piramide DIKW:</strong> Gerarchia che parte dai <em>Dati</em> (grezzi), passa per <em>Informazione</em> e <em>Conoscenza</em>, fino alla <em>Saggezza</em>[cite: 1].</p>
-            <p><strong>Machine Learning:</strong> A differenza del software tradizionale, questi sistemi "imparano" modificando l'algoritmo tramite feedback[cite: 2].</p>
+        <div class="viewer-header">
+            <select id="docSelect" onchange="caricaDocumento(this.value)" style="padding: 5px; flex-grow: 1;">
+                <option value="">-- Seleziona Materiale di Supporto --</option>
+                <option value="tracce/dispensa_ai.pdf">Dispensa AI (PDF)</option>
+                <option value="tracce/schema_algoritmi.png">Schema Algoritmi (Immagine)</option>
+            </select>
         </div>
+        <iframe id="pdf-viewer" src="about:blank"></iframe>
     </div>
 
     <div id="right-panel">
         <div class="header-box">
-            <div id="user-display">Studente: <span id="student-name">...</span></div>
-            <div id="timer-display" style="font-family: monospace; font-size: 1.2em;">Fine Prova: 45:00</div>
+            <div>Studente: <span id="student-name">...</span></div>
+            <div id="timer-display" style="font-weight: bold;">45:00</div>
         </div>
 
         <form id="quizForm">
             <div class="question-card">
-                <span style="font-weight:bold; color: var(--primary-color);">1. Qual è l'ordine gerarchico della piramide DIKW? [cite: 1]</span>
-                <label><input type="radio" name="q1" value="A"> Dati, Conoscenza, Informazione, Saggezza</label>
-                <label><input type="radio" name="q1" value="B"> Dati, Informazione, Conoscenza, Saggezza</label>
+                <h4>1. Qual è l'ordine gerarchico della piramide DIKW?</h4>
+                <label><input type="radio" name="q1" value="Dati-Conoscenza-Informazione"> Dati, Conoscenza, Informazione, Saggezza</label>
+                <label><input type="radio" name="q1" value="Dati-Informazione-Conoscenza"> Dati, Informazione, Conoscenza, Saggezza</label>
             </div>
 
             <div class="question-card">
-                <span style="font-weight:bold; color: var(--primary-color);">2. Cosa distingue il Machine Learning dal software "vecchio tipo"? [cite: 2]</span>
-                <label><input type="radio" name="q2" value="A"> La necessità di istruzioni fisse e immutabili</label>
-                <label><input type="radio" name="q2" value="B"> La capacità di modificare l'algoritmo tramite feedback</label>
+                <h4>2. Descrivi brevemente come il Machine Learning modifica il proprio algoritmo:</h4>
+                <textarea name="q2" rows="4" placeholder="Scrivi qui la tua risposta..."></textarea>
             </div>
 
-            <button type="button" class="btn-send" onclick="consegnaVerifica()">
-                <i class="fas fa-paper-plane"></i> INVIA CONSEGNA AL PROF
+            <button type="button" class="btn-send" onclick="inviaConsegnaAI()">
+                <i class="fas fa-paper-plane"></i> INVIA VERIFICA AL DRIVE
             </button>
         </form>
     </div>
 
+    <iframe name="gasTarget" style="display:none;"></iframe>
+
     <script>
-        // Recupero nome studente dalla sessione [cite: 3]
-        const nomeStudente = sessionStorage.getItem("userName") || "Studente Ospite";
+        const startTime = new Date();
+        const nomeStudente = sessionStorage.getItem("userName") || "Studente_Ospite";
         document.getElementById("student-name").innerText = nomeStudente;
 
-        // Logica Timer (come in classe.html) 
-        let timeLeft = 45 * 60;
-        const timerElement = document.getElementById("timer-display");
-        
-        const countdown = setInterval(() => {
-            let minutes = Math.floor(timeLeft / 60);
-            let seconds = timeLeft % 60;
-            timerElement.innerText = `Fine Prova: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                consegnaVerifica(true); // Consegna automatica
-            }
-            timeLeft--;
-        }, 1000);
-
-        function consegnaVerifica(isAutomatic = false) {
-            const form = document.getElementById("quizForm");
-            const data = new FormData(form);
-            let risposte = "";
-            data.forEach((value, key) => { risposte += `${key}: ${value}\n`; });
-
-            if (!isAutomatic && !confirm("Vuoi inviare la verifica definitiva?")) return;
-
-            // Simulazione invio al database del Prof 
-            console.log("Inviando dati per:", nomeStudente);
-            alert(`Grazie ${nomeStudente}.\nConsegna effettuata con successo!\nLe tue risposte sono state registrate.`);
-            
-            window.location.href = "index.html"; // Ritorno alla home dopo consegna
+        function caricaDocumento(url) {
+            if (url) document.getElementById('pdf-viewer').src = url;
         }
+
+        function inviaConsegnaAI() {
+            const formElement = document.getElementById("quizForm");
+            const formData = new FormData(formElement);
+            let reportVerifica = `STUDENTE: ${nomeStudente}\nDATA: ${new Date().toLocaleString()}\n\nRISPOSTE:\n`;
+            
+            // Ciclo per raccogliere tutte le risposte dal form
+            formData.forEach((value, key) => {
+                reportVerifica += `Domanda ${key}: ${value}\n`;
+            });
+
+            // Endpoint del tuo Google Apps Script (lo stesso di classe.html)
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = GAS_URL;
+            form.target = 'gasTarget';
+
+            const addField = (n, v) => {
+                const i = document.createElement('input');
+                i.type = 'hidden'; i.name = n; i.value = v;
+                form.appendChild(i);
+            };
+
+            addField('nomeStudente', nomeStudente);
+            addField('classe', 'Quarta');
+            addField('dataOra', new Date().toLocaleString());
+            addField('rtfContent', reportVerifica); // Inviato come testo semplice o formattato
+            addField('pyContent', "RISPOSTE QUIZ"); // Placeholder per differenziarlo dal codice Python
+
+            document.body.appendChild(form);
+            form.submit();
+
+            alert("✅ Verifica inviata con successo!");
+            window.location.href = "index.html";
+        }
+
+        // Timer di 45 minuti
+        let secondsLeft = 45 * 60;
+        setInterval(() => {
+            if (secondsLeft <= 0) return;
+            secondsLeft--;
+            let m = Math.floor(secondsLeft / 60);
+            let s = secondsLeft % 60;
+            document.getElementById("timer-display").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }, 1000);
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
-
