@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifica Quarta: AI e Algoritmi - Prof. Adinolfi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --primary-color: #002d4d;
@@ -16,17 +18,18 @@
         #left-panel { width: 45%; height: 100%; display: flex; flex-direction: column; background: #e0e0e0; border-right: 3px solid var(--primary-color); }
         #right-panel { width: 55%; height: 100%; overflow-y: auto; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        .viewer-header { background: #fff; padding: 10px; border-bottom: 1px solid #ccc; display: flex; gap: 10px; }
-        #pdf-viewer { flex-grow: 1; width: 100%; border: none; }
+        .viewer-header { background: #fff; padding: 10px; border-bottom: 1px solid #ccc; display: flex; flex-direction: column; gap: 5px; }
+        #pdf-viewer { flex-grow: 1; width: 100%; border: none; background: #525659; }
 
-        .header-box { background: var(--primary-color); color: white; padding: 15px 25px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-box { background: var(--primary-color); color: white; padding: 15px 25px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
         .question-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; }
         .question-card h4 { margin-top: 0; color: var(--primary-color); }
         
-        textarea { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit; resize: vertical; }
+        textarea { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit; resize: vertical; box-sizing: border-box; }
 
-        .btn-send { background-color: var(--secondary-color); color: white; border: none; padding: 18px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; text-transform: uppercase; margin-top: 20px; }
+        .btn-send { background-color: var(--secondary-color); color: white; border: none; padding: 18px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; text-transform: uppercase; margin-top: 20px; transition: 0.3s; }
+        .btn-send:hover { background-color: #218838; transform: translateY(-2px); }
         
         label { display: block; padding: 10px; margin: 5px 0; border: 1px solid #eee; border-radius: 6px; cursor: pointer; }
         label:hover { background: #f0f4f8; }
@@ -36,10 +39,12 @@
 
     <div id="left-panel">
         <div class="viewer-header">
-            <select id="docSelect" onchange="caricaDocumento(this.value)" style="padding: 5px; flex-grow: 1;">
-                <option value="">-- Seleziona Materiale di Supporto --</option>
-                <option value="tracce/Cacciatori di bufale.pdf">Dispensa AI (PDF)</option>
-                <option value="tracce/schema_algoritmi.png">Schema Algoritmi (Immagine)</option>
+            <strong style="color: var(--primary-color); font-size: 0.9em;">MATERIALE DI SUPPORTO / TRACCIA</strong>
+            <select id="docSelect" onchange="caricaDocumento(this.value)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                <option value="">-- Scegli un documento --</option>
+                <option value="tracce/Cacciatore di bufale.pdf">Traccia della Verifica (PDF)</option>
+                <option value="tracce/dispensa_ai.pdf">Dispensa AI (PDF)</option>
+                <option value="https://docs.google.com/document/d/IL_TUO_ID_FILE/preview">Dispensa Integrativa (Google Doc)</option>
             </select>
         </div>
         <iframe id="pdf-viewer" src="about:blank"></iframe>
@@ -47,24 +52,26 @@
 
     <div id="right-panel">
         <div class="header-box">
-            <div>Studente: <span id="student-name">...</span></div>
-            <div id="timer-display" style="font-weight: bold;">45:00</div>
+            <div><i class="fas fa-user-graduate"></i> Studente: <span id="student-name">Accesso Anonimo</span></div>
+            <div id="timer-display" style="font-weight: bold; font-family: monospace; font-size: 1.2em;"><i class="fas fa-clock"></i> 45:00</div>
         </div>
 
         <form id="quizForm">
             <input type="hidden" id="inputNomeStudente" name="nomeStudente">
+
             <div class="question-card">
-                <h4>1. Qual è l'ordine gerarchico della piramide DIKW?</h4>
-                <label><input type="radio" name="q1" value="Dati-Conoscenza-Informazione"> Dati, Conoscenza, Informazione, Saggezza</label>
-                <label><input type="radio" name="q1" value="Dati-Informazione-Conoscenza"> Dati, Informazione, Conoscenza, Saggezza</label>
+                <h4>1. Qual è l'ordine gerarchico corretto della piramide DIKW?</h4>
+                <label><input type="radio" name="D1_Piramide" value="Dati-Conoscenza-Informazione"> Dati, Conoscenza, Informazione, Saggezza</label>
+                <label><input type="radio" name="D1_Piramide" value="Dati-Informazione-Conoscenza"> Dati, Informazione, Conoscenza, Saggezza</label>
+                <label><input type="radio" name="D1_Piramide" value="Informazione-Dati-Saggezza"> Informazione, Dati, Conoscenza, Saggezza</label>
             </div>
 
             <div class="question-card">
-                <h4>2. Descrivi brevemente come il Machine Learning modifica il proprio algoritmo:</h4>
-                <textarea name="q2" rows="4" placeholder="Scrivi qui la tua risposta..."></textarea>
+                <h4>2. Descrivi brevemente come il Machine Learning modifica il proprio comportamento in base ai dati:</h4>
+                <textarea name="D2_RispostaLibera" rows="4" placeholder="Scrivi qui la tua risposta dettagliata..."></textarea>
             </div>
-            
-            <button type="button" class="btn-send" onclick="inviaConsegnaAI()">
+
+            <button type="button" class="btn-send" onclick="inviaConsegnaDrive()">
                 <i class="fas fa-paper-plane"></i> INVIA VERIFICA AL DRIVE
             </button>
         </form>
@@ -73,74 +80,89 @@
     <iframe name="gasTarget" style="display:none;"></iframe>
 
     <script>
-        const startTime = new Date();
-        const nomeStudente = sessionStorage.getItem("userName") || "Studente_Ospite";
-        document.getElementById("student-name").innerText = nomeStudente;
+        // --- 1. GESTIONE NOME E SESSIONE ---
+        window.onload = function() {
+            const nomeStudente = sessionStorage.getItem("userName");
+            if (nomeStudente) {
+                document.getElementById("student-name").innerText = nomeStudente;
+                document.getElementById("inputNomeStudente").value = nomeStudente;
+            } else {
+                alert("Attenzione: Nome studente non rilevato. Per favore effettua il login dalla home.");
+            }
+        };
 
+        // --- 2. CARICAMENTO DOCUMENTI ---
         function caricaDocumento(url) {
-            if (url) document.getElementById('pdf-viewer').src = url;
+            if (url) {
+                document.getElementById('pdf-viewer').src = url;
+            }
         }
 
-        function inviaConsegnaAI() {
+        // --- 3. INVIO AL DRIVE ---
+        function inviaConsegnaDrive() {
+            const nome = sessionStorage.getItem("userName") || "Anonimo";
+            if (!confirm("Ciao " + nome + ", vuoi inviare definitivamente la tua verifica?")) return;
+
             const formElement = document.getElementById("quizForm");
             const formData = new FormData(formElement);
-            let reportVerifica = `STUDENTE: ${nomeStudente}\nDATA: ${new Date().toLocaleString()}\n\nRISPOSTE:\n`;
             
-            // Ciclo per raccogliere tutte le risposte dal form
+            // Creiamo un testo leggibile con tutte le risposte
+            let reportVerifica = `CONSEGNA VERIFICA AI - STUDENTE: ${nome}\n`;
+            reportVerifica += `DATA/ORA: ${new Date().toLocaleString()}\n`;
+            reportVerifica += `------------------------------------------\n\n`;
+            
             formData.forEach((value, key) => {
-                reportVerifica += `Domanda ${key}: ${value}\n`;
+                if(key !== "nomeStudente") {
+                    reportVerifica += `DOMANDA [${key}]:\n${value}\n\n`;
+                }
             });
 
-            // Endpoint del tuo Google Apps Script (lo stesso di classe.html)
+            // Endpoint del tuo Google Apps Script
             const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
             
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = GAS_URL;
-            form.target = 'gasTarget';
+            // Creiamo il form di invio temporaneo
+            const tempForm = document.createElement('form');
+            tempForm.method = 'POST';
+            tempForm.action = GAS_URL;
+            tempForm.target = 'gasTarget';
 
             const addField = (n, v) => {
                 const i = document.createElement('input');
                 i.type = 'hidden'; i.name = n; i.value = v;
-                form.appendChild(i);
+                tempForm.appendChild(i);
             };
 
-            addField('nomeStudente', nomeStudente);
-            addField('classe', 'Quarta');
-            addField('dataOra', new Date().toLocaleString());
-            addField('rtfContent', reportVerifica); // Inviato come testo semplice o formattato
-            addField('pyContent', "RISPOSTE QUIZ"); // Placeholder per differenziarlo dal codice Python
+            addField('nomeStudente', nome);
+            addField('classe', '4A_Informatica');
+            addField('rtfContent', reportVerifica);
+            addField('pyContent', 'TEST_AI_QUIZ'); // Segnale per lo script che non è codice Python
 
-            document.body.appendChild(form);
-            form.submit();
+            document.body.appendChild(tempForm);
+            tempForm.submit();
 
-            alert("✅ Verifica inviata con successo!");
+            alert("✅ Verifica inviata correttamente al Prof. Adinolfi!");
             window.location.href = "index.html";
         }
 
-        // Timer di 45 minuti
+        // --- 4. LOGICA TIMER (45 Minuti) ---
         let secondsLeft = 45 * 60;
-        setInterval(() => {
-            if (secondsLeft <= 0) return;
+        const timerDisplay = document.getElementById("timer-display");
+        
+        const countdown = setInterval(() => {
+            if (secondsLeft <= 0) {
+                clearInterval(countdown);
+                alert("Tempo scaduto! Invio automatico della verifica.");
+                inviaConsegnaDrive();
+                return;
+            }
             secondsLeft--;
             let m = Math.floor(secondsLeft / 60);
             let s = secondsLeft % 60;
-            document.getElementById("timer-display").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            timerDisplay.innerHTML = `<i class="fas fa-clock"></i> ${m}:${s < 10 ? '0' : ''}${s}`;
+            
+            if (secondsLeft < 300) timerDisplay.style.color = "red"; // Avviso ultimi 5 minuti
         }, 1000);
-        // 1. Recupera il nome dalla sessione (salvato al login in index.html)
-        const nomeSalvato = sessionStorage.getItem("userName");
-        
-        // 2. Se il nome esiste, scrivilo a video e inseriscilo nel form
-        if (nomeSalvato) {
-            document.getElementById("student-name").innerText = nomeSalvato; // Lo mostra nel box blu
-            document.getElementById("inputNomeStudente").value = nomeSalvato; // Lo prepara per l'invio
-        } else {
-            // Se non c'è il nome (es. accesso diretto senza login), avvisa o rimanda alla home
-            document.getElementById("student-name").innerText = "Utente non loggato";
-        }
     </script>
 </body>
 </html>
-
-
 
