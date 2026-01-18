@@ -14,65 +14,55 @@
         }
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; background-color: var(--bg-color); }
         
-        /* Layout Split-Screen */
         #left-panel { width: 45%; height: 100%; display: flex; flex-direction: column; background: #e0e0e0; border-right: 3px solid var(--primary-color); }
         #right-panel { width: 55%; height: 100%; overflow-y: auto; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        .viewer-header { background: #fff; padding: 10px; border-bottom: 1px solid #ccc; display: flex; flex-direction: column; gap: 5px; }
-        #pdf-viewer { flex-grow: 1; width: 100%; border: none; background: #525659; }
-
-        .header-box { background: var(--primary-color); color: white; padding: 15px 25px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header-box { background: var(--primary-color); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
+        .input-studente {
+            width: 100%; padding: 12px; margin-top: 10px; border-radius: 5px; border: none; font-size: 1rem; color: var(--primary-color); font-weight: bold;
+        }
+
         .question-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; }
         .question-card h4 { margin-top: 0; color: var(--primary-color); }
         
         textarea { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit; resize: vertical; box-sizing: border-box; }
-
         .btn-send { background-color: var(--secondary-color); color: white; border: none; padding: 18px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; text-transform: uppercase; margin-top: 20px; transition: 0.3s; }
-        .btn-send:hover { background-color: #218838; transform: translateY(-2px); }
+        .btn-send:hover { background-color: #218838; }
         
-        label { display: block; padding: 10px; margin: 5px 0; border: 1px solid #eee; border-radius: 6px; cursor: pointer; }
-        label:hover { background: #f0f4f8; }
+        #timer-display { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.3em; color: #ffeb3b; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
 
     <div id="left-panel">
-        <div class="viewer-header">
-            <strong style="color: var(--primary-color); font-size: 0.9em;">MATERIALE DI SUPPORTO / TRACCIA</strong>
-            <select id="docSelect" onchange="caricaDocumento(this.value)" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-                <option value="">-- Scegli un documento --</option>
-                <option value="tracce/Cacciatore di bufale.pdf">Traccia della Verifica (PDF)</option>
-                <option value="tracce/dispensa_ai.pdf">Dispensa AI (PDF)</option>
-                <option value="https://docs.google.com/document/d/IL_TUO_ID_FILE/preview">Dispensa Integrativa (Google Doc)</option>
-            </select>
+        <div style="padding: 15px; background: #fff; border-bottom: 1px solid #ccc;">
+            <strong>TRACCIA DELLA VERIFICA</strong>
         </div>
-        <iframe id="pdf-viewer" src="about:blank"></iframe>
+        <iframe id="pdf-viewer" src="tracce/Cacciatori_di_bufale.pdf" style="flex-grow:1; border:none;"></iframe>
     </div>
 
     <div id="right-panel">
         <div class="header-box">
-            <div><i class="fas fa-user-graduate"></i> Studente: <span id="student-name">Accesso Anonimo</span></div>
-            <div id="timer-display" style="font-weight: bold; font-family: monospace; font-size: 1.2em;"><i class="fas fa-clock"></i> 45:00</div>
+            <label style="font-weight: bold; display: block;"><i class="fas fa-user-edit"></i> COGNOME E NOME STUDENTE:</label>
+            <input type="text" id="manual-name" class="input-studente" placeholder="Inserisci qui il tuo nome completo..." required>
+            <span id="timer-display"><i class="fas fa-clock"></i> Tempo Rimanente: 15:00</span>
         </div>
 
         <form id="quizForm">
-            <input type="hidden" id="inputNomeStudente" name="nomeStudente">
-
             <div class="question-card">
-                <h4>1. Qual è l'ordine gerarchico corretto della piramide DIKW?</h4>
-                <label><input type="radio" name="D1_Piramide" value="Dati-Conoscenza-Informazione"> Dati, Conoscenza, Informazione, Saggezza</label>
-                <label><input type="radio" name="D1_Piramide" value="Dati-Informazione-Conoscenza"> Dati, Informazione, Conoscenza, Saggezza</label>
-                <label><input type="radio" name="D1_Piramide" value="Informazione-Dati-Saggezza"> Informazione, Dati, Conoscenza, Saggezza</label>
+                <h4>1. Cos'è un algoritmo di apprendimento supervisionato?</h4>
+                <textarea name="Risposta_1" rows="3" placeholder="Scrivi qui la tua risposta..."></textarea>
             </div>
 
             <div class="question-card">
-                <h4>2. Descrivi brevemente come il Machine Learning modifica il proprio comportamento in base ai dati:</h4>
-                <textarea name="D2_RispostaLibera" rows="4" placeholder="Scrivi qui la tua risposta dettagliata..."></textarea>
+                <h4>2. L'intelligenza Artificiale "Forte" (Generale) esiste già?</h4>
+                <label><input type="radio" name="Risposta_2" value="Sì"> Sì, la usiamo tutti i giorni</label><br>
+                <label><input type="radio" name="Risposta_2" value="No"> No, è ancora teorica/futuristica</label>
             </div>
 
-            <button type="button" class="btn-send" onclick="inviaConsegnaDrive()">
-                <i class="fas fa-paper-plane"></i> INVIA VERIFICA AL DRIVE
+            <button type="button" class="btn-send" onclick="inviaConsegna(false)">
+                <i class="fas fa-paper-plane"></i> INVIA VERIFICA ADESSO
             </button>
         </form>
     </div>
@@ -80,58 +70,53 @@
     <iframe name="gasTarget" style="display:none;"></iframe>
 
     <script>
-        // --- 1. GESTIONE NOME E SESSIONE ---
-        window.onload = function() {
-            // Recupera il nome salvato dalla home
-            const nomeSalvato = sessionStorage.getItem("userName");
+        // --- CONFIGURAZIONE TIMER (15 MINUTI) ---
+        let secondsLeft = 15 * 60; 
+        const timerDisplay = document.getElementById("timer-display");
+
+        const timerInterval = setInterval(() => {
+            secondsLeft--;
+            let m = Math.floor(secondsLeft / 60);
+            let s = secondsLeft % 60;
+            timerDisplay.innerHTML = `<i class="fas fa-clock"></i> Tempo Rimanente: ${m}:${s < 10 ? '0' : ''}${s}`;
+
+            if (secondsLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("TEMPO SCADUTO! La verifica verrà inviata automaticamente.");
+                inviaConsegna(true); // Invio automatico
+            }
             
-            const displayNome = document.getElementById("student-name");
-            const inputNascosto = document.getElementById("inputNomeStudente");
-        
-            if (nomeSalvato) {
-                if(displayNome) displayNome.innerText = nomeSalvato;
-                if(inputNascosto) inputNascosto.value = nomeSalvato;
-                console.log("Benvenuto:", nomeSalvato);
-            } else {
-                // Se arrivi qui, vuol dire che sessionStorage è vuoto
-                if(displayNome) displayNome.innerText = "Utente non loggato";
-                console.error("Errore: userName non trovato in sessionStorage");
+            if (secondsLeft < 60) timerDisplay.style.color = "#ff4d4d"; // Diventa rosso l'ultimo minuto
+        }, 1000);
+
+        // --- FUNZIONE DI INVIO ---
+        function inviaConsegna(isAutomatico) {
+            const nomeStudente = document.getElementById("manual-name").value.trim();
+            
+            // Se l'invio è manuale, controllo che il nome sia inserito
+            if (!isAutomatico && nomeStudente === "") {
+                alert("ERRORE: Inserisci il tuo Nome e Cognome prima di inviare!");
+                return;
             }
-        };
 
-        // --- 2. CARICAMENTO DOCUMENTI ---
-        function caricaDocumento(url) {
-            if (url) {
-                document.getElementById('pdf-viewer').src = url;
-            }
-        }
-
-        // --- 3. INVIO AL DRIVE ---
-        function inviaConsegnaDrive() {
-            const nome = sessionStorage.getItem("userName") || "Anonimo";
-            if (!confirm("Ciao " + nome + ", vuoi inviare definitivamente la tua verifica?")) return;
-
+            const identificativo = (nomeStudente === "") ? "Studente_Anonimo_TempoScaduto" : nomeStudente;
             const formElement = document.getElementById("quizForm");
             const formData = new FormData(formElement);
             
-            // Creiamo un testo leggibile con tutte le risposte
-            let reportVerifica = `CONSEGNA VERIFICA AI - STUDENTE: ${nome}\n`;
-            reportVerifica += `DATA/ORA: ${new Date().toLocaleString()}\n`;
-            reportVerifica += `------------------------------------------\n\n`;
+            let report = `VERIFICA AI - CONSEGNA ${isAutomatico ? 'AUTOMATICA' : 'MANUALE'}\n`;
+            report += `STUDENTE: ${identificativo}\n`;
+            report += `DATA: ${new Date().toLocaleString()}\n--------------------------\n\n`;
             
             formData.forEach((value, key) => {
-                if(key !== "nomeStudente") {
-                    reportVerifica += `DOMANDA [${key}]:\n${value}\n\n`;
-                }
+                report += `${key}: ${value}\n`;
             });
 
-            // Endpoint del tuo Google Apps Script
-            const GAS_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
-            
-            // Creiamo il form di invio temporaneo
+            // URL del tuo script Google Apps Script
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXYR1fJ2yYKKbgd_cIdNUTbIG5fZH3piPQ75Bw2TC-YkMcUaM7bOvzUQWNNGGmjcdg/exec";
+
             const tempForm = document.createElement('form');
             tempForm.method = 'POST';
-            tempForm.action = GAS_URL;
+            tempForm.action = SCRIPT_URL;
             tempForm.target = 'gasTarget';
 
             const addField = (n, v) => {
@@ -140,38 +125,17 @@
                 tempForm.appendChild(i);
             };
 
-            addField('nomeStudente', nome);
-            addField('classe', '4A_Informatica');
-            addField('rtfContent', reportVerifica);
-            addField('pyContent', 'TEST_AI_QUIZ'); // Segnale per lo script che non è codice Python
+            addField('nomeStudente', identificativo);
+            addField('classe', '4A_INF');
+            addField('rtfContent', report);
+            addField('pyContent', isAutomatico ? 'TIMEOUT' : 'MANUALE');
 
             document.body.appendChild(tempForm);
             tempForm.submit();
 
-            alert("✅ Verifica inviata correttamente al Prof. Adinolfi!");
+            alert("✅ Verifica consegnata correttamente al Drive del Prof. Adinolfi.");
             window.location.href = "index.html";
         }
-
-        // --- 4. LOGICA TIMER (45 Minuti) ---
-        let secondsLeft = 45 * 60;
-        const timerDisplay = document.getElementById("timer-display");
-        
-        const countdown = setInterval(() => {
-            if (secondsLeft <= 0) {
-                clearInterval(countdown);
-                alert("Tempo scaduto! Invio automatico della verifica.");
-                inviaConsegnaDrive();
-                return;
-            }
-            secondsLeft--;
-            let m = Math.floor(secondsLeft / 60);
-            let s = secondsLeft % 60;
-            timerDisplay.innerHTML = `<i class="fas fa-clock"></i> ${m}:${s < 10 ? '0' : ''}${s}`;
-            
-            if (secondsLeft < 300) timerDisplay.style.color = "red"; // Avviso ultimi 5 minuti
-        }, 1000);
     </script>
 </body>
 </html>
-
-
