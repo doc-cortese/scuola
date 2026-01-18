@@ -82,12 +82,20 @@
     <script>
         // --- 1. GESTIONE NOME E SESSIONE ---
         window.onload = function() {
-            const nomeStudente = sessionStorage.getItem("userName");
-            if (nomeStudente) {
-                document.getElementById("student-name").innerText = nomeStudente;
-                document.getElementById("inputNomeStudente").value = nomeStudente;
+            // Recupera il nome salvato dalla home
+            const nomeSalvato = sessionStorage.getItem("userName");
+            
+            const displayNome = document.getElementById("student-name");
+            const inputNascosto = document.getElementById("inputNomeStudente");
+        
+            if (nomeSalvato) {
+                if(displayNome) displayNome.innerText = nomeSalvato;
+                if(inputNascosto) inputNascosto.value = nomeSalvato;
+                console.log("Benvenuto:", nomeSalvato);
             } else {
-                alert("Attenzione: Nome studente non rilevato. Per favore effettua il login dalla home.");
+                // Se arrivi qui, vuol dire che sessionStorage è vuoto
+                if(displayNome) displayNome.innerText = "Utente non loggato";
+                console.error("Errore: userName non trovato in sessionStorage");
             }
         };
 
@@ -165,4 +173,5 @@
     </script>
 </body>
 </html>
+
 
